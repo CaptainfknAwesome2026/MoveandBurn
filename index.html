@@ -2667,11 +2667,21 @@ Return ONLY compact valid JSON, no markdown:
       })
     });
     const data = await res.json();
+    console.log('Recipe API response:', JSON.stringify(data).slice(0, 500));
+
+    if (data.error) throw new Error('API error: ' + data.error.message);
+    if (!data.content || !data.content.length) throw new Error('Empty response from API');
+
     let text = data.content.map(b => b.text||'').join('');
+    console.log('Raw text:', text.slice(0, 300));
     text = text.replace(/```json/g,'').replace(/```/g,'').trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON in response');
+    if (!jsonMatch) throw new Error('No JSON object found in: ' + text.slice(0,200));
     generatedRecipes = JSON.parse(jsonMatch[0]);
+
+    // Validate structure
+    if (!generatedRecipes.breakfast) throw new Error('Missing breakfast in response');
+
     expandedRecipe = null;
     weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
     renderWeekBar();
@@ -2680,8 +2690,14 @@ Return ONLY compact valid JSON, no markdown:
     document.getElementById('groceryCard').style.display = 'none';
     document.getElementById('groceryBtn').style.display = 'flex';
   } catch(e) {
-    alert('Could not generate recipes. Please try again.');
-    console.error(e);
+    console.error('Recipe generation failed:', e);
+    document.getElementById('recipePanelContent').style.display = 'block';
+    document.getElementById('breakfastCards').innerHTML =
+      `<div class="no-recipes-msg" style="border-color:var(--red);text-align:left;padding:16px">
+        <strong style="color:var(--red)">⚠ Error details:</strong><br><br>
+        <code style="font-size:0.78rem;word-break:break-all">${e.message}</code><br><br>
+        <small style="color:var(--muted)">Please screenshot this and share it so the error can be fixed.</small>
+      </div>`;
   }
   btn.innerHTML = '✦ Regenerate Meal Plan';
 }
