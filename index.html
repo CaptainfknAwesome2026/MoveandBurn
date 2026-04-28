@@ -1,0 +1,2965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move — Exercise Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #ede8df;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a1a;
+    --muted: #888070;
+    --orange: #e85d26;
+    --orange-dim: rgba(232,93,38,0.1);
+    --green: #2e7d5e;
+    --green-dim: rgba(46,125,94,0.1);
+    --red: #c0392b;
+    --red-dim: rgba(192,57,43,0.1);
+    --charcoal: #2c2c2c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px;
+    background-image:
+      radial-gradient(circle at 90% 10%, rgba(232,93,38,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 10% 90%, rgba(46,125,94,0.06) 0%, transparent 50%);
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    background: var(--charcoal);
+    padding: 36px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: 'MOVE';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18vw;
+    color: rgba(255,255,255,0.03);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 8vw, 4.5rem);
+    letter-spacing: 0.06em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .hero h1 span { color: var(--orange); }
+
+  .hero p {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--charcoal);
+    border-bottom: 2px solid rgba(255,255,255,0.06);
+    padding: 0 16px;
+    overflow-x: auto;
+    gap: 0;
+  }
+
+  .tab {
+    padding: 14px 20px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.35);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { color: rgba(255,255,255,0.7); }
+  .tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 24px 16px; max-width: 600px; margin: 0 auto; }
+  .panel.active { display: block; animation: fadeUp 0.3s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.05em;
+    color: var(--charcoal);
+    margin-bottom: 4px;
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  /* ── FORM ── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .form-group input, .form-group select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--orange);
+  }
+
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  .calc-btn:hover { background: #d4521f; transform: translateY(-1px); }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* ── RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .result-box {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+  }
+
+  .result-box.highlight {
+    background: var(--orange);
+    border-color: var(--orange);
+    grid-column: 1 / -1;
+  }
+
+  .result-box.highlight .result-val { color: white; font-size: 2.2rem; }
+  .result-box.highlight .result-label { color: rgba(255,255,255,0.75); }
+
+  .result-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--charcoal);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .result-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── CALORIE TRACKER ── */
+  .cal-balance {
+    text-align: center;
+    padding: 20px 0 16px;
+  }
+
+  .cal-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .cal-number.surplus { color: var(--red); }
+  .cal-number.deficit { color: var(--green); }
+  .cal-number.balanced { color: var(--orange); }
+
+  .cal-status {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .cal-bar-wrap {
+    height: 8px;
+    background: var(--surface);
+    border-radius: 4px;
+    margin: 16px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .cal-bar-goal {
+    position: absolute;
+    height: 100%;
+    background: var(--green);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .cal-bar-consumed {
+    position: absolute;
+    height: 100%;
+    background: var(--orange);
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: width 0.5s ease;
+  }
+
+  .cal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cal-row:last-child { border-bottom: none; }
+
+  .cal-row-label { font-size: 0.85rem; color: var(--muted); }
+  .cal-row-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--charcoal); }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .input-row input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-row input:focus { border-color: var(--orange); }
+
+  .add-btn {
+    padding: 11px 20px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .add-btn:hover { background: #d4521f; }
+
+  .add-btn.green { background: var(--green); }
+  .add-btn.green:hover { background: #246b50; }
+
+  /* ── STEPS ── */
+  .step-ring {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+
+  .step-ring svg { transform: rotate(-90deg); }
+
+  .step-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step-ring-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+
+  .step-ring-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+
+  .step-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .step-input-row input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .step-input-row input:focus { border-color: var(--orange); }
+
+  .step-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .step-stat {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .step-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--charcoal);
+  }
+
+  .step-stat-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── EXERCISES ── */
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .ex-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 18px 16px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ex-card:hover { border-color: var(--orange); transform: translateY(-2px); }
+  .ex-card.expanded { grid-column: 1 / -1; border-color: var(--orange); background: white; }
+
+  .ex-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+  .ex-name { font-weight: 500; font-size: 0.88rem; margin-bottom: 2px; }
+  .ex-cal { font-size: 0.72rem; color: var(--orange); font-weight: 500; }
+  .ex-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--orange-dim);
+    color: var(--orange);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .ex-detail { display: none; margin-top: 16px; }
+  .ex-card.expanded .ex-detail { display: block; }
+
+  .ex-detail h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    color: var(--charcoal);
+  }
+
+  .ex-sets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .ex-set-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    background: var(--surface);
+  }
+
+  .ex-how {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .ex-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--muted);
+  }
+
+  .ex-card.expanded .ex-close { display: flex; }
+
+  /* ── CONSUMED LIST ── */
+  .consumed-list { margin-top: 12px; }
+
+  .consumed-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    background: var(--surface);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    animation: fadeUp 0.2s ease;
+  }
+
+  .consumed-item .remove {
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .consumed-item .remove:hover { background: var(--red-dim); color: var(--red); }
+
+  .tag-beginner { background: var(--green-dim); color: var(--green); }
+
+  /* ── SET TICK-OFF ── */
+  .ex-done { border-color: var(--green) !important; }
+  .ex-done .ex-name { color: var(--green); }
+
+  .ex-done-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--green);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .ex-set-mini-progress {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .set-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1.5px solid rgba(0,0,0,0.12);
+    transition: all 0.2s;
+  }
+
+  .set-dot-done {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+
+  .ex-checklist { margin-bottom: 14px; }
+
+  .set-check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .set-check-row:hover { border-color: rgba(232,93,38,0.3); }
+
+  .set-check-row.set-checked {
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .set-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    color: transparent;
+  }
+
+  .set-check-row.set-checked .set-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .set-check-row span:nth-child(2) {
+    flex: 1;
+    font-size: 0.85rem;
+  }
+
+  .set-check-row.set-checked span:nth-child(2) {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  .set-kcal {
+    font-size: 0.72rem;
+    color: var(--orange);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .set-check-row.set-checked .set-kcal { color: var(--green); }
+
+  .tip-strip {
+    background: var(--orange-dim);
+    border: 1px solid rgba(232,93,38,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    color: var(--charcoal);
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  .tip-strip strong { color: var(--orange); }
+
+  .no-results {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 24px 0;
+  }
+  /* ── WEEKLY TRACKER ── */
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .week-nav-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .week-nav-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+  .week-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    color: var(--charcoal);
+  }
+
+  .week-label span { color: var(--orange); }
+
+  /* Day grid */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .day-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .day-pill-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .day-pill-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--surface);
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .day-pill.active .day-pill-circle {
+    border-color: var(--orange);
+    background: var(--orange);
+    color: white;
+    box-shadow: 0 2px 8px rgba(232,93,38,0.3);
+  }
+
+  .day-pill.has-data .day-pill-circle { border-color: var(--green); }
+  .day-pill.has-data:not(.active) .day-pill-circle { color: var(--green); }
+  .day-pill.full-day .day-pill-circle { background: var(--green); color: white; border-color: var(--green); }
+
+  .day-dot-row {
+    display: flex; gap: 2px;
+  }
+
+  .day-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--border);
+  }
+
+  .day-dot.ex-done { background: var(--orange); }
+  .day-dot.walk-done { background: var(--green); }
+
+  /* Day detail */
+  .day-detail-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--charcoal);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .day-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+    margin-top: 16px;
+  }
+
+  .day-ex-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .day-ex-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .day-ex-row:hover { border-color: rgba(232,93,38,0.25); }
+  .day-ex-row.day-ex-done { border-color: var(--green); background: var(--green-dim); }
+
+  .day-ex-check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .day-ex-row.day-ex-done .day-ex-check {
+    background: var(--green); border-color: var(--green); color: white;
+  }
+
+  .day-ex-info { flex: 1; }
+  .day-ex-name { font-size: 0.88rem; font-weight: 500; }
+  .day-ex-sub { font-size: 0.72rem; color: var(--muted); }
+  .day-ex-row.day-ex-done .day-ex-name { color: var(--green); }
+
+  .day-ex-cal {
+    font-size: 0.72rem;
+    color: var(--orange);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .day-ex-row.day-ex-done .day-ex-cal { color: var(--green); }
+
+  /* Walk logger */
+  .walk-log-row {
+    display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+  }
+
+  .walk-log-row input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .walk-log-row input:focus { border-color: var(--orange); }
+
+  .walk-log-row button {
+    padding: 10px 16px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .walk-log-row button:hover { background: #246b50; }
+
+  .walk-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--green-dim);
+    border: 1px solid rgba(46,125,94,0.2);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+    animation: fadeUp 0.2s ease;
+  }
+
+  .walk-entry .walk-remove {
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    font-size: 0.75rem;
+  }
+
+  .walk-entry .walk-remove:hover { background: var(--red-dim); color: var(--red); }
+
+  /* Day summary strip */
+  .day-summary-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .day-summary-box {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .day-summary-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+
+  .day-summary-lbl {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* Weekly history */
+  .week-history-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .week-history-row:last-child { border-bottom: none; }
+
+  .week-hist-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    width: 56px;
+    flex-shrink: 0;
+  }
+
+  .week-hist-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+  .week-hist-bar-wrap {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .week-hist-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .week-hist-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .bar-ex { background: var(--orange); }
+  .bar-walk { background: var(--green); }
+
+  .week-hist-pct {
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: 30px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .week-hist-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--charcoal);
+    width: 44px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .rest-day-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: var(--lavender-dim, rgba(155,142,196,0.12));
+    color: #7986cb;
+  }
+
+  .save-day-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s;
+  }
+
+  .save-day-btn:hover { background: #d4521f; transform: translateY(-1px); }
+  .save-day-btn:active { transform: translateY(0); }
+
+  .saved-toast {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .saved-toast.show { opacity: 1; }
+  /* ── RECIPES ── */
+  .diet-filters {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+
+  .diet-btn {
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .diet-btn.active {
+    border-color: var(--green);
+    background: var(--green-dim);
+    color: var(--green);
+  }
+
+  .meal-section { margin-bottom: 24px; }
+
+  .meal-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .meal-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--charcoal);
+  }
+
+  .meal-cal-budget {
+    font-size: 0.75rem;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .meal-cal-budget span { color: var(--orange); font-weight: 500; }
+
+  .recipe-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .recipe-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .recipe-card:hover { border-color: rgba(232,93,38,0.3); background: white; }
+
+  .recipe-card.selected {
+    border-color: var(--orange);
+    background: white;
+    box-shadow: 0 2px 12px rgba(232,93,38,0.1);
+  }
+
+  .recipe-card-top {
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+
+  .recipe-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+
+  .recipe-info { flex: 1; }
+
+  .recipe-name {
+    font-size: 0.92rem;
+    font-weight: 500;
+    margin-bottom: 3px;
+    color: var(--charcoal);
+  }
+
+  .recipe-meta {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;
+  }
+
+  .recipe-badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .badge-cal { background: var(--orange-dim); color: var(--orange); }
+  .badge-vegan { background: var(--green-dim); color: var(--green); }
+  .badge-veg { background: rgba(107,170,142,0.15); color: #3d8b6e; }
+  .badge-protein { background: rgba(74,111,165,0.12); color: #4a6fa5; }
+  .badge-time { background: rgba(0,0,0,0.05); color: var(--muted); }
+
+  .recipe-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .recipe-select-check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    color: transparent;
+    margin-top: 2px;
+  }
+
+  .recipe-card.selected .recipe-select-check {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+
+  /* Day calorie summary bar */
+  .day-cal-bar {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .day-cal-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .day-cal-label { font-size: 0.8rem; color: var(--muted); }
+  .day-cal-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--charcoal); }
+  .day-cal-val.over { color: var(--red); }
+  .day-cal-val.under { color: var(--green); }
+
+  .day-cal-progress {
+    height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden;
+  }
+
+  .day-cal-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--orange));
+    transition: width 0.4s ease;
+  }
+
+  .day-cal-fill.over { background: var(--red); }
+
+  /* Grocery list */
+  .grocery-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 16px 0 8px;
+  }
+
+  .grocery-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grocery-item:last-child { border-bottom: none; }
+
+  .grocery-check {
+    width: 20px; height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.2s;
+    color: transparent;
+  }
+
+  .grocery-item.ticked .grocery-check {
+    background: var(--green); border-color: var(--green); color: white;
+  }
+
+  .grocery-item.ticked .grocery-name { text-decoration: line-through; color: var(--muted); }
+
+  .grocery-name { flex: 1; font-size: 0.85rem; }
+  .grocery-qty { font-size: 0.75rem; color: var(--muted); margin-right: 8px; }
+  .grocery-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--charcoal);
+    width: 46px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .grocery-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0 0;
+    margin-top: 8px;
+    border-top: 2px solid var(--charcoal);
+  }
+
+  .grocery-total-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+    color: var(--charcoal);
+  }
+
+  .grocery-total-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--orange);
+  }
+
+  .aldi-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #003087;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.75rem;
+  }
+
+  .aldi-note a { color: #f9c623; text-decoration: none; font-weight: 500; }
+  .aldi-note a:hover { text-decoration: underline; }
+
+  .gen-grocery-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--charcoal);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .gen-grocery-btn:hover { background: #1a1a1a; transform: translateY(-1px); }
+  .gen-grocery-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .loading-dots span {
+    display: inline-block;
+    animation: dotBounce 1.2s infinite;
+    font-size: 1.2rem;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
+  }
+
+  .recipe-loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .no-recipes-msg {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+  }
+
+  /* ── RECIPE DAY TABS ── */
+  .recipe-day-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    min-width: 52px;
+  }
+
+  .recipe-day-tab:hover { border-color: rgba(232,93,38,0.3); }
+
+  .recipe-day-tab.active {
+    border-color: var(--orange);
+    background: var(--orange);
+  }
+
+  .recipe-day-tab.has-meals:not(.active) {
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .rdt-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  .recipe-day-tab.active .rdt-name { color: white; }
+  .recipe-day-tab.has-meals:not(.active) .rdt-name { color: var(--green); }
+
+  .rdt-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    color: var(--orange);
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .recipe-day-tab.has-meals:not(.active) .rdt-dot {
+    background: var(--green);
+    color: white;
+  }
+
+  .rdt-dot-empty {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    margin: 2px auto;
+  }
+
+  /* ── EXPANDABLE RECIPE CARDS ── */
+  .recipe-chevron {
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 4px;
+    transition: transform 0.2s;
+  }
+
+  .expanded-card {
+    border-color: var(--orange) !important;
+    background: white !important;
+  }
+
+  .recipe-card-top { cursor: pointer; }
+
+  .recipe-expanded-body {
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    padding-top: 14px;
+    animation: fadeUp 0.2s ease;
+  }
+
+  .recipe-expand-section { margin-bottom: 14px; }
+
+  .recipe-expand-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .recipe-ingredient-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .recipe-ingredient-list li {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--charcoal);
+  }
+
+  .recipe-steps-list {
+    padding-left: 18px;
+  }
+
+  .recipe-steps-list li {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .recipe-select-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1.5px solid var(--orange);
+    background: var(--orange-dim);
+    color: var(--orange);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .recipe-select-btn:hover { background: rgba(232,93,38,0.2); }
+
+  .recipe-select-btn.selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  /* ── DAY CHECKBOXES ON RECIPE CARDS ── */
+  .day-checks-row {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px;
+  }
+
+  .day-check-label {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+
+  .day-check-label:hover { border-color: var(--orange); color: var(--orange); }
+
+  .day-check-label.checked {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+
+  .rc-sel-label {
+    font-size: 0.72rem;
+    color: var(--green);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* ── WEEK OVERVIEW PILLS ── */
+  .rc-week-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 10px 8px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    flex-shrink: 0;
+    min-width: 60px;
+    transition: all 0.2s;
+  }
+
+  .rc-week-pill:hover { border-color: rgba(232,93,38,0.3); background: white; }
+
+  .rcpill-day {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .rcpill-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  .rcpill-count.has { color: var(--orange); }
+
+  .rcpill-cal {
+    font-size: 0.62rem;
+    color: var(--green);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>MOVE <span>&</span> BURN</h1>
+  <p>Your personal weight loss tracker</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('profile')">Profile</button>
+  <button class="tab" onclick="switchTab('calories')">Calories</button>
+  <button class="tab" onclick="switchTab('steps')">Steps</button>
+  <button class="tab" onclick="switchTab('exercises')">Exercises</button>
+  <button class="tab" onclick="switchTab('weekly')">📅 Weekly</button>
+  <button class="tab" onclick="switchTab('recipes')">🍽 Recipes</button>
+</div>
+
+<!-- ── PROFILE ── -->
+<div class="panel active" id="panel-profile">
+  <div class="card">
+    <div class="card-title">Your Details</div>
+    <div class="card-desc">Enter your stats to calculate your personalised daily targets</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="e.g. 35" min="10" max="100">
+      </div>
+      <div class="form-group">
+        <label>Sex</label>
+        <select id="sex">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 85" min="30" max="300">
+      </div>
+      <div class="form-group">
+        <label>Height (cm)</label>
+        <input type="number" id="height" placeholder="e.g. 175" min="100" max="250">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full">
+        <label>Activity Level</label>
+        <select id="activity">
+          <option value="1.2">Sedentary (desk job, little exercise)</option>
+          <option value="1.375">Lightly active (1–3 days/week)</option>
+          <option value="1.55" selected>Moderately active (3–5 days/week)</option>
+          <option value="1.725">Very active (6–7 days/week)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full">
+        <label>Weekly weight loss goal</label>
+        <select id="deficit">
+          <option value="250">Gentle — 0.25 kg/week (−250 cal/day)</option>
+          <option value="500" selected>Moderate — 0.5 kg/week (−500 cal/day)</option>
+          <option value="750">Aggressive — 0.75 kg/week (−750 cal/day)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate My Targets →</button>
+  </div>
+
+  <div class="card" id="resultsCard" style="display:none">
+    <div class="card-title">Your Daily Targets</div>
+    <div class="card-desc">Based on the Mifflin-St Jeor equation</div>
+    <div class="results-grid">
+      <div class="result-box highlight">
+        <div class="result-val" id="r-calTarget">—</div>
+        <div class="result-label">Daily calorie target to lose weight</div>
+      </div>
+      <div class="result-box">
+        <div class="result-val" id="r-bmr">—</div>
+        <div class="result-label">BMR (calories at rest)</div>
+      </div>
+      <div class="result-box">
+        <div class="result-val" id="r-tdee">—</div>
+        <div class="result-label">TDEE (maintenance calories)</div>
+      </div>
+      <div class="result-box">
+        <div class="result-val" id="r-steps">—</div>
+        <div class="result-label">Recommended daily steps</div>
+      </div>
+      <div class="result-box">
+        <div class="result-val" id="r-stepCal">—</div>
+        <div class="result-label">Calories burned by steps</div>
+      </div>
+    </div>
+    <div class="tip-strip" id="profileTip"></div>
+  </div>
+</div>
+
+<!-- ── CALORIES ── -->
+<div class="panel" id="panel-calories">
+  <div class="card">
+    <div class="card-title">Calorie Balance</div>
+    <div class="card-desc">Track what you eat vs what you burn</div>
+
+    <div class="cal-balance">
+      <div class="cal-number balanced" id="calBalance">0</div>
+      <div class="cal-status" id="calStatus">Set your profile first</div>
+    </div>
+
+    <div class="cal-bar-wrap">
+      <div class="cal-bar-goal" id="calBarGoal" style="width:100%"></div>
+      <div class="cal-bar-consumed" id="calBarConsumed" style="width:0%"></div>
+    </div>
+
+    <div class="cal-row">
+      <span class="cal-row-label">🎯 Daily target</span>
+      <span class="cal-row-val" id="calTargetDisplay">— kcal</span>
+    </div>
+    <div class="cal-row">
+      <span class="cal-row-label">🍽 Consumed</span>
+      <span class="cal-row-val" id="calConsumedDisplay">0 kcal</span>
+    </div>
+    <div class="cal-row">
+      <span class="cal-row-label">🔥 Burned (exercise)</span>
+      <span class="cal-row-val" id="calBurnedDisplay">0 kcal</span>
+    </div>
+    <div class="cal-row">
+      <span class="cal-row-label">👟 Burned (steps)</span>
+      <span class="cal-row-val" id="calStepBurnDisplay">0 kcal</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Log Food</div>
+    <div class="card-desc">Add meals or snacks to track intake</div>
+    <div class="input-row">
+      <input type="text" id="foodName" placeholder="Food / meal name">
+      <input type="number" id="foodCal" placeholder="kcal" style="width:90px;flex:none">
+      <button class="add-btn" onclick="addFood()">Add</button>
+    </div>
+    <div class="consumed-list" id="foodList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Log Exercise Calories</div>
+    <div class="card-desc">Manually add calories burned from any workout</div>
+    <div class="input-row">
+      <input type="text" id="exName" placeholder="Exercise name">
+      <input type="number" id="exCal" placeholder="kcal" style="width:90px;flex:none">
+      <button class="add-btn green" onclick="addExerciseCal()">Add</button>
+    </div>
+    <div class="consumed-list" id="exList"></div>
+  </div>
+</div>
+
+<!-- ── STEPS ── -->
+<div class="panel" id="panel-steps">
+  <div class="card" style="text-align:center">
+    <div class="card-title">Today's Steps</div>
+    <div class="card-desc">Enter your step count to see calories burned</div>
+
+    <div class="step-ring">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="68" fill="none" stroke="#ede8df" stroke-width="10"/>
+        <circle cx="80" cy="80" r="68" fill="none" stroke="#e85d26" stroke-width="10"
+          stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="427"
+          id="stepRingCircle" style="transition: stroke-dashoffset 0.6s ease"/>
+      </svg>
+      <div class="step-ring-text">
+        <div class="step-ring-num" id="stepRingNum">0</div>
+        <div class="step-ring-label">of <span id="stepRingGoal">10,000</span></div>
+      </div>
+    </div>
+
+    <div class="step-input-row">
+      <input type="number" id="stepInput" placeholder="Enter step count" min="0" max="100000" oninput="updateSteps()">
+      <button class="add-btn" onclick="updateSteps()">Update</button>
+    </div>
+
+    <div class="step-stats">
+      <div class="step-stat">
+        <div class="step-stat-val" id="statCal">0</div>
+        <div class="step-stat-label">kcal burned</div>
+      </div>
+      <div class="step-stat">
+        <div class="step-stat-val" id="statKm">0.0</div>
+        <div class="step-stat-label">km walked</div>
+      </div>
+      <div class="step-stat">
+        <div class="step-stat-val" id="statPct">0%</div>
+        <div class="step-stat-label">goal reached</div>
+      </div>
+    </div>
+
+    <!-- Exercise reduction strip -->
+    <div id="exReductionStrip" style="display:none;margin-top:16px;background:var(--green-dim);border:1px solid rgba(46,125,94,0.25);border-radius:10px;padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.75rem;color:var(--green);text-transform:uppercase;letter-spacing:0.07em;font-weight:500">💪 Exercise credit applied</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--green)" id="exStepCredit">−0 steps</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted)">
+        <span>Base goal</span><span id="exBaseGoal" style="color:var(--charcoal)">10,000</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted);margin-top:4px;">
+        <span>Reduced goal</span><span id="exReducedGoal" style="color:var(--green);font-weight:500">10,000</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Step Guidelines</div>
+    <div class="card-desc">How many steps per day for weight loss?</div>
+    <div class="cal-row">
+      <span class="cal-row-label">🚶 Baseline health</span>
+      <span class="cal-row-val">7,000–8,000</span>
+    </div>
+    <div class="cal-row">
+      <span class="cal-row-label">⚡ Active weight loss</span>
+      <span class="cal-row-val">10,000–12,000</span>
+    </div>
+    <div class="cal-row">
+      <span class="cal-row-label">🔥 Accelerated loss</span>
+      <span class="cal-row-val">12,000–15,000</span>
+    </div>
+    <div class="tip-strip">
+      <strong>Tip:</strong> Every 2,000 steps burns roughly 80–100 kcal depending on your weight. Breaking it up — morning walk + evening walk — is just as effective as one long session.
+    </div>
+  </div>
+</div>
+
+<!-- ── EXERCISES ── -->
+<div class="panel" id="panel-exercises">
+
+  <!-- Daily workout summary -->
+  <div class="card" id="workoutSummaryCard">
+    <div class="card-title">Today's Workout</div>
+    <div class="card-desc">Tick off each set as you complete it — calories auto-update your balance</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:1;color:var(--orange)" id="woBurnedBig">0</div>
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)">kcal burned today</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:1;color:var(--charcoal)" id="woSetsCompleted">0</div>
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)">sets done</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:1;color:var(--green)" id="woExDone">0/8</div>
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)">exercises</div>
+      </div>
+    </div>
+    <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:8px">
+      <div id="woProgressBar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:3px;width:0%;transition:width 0.4s ease"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:0.75rem;color:var(--muted)" id="woProgressLabel">0 of 24 sets completed</span>
+      <button onclick="resetWorkout()" style="font-size:0.72rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Calisthenics for Weight Loss</div>
+    <div class="card-desc">Tap an exercise to expand — tick each set as you complete it.</div>
+    <div class="exercise-grid" id="exerciseGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Beginner Weekly Plan</div>
+    <div class="card-desc">A simple structure to start with — 3 days on, 1 day rest</div>
+    <div class="cal-row"><span class="cal-row-label">Mon / Wed / Fri</span><span class="cal-row-val" style="font-size:0.85rem;font-family:'DM Sans'">Full body circuit</span></div>
+    <div class="cal-row"><span class="cal-row-label">Tue / Thu</span><span class="cal-row-val" style="font-size:0.85rem;font-family:'DM Sans'">Walking (10,000+ steps)</span></div>
+    <div class="cal-row"><span class="cal-row-label">Sat</span><span class="cal-row-val" style="font-size:0.85rem;font-family:'DM Sans'">Longer walk or light stretch</span></div>
+    <div class="cal-row"><span class="cal-row-label">Sun</span><span class="cal-row-val" style="font-size:0.85rem;font-family:'DM Sans'">Full rest — let muscles recover</span></div>
+    <div class="tip-strip">
+      <strong>Circuit tip:</strong> Do each exercise back to back with 30 sec rest between. Rest 2 min between rounds. Aim for 3 rounds as you build fitness.
+    </div>
+  </div>
+</div>
+
+<!-- ── WEEKLY TRACKER ── -->
+<div class="panel" id="panel-weekly">
+
+  <!-- Week navigation -->
+  <div class="card">
+    <div class="week-nav">
+      <button class="week-nav-btn" onclick="changeWeek(-1)">‹</button>
+      <div class="week-label" id="weekLabel">WEEK <span id="weekNum">1</span></div>
+      <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
+    </div>
+
+    <!-- 7-day pill grid -->
+    <div class="day-grid" id="dayGrid"></div>
+
+    <!-- Day detail -->
+    <div id="dayDetail"></div>
+
+    <button class="save-day-btn" onclick="saveDay()">✓ Save Today's Progress</button>
+    <div class="saved-toast" id="savedToast">✓ Day saved!</div>
+  </div>
+
+  <!-- Weekly summary -->
+  <div class="card" id="weekSummaryCard">
+    <div class="card-title">This Week</div>
+    <div class="card-desc">Your totals so far this week</div>
+    <div class="day-summary-strip" id="weekTotals">
+      <div class="day-summary-box"><div class="day-summary-val" id="wtExDays">0</div><div class="day-summary-lbl">Workout days</div></div>
+      <div class="day-summary-box"><div class="day-summary-val" id="wtWalkDays">0</div><div class="day-summary-lbl">Walk days</div></div>
+      <div class="day-summary-box"><div class="day-summary-val" id="wtCalBurned">0</div><div class="day-summary-lbl">kcal burned</div></div>
+    </div>
+    <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:8px">
+      <div id="weekScoreBar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:3px;width:0%;transition:width 0.5s ease"></div>
+    </div>
+    <div style="font-size:0.75rem;color:var(--muted)" id="weekScoreLabel">Complete more days to build your score</div>
+  </div>
+
+  <!-- Multi-week history -->
+  <div class="card" id="historyCard">
+    <div class="card-title">Progress History</div>
+    <div class="card-desc">Exercise days vs walk days per week</div>
+    <div id="weekHistoryList"></div>
+  </div>
+
+</div>
+
+<!-- ── RECIPES ── -->
+<div class="panel" id="panel-recipes">
+
+  <!-- Weekly overview bar -->
+  <div id="rcWeekBar" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 16px"></div>
+
+  <!-- Calorie budget bar for viewed day -->
+  <div class="day-cal-bar" id="rcCalBar" style="display:none">
+    <div class="day-cal-row">
+      <span class="day-cal-label" id="rcDayLabel">Monday</span>
+      <span class="day-cal-val" id="rcCalTarget">— kcal target</span>
+    </div>
+    <div class="day-cal-row">
+      <span class="day-cal-label">🍽 Meals selected</span>
+      <span class="day-cal-val" id="rcCalSelected">0 kcal</span>
+    </div>
+    <div class="day-cal-row" style="margin-bottom:10px">
+      <span class="day-cal-label">✅ Remaining</span>
+      <span class="day-cal-val" id="rcCalRemaining">—</span>
+    </div>
+    <div class="day-cal-progress">
+      <div class="day-cal-fill" id="rcCalFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Diet filter -->
+  <div class="card">
+    <div class="card-title">Diet Preference</div>
+    <div class="card-desc">Select one or more — Meat only hides all vegetarian &amp; vegan options</div>
+    <div class="diet-filters">
+      <button class="diet-btn" data-diet="all" onclick="toggleDietFilter('all', this)">🍴 All</button>
+      <button class="diet-btn" data-diet="vegetarian" onclick="toggleDietFilter('vegetarian', this)">🥦 Vegetarian</button>
+      <button class="diet-btn" data-diet="vegan" onclick="toggleDietFilter('vegan', this)">🌱 Vegan</button>
+      <button class="diet-btn active" data-diet="meat" onclick="toggleDietFilter('meat', this)">🍗 Meat</button>
+      <button class="diet-btn" data-diet="high-protein" onclick="toggleDietFilter('high-protein', this)">💪 High Protein</button>
+      <button class="diet-btn" data-diet="low-carb" onclick="toggleDietFilter('low-carb', this)">🥑 Low Carb</button>
+    </div>
+    <button class="gen-grocery-btn" style="background:var(--orange);margin-top:0" onclick="generateRecipes()">
+      <span id="genRecipesLabel">✦ Generate Week Meal Plan</span>
+    </button>
+  </div>
+
+  <!-- Meal sections -->
+  <div id="recipePanelContent" style="display:none">
+
+    <div class="meal-section">
+      <div class="meal-section-header">
+        <div class="meal-section-title">☀️ Breakfast</div>
+        <div class="meal-cal-budget">~<span id="bfCalBudget">400</span> kcal</div>
+      </div>
+      <div class="recipe-cards" id="breakfastCards"></div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-section-header">
+        <div class="meal-section-title">🍎 Morning Snack</div>
+        <div class="meal-cal-budget">~<span id="snackAmCalBudget">150</span> kcal</div>
+      </div>
+      <div class="recipe-cards" id="snackAmCards"></div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-section-header">
+        <div class="meal-section-title">🥗 Lunch</div>
+        <div class="meal-cal-budget">~<span id="lunchCalBudget">500</span> kcal</div>
+      </div>
+      <div class="recipe-cards" id="lunchCards"></div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-section-header">
+        <div class="meal-section-title">🧃 Afternoon Snack</div>
+        <div class="meal-cal-budget">~<span id="snackPmCalBudget">150</span> kcal</div>
+      </div>
+      <div class="recipe-cards" id="snackPmCards"></div>
+    </div>
+
+    <div class="meal-section">
+      <div class="meal-section-header">
+        <div class="meal-section-title">🌙 Dinner</div>
+        <div class="meal-cal-budget">~<span id="dinnerCalBudget">600</span> kcal</div>
+      </div>
+      <div class="recipe-cards" id="dinnerCards"></div>
+    </div>
+
+    <!-- Grocery list -->
+    <div class="card" id="groceryCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="card-title" style="margin-bottom:0">🛒 Grocery List</div>
+        <button onclick="selectAllGrocery()" id="selectAllBtn" style="font-size:0.75rem;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">☑ Select All</button>
+      </div>
+      <div class="card-desc">Tick what you need — download exports only ticked items</div>
+      <div id="groceryContent"></div>
+      <div class="aldi-note">
+        <span>🛍</span>
+        <span>Prices are approximate Aldi Australia estimates. Shop at <a href="https://www.aldi.com.au" target="_blank">aldi.com.au</a> to check current specials.</span>
+      </div>
+      <button onclick="downloadGroceryList()" style="width:100%;margin-top:14px;padding:12px;background:var(--charcoal);color:white;border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.07em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--charcoal)'">
+        ⬇ Download Selected Items
+      </button>
+    </div>
+
+    <button class="gen-grocery-btn" onclick="generateGroceryList()" id="groceryBtn">
+      <span id="groceryBtnLabel">🛒 Generate Grocery List</span>
+    </button>
+
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let state = {
+  calTarget: 0,
+  tdee: 0,
+  weight: 70,
+  stepGoal: 10000,
+  stepCalPerStep: 0.04,
+  consumed: 0,
+  burned: 0,
+  stepsBurned: 0,
+  calisthenicsCalBurned: 0,
+  steps: 0,
+  foods: [],
+  exercises: [],
+};
+
+// ─── TABS (defined below in weekly section) ───
+
+// ─── CALCULATE ───
+function calculate() {
+  const age = parseFloat(document.getElementById('age').value);
+  const sex = document.getElementById('sex').value;
+  const weight = parseFloat(document.getElementById('weight').value);
+  const height = parseFloat(document.getElementById('height').value);
+  const activity = parseFloat(document.getElementById('activity').value);
+  const deficit = parseFloat(document.getElementById('deficit').value);
+
+  if (!age || !weight || !height) {
+    alert('Please fill in age, weight and height.');
+    return;
+  }
+
+  // Mifflin-St Jeor BMR
+  let bmr = sex === 'male'
+    ? 10 * weight + 6.25 * height - 5 * age + 5
+    : 10 * weight + 6.25 * height - 5 * age - 161;
+
+  const tdee = Math.round(bmr * activity);
+  const calTarget = Math.max(1200, tdee - deficit);
+
+  // Step goal: calories needed from steps = deficit / 2
+  // ~0.04 kcal per step per kg of body weight (approx)
+  const calPerStep = weight * 0.00045;
+  const stepsNeeded = Math.round(deficit / 2 / calPerStep / 1000) * 1000;
+  const stepGoal = Math.max(7000, Math.min(15000, stepsNeeded + 7000));
+
+  state.calTarget = calTarget;
+  state.tdee = tdee;
+  state.weight = weight;
+  state.stepGoal = stepGoal;
+  state.stepCalPerStep = calPerStep;
+
+  document.getElementById('r-bmr').textContent = Math.round(bmr).toLocaleString();
+  document.getElementById('r-tdee').textContent = tdee.toLocaleString();
+  document.getElementById('r-calTarget').textContent = calTarget.toLocaleString() + ' kcal';
+  document.getElementById('r-steps').textContent = stepGoal.toLocaleString();
+  document.getElementById('r-stepCal').textContent = Math.round(stepGoal * calPerStep) + ' kcal';
+
+  const weeklyLoss = (deficit * 7 / 7700).toFixed(2);
+  document.getElementById('profileTip').innerHTML =
+    `<strong>At this deficit</strong>, you're on track to lose roughly <strong>${weeklyLoss} kg per week</strong>. Combined with ${stepGoal.toLocaleString()} steps/day, that's sustainable, healthy progress. Update your numbers monthly as your weight changes.`;
+
+  document.getElementById('resultsCard').style.display = 'block';
+  document.getElementById('stepRingGoal').textContent = stepGoal.toLocaleString();
+  document.getElementById('calTargetDisplay').textContent = calTarget.toLocaleString() + ' kcal';
+  updateCalDisplay();
+}
+
+// ─── CALORIE TRACKER ───
+function addFood() {
+  const name = document.getElementById('foodName').value.trim();
+  const cal = parseFloat(document.getElementById('foodCal').value);
+  if (!name || !cal) return;
+
+  state.foods.push({ name, cal });
+  state.consumed += cal;
+  document.getElementById('foodName').value = '';
+  document.getElementById('foodCal').value = '';
+  renderFoodList();
+  updateCalDisplay();
+}
+
+function addExerciseCal() {
+  const name = document.getElementById('exName').value.trim();
+  const cal = parseFloat(document.getElementById('exCal').value);
+  if (!name || !cal) return;
+
+  state.exercises.push({ name, cal });
+  state.burned += cal;
+  document.getElementById('exName').value = '';
+  document.getElementById('exCal').value = '';
+  renderExList();
+  updateCalDisplay();
+}
+
+function removeFood(idx) {
+  state.consumed -= state.foods[idx].cal;
+  state.foods.splice(idx, 1);
+  renderFoodList();
+  updateCalDisplay();
+}
+
+function removeEx(idx) {
+  state.burned -= state.exercises[idx].cal;
+  state.exercises.splice(idx, 1);
+  renderExList();
+  updateCalDisplay();
+}
+
+function renderFoodList() {
+  document.getElementById('foodList').innerHTML = state.foods.map((f, i) =>
+    `<div class="consumed-item"><span>${f.name}</span><span>${f.cal} kcal <span class="remove" onclick="removeFood(${i})">✕</span></span></div>`
+  ).join('');
+}
+
+function renderExList() {
+  document.getElementById('exList').innerHTML = state.exercises.map((e, i) =>
+    `<div class="consumed-item"><span>${e.name}</span><span>−${e.cal} kcal <span class="remove" onclick="removeEx(${i})">✕</span></span></div>`
+  ).join('');
+}
+
+function updateCalDisplay() {
+  const target = state.calTarget || 2000;
+  const totalBurned = state.burned + state.stepsBurned + (state.calisthenicsCalBurned || 0);
+  const netConsumed = state.consumed - totalBurned;
+  const balance = netConsumed - target;
+
+  const balEl = document.getElementById('calBalance');
+  balEl.textContent = (balance >= 0 ? '+' : '') + Math.round(balance).toLocaleString();
+  balEl.className = 'cal-number ' + (balance > 100 ? 'surplus' : balance < -100 ? 'deficit' : 'balanced');
+
+  document.getElementById('calStatus').textContent = balance > 100
+    ? 'calorie surplus — eat a little less'
+    : balance < -100
+    ? 'calorie deficit — great work!'
+    : 'right on target';
+
+  document.getElementById('calConsumedDisplay').textContent = state.consumed.toLocaleString() + ' kcal';
+  document.getElementById('calBurnedDisplay').textContent = Math.round(state.burned + (state.calisthenicsCalBurned || 0)).toLocaleString() + ' kcal';
+  document.getElementById('calStepBurnDisplay').textContent = Math.round(state.stepsBurned).toLocaleString() + ' kcal';
+
+  const pct = Math.min(100, (state.consumed / target) * 100);
+  document.getElementById('calBarConsumed').style.width = pct + '%';
+}
+
+// ─── STEPS ───
+function getEffectiveStepGoal() {
+  const baseGoal = state.stepGoal || 10000;
+  const calPerStep = state.stepCalPerStep || 0.04;
+  const calisthenicsCal = state.calisthenicsCalBurned || 0;
+  // Convert calisthenics calories to equivalent steps, cap reduction at 50% of base goal
+  const stepCredit = Math.round(calisthenicsCal / calPerStep);
+  const maxReduction = Math.round(baseGoal * 0.5);
+  const reduction = Math.min(stepCredit, maxReduction);
+  return { baseGoal, reduction, effectiveGoal: Math.max(0, baseGoal - reduction) };
+}
+
+function updateSteps() {
+  const val = parseFloat(document.getElementById('stepInput').value) || 0;
+  state.steps = val;
+  const calPerStep = state.stepCalPerStep || 0.04;
+  const burned = val * calPerStep;
+  state.stepsBurned = burned;
+
+  const { baseGoal, reduction, effectiveGoal } = getEffectiveStepGoal();
+
+  const pct = effectiveGoal > 0 ? Math.min(1, val / effectiveGoal) : 1;
+  const circumference = 427;
+  document.getElementById('stepRingCircle').style.strokeDashoffset = circumference * (1 - pct);
+  document.getElementById('stepRingNum').textContent = val.toLocaleString();
+  document.getElementById('stepRingGoal').textContent = effectiveGoal.toLocaleString();
+  document.getElementById('statCal').textContent = Math.round(burned);
+  document.getElementById('statKm').textContent = (val * 0.00075).toFixed(1);
+  document.getElementById('statPct').textContent = Math.round(pct * 100) + '%';
+
+  // Show/hide exercise reduction strip
+  const strip = document.getElementById('exReductionStrip');
+  if (reduction > 0) {
+    strip.style.display = 'block';
+    document.getElementById('exStepCredit').textContent = '−' + reduction.toLocaleString() + ' steps';
+    document.getElementById('exBaseGoal').textContent = baseGoal.toLocaleString();
+    document.getElementById('exReducedGoal').textContent = effectiveGoal.toLocaleString();
+  } else {
+    strip.style.display = 'none';
+  }
+
+  updateCalDisplay();
+}
+
+function updateStepDisplay() {
+  updateSteps();
+}
+
+// ─── EXERCISES ───
+const exercises = [
+  {
+    icon: '💪', name: 'Push-ups', calPerSet: 12, tag: 'Upper body', numSets: 3,
+    sets: ['Set 1 — 8–12 reps', 'Set 2 — 8–12 reps', 'Set 3 — 8–12 reps'],
+    how: 'Hands shoulder-width apart, body in a straight line from head to heels. Lower until chest nearly touches the floor. Push back up without letting hips sag or rise. Exhale on the way up. Beginner: knees on floor is fine.'
+  },
+  {
+    icon: '🦵', name: 'Squats', calPerSet: 14, tag: 'Lower body', numSets: 3,
+    sets: ['Set 1 — 15–20 reps', 'Set 2 — 15–20 reps', 'Set 3 — 15–20 reps'],
+    how: 'Stand feet shoulder-width, toes slightly out. Push hips back and bend knees as if sitting into a chair. Keep chest up, heels flat. Lower until thighs parallel to floor. Drive through heels to stand.'
+  },
+  {
+    icon: '🏋️', name: 'Burpees', calPerSet: 22, tag: 'Full body 🔥', numSets: 3,
+    sets: ['Set 1 — 8–10 reps', 'Set 2 — 8–10 reps', 'Set 3 — 8–10 reps'],
+    how: 'Start standing. Drop hands to floor, jump feet back to push-up position, do one push-up (optional), jump feet to hands, then explosively jump up with arms overhead. Land softly. Scale by stepping instead of jumping.'
+  },
+  {
+    icon: '🧘', name: 'Plank', calPerSet: 7, tag: 'Core', numSets: 3,
+    sets: ['Set 1 — 30–45 sec', 'Set 2 — 30–45 sec', 'Set 3 — 30–45 sec'],
+    how: 'Forearms on floor, elbows under shoulders. Body in a straight line from head to heels — squeeze glutes and core. Don\'t let hips sag or pike. Breathe steadily. Build hold time week by week.'
+  },
+  {
+    icon: '🚶', name: 'Lunges', calPerSet: 11, tag: 'Lower body', numSets: 3,
+    sets: ['Set 1 — 10 each leg', 'Set 2 — 10 each leg', 'Set 3 — 10 each leg'],
+    how: 'Step one foot forward and lower back knee toward the floor — stop just before it touches. Front knee stays above ankle, not past toes. Push through front heel to return to standing. Alternate legs each rep.'
+  },
+  {
+    icon: '⬆️', name: 'Mountain Climbers', calPerSet: 18, tag: 'Cardio + Core', numSets: 3,
+    sets: ['Set 1 — 30 sec', 'Set 2 — 30 sec', 'Set 3 — 30 sec'],
+    how: 'Start in a high push-up position. Drive one knee toward your chest, then quickly switch legs — like running horizontally. Keep hips level and core tight. Faster = more cardio. Slower = more core.'
+  },
+  {
+    icon: '🦗', name: 'Glute Bridges', calPerSet: 8, tag: 'Posterior chain', numSets: 3,
+    sets: ['Set 1 — 15 reps', 'Set 2 — 15 reps', 'Set 3 — 15 reps'],
+    how: 'Lie on your back, knees bent, feet flat on floor hip-width apart. Push through heels and squeeze glutes to lift hips until body forms a straight line from shoulders to knees. Hold briefly, lower with control.'
+  },
+  {
+    icon: '🤸', name: 'Jumping Jacks', calPerSet: 13, tag: 'Warm-up / Cardio', numSets: 3,
+    sets: ['Set 1 — 45 sec', 'Set 2 — 45 sec', 'Set 3 — 45 sec'],
+    how: 'Stand feet together, arms at sides. Jump feet out to shoulder-width while raising arms overhead, then jump back. Keep soft bend in knees on landing. Great as a warm-up or between exercises to keep heart rate up.'
+  },
+];
+
+// Track which sets are ticked: { exIndex: Set of setIndex }
+let tickedSets = {};
+exercises.forEach((_, i) => tickedSets[i] = new Set());
+
+function renderExercises() {
+  document.getElementById('exerciseGrid').innerHTML = exercises.map((e, i) => {
+    const ticked = tickedSets[i].size;
+    const allDone = ticked === e.numSets;
+    return `
+    <div class="ex-card${allDone ? ' ex-done' : ''}" id="ex-${i}" onclick="toggleEx(${i}, event)">
+      <button class="ex-close" onclick="closeEx(${i}, event)">✕</button>
+      ${allDone ? '<div class="ex-done-badge">✓ Done</div>' : ''}
+      <span class="ex-icon">${e.icon}</span>
+      <div class="ex-name">${e.name}</div>
+      <div class="ex-cal">${e.calPerSet} kcal/set</div>
+      <span class="ex-tag">${e.tag}</span>
+      <div class="ex-set-mini-progress">
+        ${Array.from({length: e.numSets}, (_, s) =>
+          `<div class="set-dot ${tickedSets[i].has(s) ? 'set-dot-done' : ''}"></div>`
+        ).join('')}
+      </div>
+      <div class="ex-detail">
+        <h4>Sets & Reps — tap to tick off</h4>
+        <div class="ex-checklist">
+          ${e.sets.map((s, si) => `
+            <div class="set-check-row ${tickedSets[i].has(si) ? 'set-checked' : ''}" onclick="tickSet(${i}, ${si}, event)">
+              <div class="set-checkbox">${tickedSets[i].has(si) ? '✓' : ''}</div>
+              <span>${s}</span>
+              <span class="set-kcal">${e.calPerSet} kcal</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="ex-how">${e.how}</div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function tickSet(exIdx, setIdx, e) {
+  e.stopPropagation();
+  const wasChecked = tickedSets[exIdx].has(setIdx);
+  if (wasChecked) {
+    tickedSets[exIdx].delete(setIdx);
+  } else {
+    tickedSets[exIdx].add(setIdx);
+  }
+  renderExercises();
+  // Re-expand the card that was open
+  const card = document.getElementById('ex-' + exIdx);
+  card.classList.add('expanded');
+  updateWorkoutSummary();
+}
+
+function updateWorkoutSummary() {
+  let totalCal = 0;
+  let totalSets = 0;
+  let exDone = 0;
+  const totalPossibleSets = exercises.reduce((a, e) => a + e.numSets, 0);
+
+  exercises.forEach((ex, i) => {
+    const done = tickedSets[i].size;
+    totalCal += done * ex.calPerSet;
+    totalSets += done;
+    if (done === ex.numSets) exDone++;
+  });
+
+  document.getElementById('woBurnedBig').textContent = totalCal;
+  document.getElementById('woSetsCompleted').textContent = totalSets;
+  document.getElementById('woExDone').textContent = exDone + '/' + exercises.length;
+  const pct = totalPossibleSets > 0 ? (totalSets / totalPossibleSets) * 100 : 0;
+  document.getElementById('woProgressBar').style.width = pct + '%';
+  document.getElementById('woProgressLabel').textContent = `${totalSets} of ${totalPossibleSets} sets completed`;
+
+  // Feed into calorie balance — replace calisthenics burned
+  state.calisthenicsCalBurned = totalCal;
+  updateCalDisplay();
+  // Refresh step goal reduction live
+  updateSteps();
+}
+
+function resetWorkout() {
+  exercises.forEach((_, i) => tickedSets[i] = new Set());
+  renderExercises();
+  updateWorkoutSummary();
+}
+
+function toggleEx(i, e) {
+  const card = document.getElementById('ex-' + i);
+  const wasExpanded = card.classList.contains('expanded');
+  document.querySelectorAll('.ex-card').forEach(c => c.classList.remove('expanded'));
+  if (!wasExpanded) card.classList.add('expanded');
+}
+
+function closeEx(i, e) {
+  e.stopPropagation();
+  document.getElementById('ex-' + i).classList.remove('expanded');
+}
+
+// weekData: { weekNum: { dayIdx: { exercises: [bool x8], walks: [{steps, note}], notes: '' } } }
+let weeklyData = {};
+let currentWeek = 1;
+let selectedDay = new Date().getDay(); // 0=Sun, start from Mon so shift
+// Convert to Mon=0..Sun=6
+selectedDay = (selectedDay + 6) % 7;
+
+const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_FULL  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAY_TYPES = ['workout','walk','workout','walk','workout','walk','rest'];
+// workout days: Mon/Wed/Fri (0,2,4), walk: Tue/Thu/Sat (1,3,5), rest: Sun (6)
+
+function getWeekDay(week, day) {
+  if (!weeklyData[week]) weeklyData[week] = {};
+  if (!weeklyData[week][day]) weeklyData[week][day] = {
+    exercises: new Array(8).fill(false),
+    walks: [],
+    stepCount: 0,
+    saved: false
+  };
+  return weeklyData[week][day];
+}
+
+function renderDayGrid() {
+  const html = DAY_NAMES.map((name, i) => {
+    const d = weeklyData[currentWeek]?.[i];
+    const exDone = d ? d.exercises.filter(Boolean).length : 0;
+    const walkDone = d && d.walks.length > 0;
+    const isFull = d?.saved;
+    const isActive = i === selectedDay;
+    const type = DAY_TYPES[i];
+
+    let pillClass = 'day-pill';
+    if (isActive) pillClass += ' active';
+    else if (isFull) pillClass += ' full-day';
+    else if (d && (exDone > 0 || walkDone)) pillClass += ' has-data';
+
+    const dots = type === 'rest' ? '' : `
+      <div class="day-dot-row">
+        ${type === 'workout' ? Array.from({length:8}, (_,ei) =>
+          `<div class="day-dot${d?.exercises[ei] ? ' ex-done' : ''}"></div>`).join('') : ''}
+        ${type === 'walk' || type === 'workout' ? `<div class="day-dot${walkDone ? ' walk-done' : ''}"></div>` : ''}
+      </div>`;
+
+    return `<div class="${pillClass}" onclick="selectDay(${i})">
+      <div class="day-pill-label">${name}</div>
+      <div class="day-pill-circle">${isFull && !isActive ? '✓' : (i+1)}</div>
+      ${dots}
+    </div>`;
+  }).join('');
+  document.getElementById('dayGrid').innerHTML = html;
+  renderDayDetail();
+}
+
+function selectDay(i) {
+  selectedDay = i;
+  renderDayGrid();
+}
+
+function renderDayDetail() {
+  const i = selectedDay;
+  const type = DAY_TYPES[i];
+  const d = getWeekDay(currentWeek, i);
+  const dayName = DAY_FULL[i];
+
+  // Day summary
+  const exCount = d.exercises.filter(Boolean).length;
+  const exCal = exercises.reduce((sum, ex, ei) => sum + (d.exercises[ei] ? ex.calPerSet * ex.numSets : 0), 0);
+  const walkCal = d.walks.reduce((s, w) => s + (w.cal || 0), 0);
+  const totalCal = exCal + walkCal;
+
+  let html = `<div class="day-detail-header">${dayName} <span style="color:var(--muted);font-size:0.85rem;font-family:'DM Sans'">— ${type === 'rest' ? 'Rest Day' : type === 'walk' ? 'Walk Day' : 'Workout Day'}</span></div>`;
+
+  html += `<div class="day-summary-strip">
+    <div class="day-summary-box"><div class="day-summary-val">${exCount}</div><div class="day-summary-lbl">Exercises done</div></div>
+    <div class="day-summary-box"><div class="day-summary-val">${d.walks.length}</div><div class="day-summary-lbl">Walks logged</div></div>
+    <div class="day-summary-box"><div class="day-summary-val">${totalCal}</div><div class="day-summary-lbl">kcal burned</div></div>
+  </div>`;
+
+  // Exercises section (all days can tick exercises)
+  if (type !== 'rest') {
+    html += `<div class="day-section-title">${type === 'workout' ? '💪 Exercises' : '💪 Optional Exercises'}</div>
+    <div class="day-ex-list">`;
+    exercises.forEach((ex, ei) => {
+      const done = d.exercises[ei];
+      html += `<div class="day-ex-row${done ? ' day-ex-done' : ''}" onclick="toggleDayEx(${i}, ${ei})">
+        <div class="day-ex-check">${done ? '✓' : ''}</div>
+        <div class="day-ex-info">
+          <div class="day-ex-name">${ex.icon} ${ex.name}</div>
+          <div class="day-ex-sub">${ex.sets[0].replace('Set 1 — ','')}</div>
+        </div>
+        <div class="day-ex-cal">${done ? ex.calPerSet * ex.numSets : ex.calPerSet * ex.numSets} kcal</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:0.85rem">🛌 Rest day — let your body recover.<br>Light stretching is always welcome.</div>`;
+  }
+
+  // Walk section
+  html += `<div class="day-section-title">🚶 Walks</div>
+  <div class="walk-log-row">
+    <input type="number" id="walkSteps-${i}" placeholder="Steps (e.g. 8500)" min="0">
+    <input type="text" id="walkNote-${i}" placeholder="Note (optional)" style="flex:1.2">
+    <button onclick="logWalk(${i})">+ Walk</button>
+  </div>
+  <div id="walkEntries-${i}">`;
+
+  d.walks.forEach((w, wi) => {
+    html += `<div class="walk-entry">
+      <span>👟 ${w.steps?.toLocaleString() || '—'} steps${w.note ? ' — ' + w.note : ''}</span>
+      <span>${w.cal || 0} kcal <span class="walk-remove" onclick="removeWalk(${i},${wi})">✕</span></span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  document.getElementById('dayDetail').innerHTML = html;
+}
+
+function toggleDayEx(dayIdx, exIdx) {
+  const d = getWeekDay(currentWeek, dayIdx);
+  d.exercises[exIdx] = !d.exercises[exIdx];
+  renderDayGrid();
+  updateWeekSummary();
+}
+
+function logWalk(dayIdx) {
+  const steps = parseInt(document.getElementById(`walkSteps-${dayIdx}`)?.value) || 0;
+  const note  = document.getElementById(`walkNote-${dayIdx}`)?.value.trim() || '';
+  if (!steps) return;
+  const calPerStep = state.stepCalPerStep || 0.04;
+  const cal = Math.round(steps * calPerStep);
+  const d = getWeekDay(currentWeek, dayIdx);
+  d.walks.push({ steps, note, cal });
+  renderDayGrid();
+  updateWeekSummary();
+}
+
+function removeWalk(dayIdx, walkIdx) {
+  const d = getWeekDay(currentWeek, dayIdx);
+  d.walks.splice(walkIdx, 1);
+  renderDayGrid();
+  updateWeekSummary();
+}
+
+function saveDay() {
+  const d = getWeekDay(currentWeek, selectedDay);
+  d.saved = true;
+  renderDayGrid();
+  updateWeekSummary();
+  updateWeekHistory();
+  const toast = document.getElementById('savedToast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function changeWeek(dir) {
+  currentWeek = Math.max(1, currentWeek + dir);
+  document.getElementById('weekNum').textContent = currentWeek;
+  selectedDay = 0;
+  renderDayGrid();
+  updateWeekSummary();
+  updateWeekHistory();
+}
+
+function updateWeekSummary() {
+  const week = weeklyData[currentWeek] || {};
+  let exDays = 0, walkDays = 0, calBurned = 0;
+  let totalScore = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const d = week[i];
+    if (!d) continue;
+    const exCount = d.exercises.filter(Boolean).length;
+    const walkCount = d.walks.length;
+    const exCal = exercises.reduce((s, ex, ei) => s + (d.exercises[ei] ? ex.calPerSet * ex.numSets : 0), 0);
+    const walkCal = d.walks.reduce((s, w) => s + (w.cal || 0), 0);
+    if (exCount > 0) exDays++;
+    if (walkCount > 0) walkDays++;
+    calBurned += exCal + walkCal;
+    // Score: workout day = 2pts, walk day = 1pt, bonus if saved
+    const type = DAY_TYPES[i];
+    if (type === 'workout' && exCount >= 4) totalScore += 2;
+    else if (exCount > 0) totalScore += 1;
+    if (walkCount > 0) totalScore += 1;
+  }
+
+  document.getElementById('wtExDays').textContent = exDays;
+  document.getElementById('wtWalkDays').textContent = walkDays;
+  document.getElementById('wtCalBurned').textContent = calBurned;
+  const maxScore = 13; // 3 workout days × 2 + 3 walk days × 1 + 3 walk days bonus
+  const pct = Math.min(100, (totalScore / maxScore) * 100);
+  document.getElementById('weekScoreBar').style.width = pct + '%';
+  document.getElementById('weekScoreLabel').textContent =
+    pct >= 100 ? '🏆 Perfect week! Outstanding effort.' :
+    pct >= 70  ? '🔥 Great week — keep it up!' :
+    pct >= 40  ? '💪 Good start — push a little more!' :
+    'Log your workouts and walks to build your score';
+}
+
+function updateWeekHistory() {
+  const weeks = Object.keys(weeklyData).map(Number).sort((a,b) => a-b);
+  if (weeks.length === 0) {
+    document.getElementById('weekHistoryList').innerHTML =
+      `<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:12px 0">Save some days to see your history here</div>`;
+    return;
+  }
+
+  const html = weeks.map(wk => {
+    const week = weeklyData[wk] || {};
+    let exDays = 0, walkDays = 0, savedDays = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = week[i];
+      if (!d) continue;
+      if (d.exercises.filter(Boolean).length > 0) exDays++;
+      if (d.walks.length > 0) walkDays++;
+      if (d.saved) savedDays++;
+    }
+    const exPct = Math.round((exDays / 3) * 100);
+    const walkPct = Math.round((walkDays / 3) * 100);
+    return `<div class="week-history-row">
+      <div class="week-hist-label">Wk ${wk}</div>
+      <div class="week-hist-bars">
+        <div class="week-hist-bar-wrap">
+          <span style="font-size:0.65rem;color:var(--orange);width:12px">💪</span>
+          <div class="week-hist-bar-bg"><div class="week-hist-bar-fill bar-ex" style="width:${exPct}%"></div></div>
+          <div class="week-hist-pct">${exDays}/3</div>
+        </div>
+        <div class="week-hist-bar-wrap">
+          <span style="font-size:0.65rem;color:var(--green);width:12px">🚶</span>
+          <div class="week-hist-bar-bg"><div class="week-hist-bar-fill bar-walk" style="width:${walkPct}%"></div></div>
+          <div class="week-hist-pct">${walkDays}/3</div>
+        </div>
+      </div>
+      <div class="week-hist-score">${savedDays}/7</div>
+    </div>`;
+  }).join('');
+  document.getElementById('weekHistoryList').innerHTML = html;
+}
+
+// ─── RECIPES ───
+const WEEK_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const WEEK_DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MEAL_SLOTS = ['breakfast','snackAm','lunch','snackPm','dinner'];
+const MEAL_LABELS = { breakfast:'☀️ Breakfast', snackAm:'🍎 Morning Snack', lunch:'🥗 Lunch', snackPm:'🧃 Afternoon Snack', dinner:'🌙 Dinner' };
+
+let activeDiets = new Set(['meat']);
+let generatedRecipes = {};
+let expandedRecipe = null; // {meal, idx}
+// weekPlan[dayIdx][slot] = recipe object or null
+let weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
+// groceryItems: flat array of {uid, name, qty, price, section}
+let groceryItems = [];
+
+function toggleDietFilter(diet, el) {
+  if (diet === 'all') {
+    activeDiets.clear();
+    activeDiets.add('all');
+  } else {
+    activeDiets.delete('all');
+    if (activeDiets.has(diet)) {
+      activeDiets.delete(diet);
+      if (activeDiets.size === 0) activeDiets.add('all');
+    } else {
+      activeDiets.add(diet);
+    }
+  }
+  document.querySelectorAll('.diet-btn').forEach(b => {
+    b.classList.toggle('active', activeDiets.has(b.dataset.diet));
+  });
+}
+
+function buildDietNote() {
+  if (activeDiets.has('all')) return 'Include a mix of meat, vegetarian and vegan options.';
+  const parts = [];
+  if (activeDiets.has('vegan')) parts.push('vegan');
+  if (activeDiets.has('vegetarian')) parts.push('vegetarian');
+  if (activeDiets.has('meat')) parts.push('meat-based');
+  if (activeDiets.has('high-protein')) parts.push('high protein');
+  if (activeDiets.has('low-carb')) parts.push('low carb');
+  const hasMeat = activeDiets.has('meat');
+  const hasVeg = activeDiets.has('vegetarian');
+  const hasVegan = activeDiets.has('vegan');
+  let note = `Only show ${parts.join(' and ')} recipes.`;
+  if (!hasVegan && !hasVeg && hasMeat) note += ' ALL 3 options per meal must contain meat or fish. Do NOT include any vegetarian or vegan options.';
+  else if (hasVegan && !hasMeat) note += ' All options must be fully vegan.';
+  else if (hasVeg && !hasVegan && !hasMeat) note += ' All options must be vegetarian — no meat.';
+  return note;
+}
+
+// ── Week bar (overview of all 7 days) ──
+function renderWeekBar() {
+  const el = document.getElementById('rcWeekBar');
+  if (!el) return;
+  el.innerHTML = WEEK_DAYS_SHORT.map((d, i) => {
+    const count = Object.values(weekPlan[i]).filter(Boolean).length;
+    const totalCal = Object.values(weekPlan[i]).reduce((s,m) => s+(m?m.calories:0), 0);
+    return `<div class="rc-week-pill" onclick="rcShowDay(${i})" id="rcpill-${i}">
+      <div class="rcpill-day">${d}</div>
+      <div class="rcpill-count ${count>0?'has':''}">
+        ${count > 0 ? count+'<span style="font-size:0.55rem;font-family:\'DM Sans\'"> meals</span>' : '—'}
+      </div>
+      ${count>0 ? `<div class="rcpill-cal">${totalCal} kcal</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function rcShowDay(dayIdx) {
+  // Show calorie bar for that day
+  const bar = document.getElementById('rcCalBar');
+  bar.style.display = 'block';
+  document.getElementById('rcDayLabel').textContent = '📅 ' + WEEK_DAYS[dayIdx] + ' calories';
+  const target = state.calTarget || 0;
+  const dayMeals = weekPlan[dayIdx];
+  const selected = Object.values(dayMeals).reduce((s,m) => s+(m?m.calories:0), 0);
+  document.getElementById('rcCalTarget').textContent = target ? target.toLocaleString() + ' kcal target' : 'Set profile first';
+  document.getElementById('rcCalSelected').textContent = selected + ' kcal';
+  const remaining = target - selected;
+  const remEl = document.getElementById('rcCalRemaining');
+  remEl.textContent = target ? (remaining >= 0 ? remaining.toLocaleString() : '−'+Math.abs(remaining).toLocaleString()) + ' kcal' : '—';
+  remEl.className = 'day-cal-val' + (remaining < 0 ? ' over' : remaining < 100 ? ' under' : '');
+  const pct = target ? Math.min(100,(selected/target)*100) : 0;
+  const fill = document.getElementById('rcCalFill');
+  fill.style.width = pct + '%';
+  fill.className = 'day-cal-fill' + (pct > 100 ? ' over' : '');
+}
+
+function updateRecipeCalBar() {
+  // Update all day pills
+  renderWeekBar();
+}
+
+// ── Generate recipes ──
+async function generateRecipes() {
+  const btn = document.getElementById('genRecipesLabel');
+  btn.innerHTML = '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>';
+  document.getElementById('recipePanelContent').style.display = 'none';
+
+  const target = state.calTarget || 1800;
+  const budgets = {
+    breakfast: Math.round(target * 0.22),
+    snackAm:   Math.round(target * 0.08),
+    lunch:     Math.round(target * 0.28),
+    snackPm:   Math.round(target * 0.08),
+    dinner:    Math.round(target * 0.34),
+  };
+
+  document.getElementById('bfCalBudget').textContent = budgets.breakfast;
+  document.getElementById('snackAmCalBudget').textContent = budgets.snackAm;
+  document.getElementById('lunchCalBudget').textContent = budgets.lunch;
+  document.getElementById('snackPmCalBudget').textContent = budgets.snackPm;
+  document.getElementById('dinnerCalBudget').textContent = budgets.dinner;
+
+  const dietNote = buildDietNote();
+  const meatOnly = activeDiets.has('meat') && !activeDiets.has('vegan') && !activeDiets.has('vegetarian') && !activeDiets.has('all');
+
+  const prompt = `Create 3 recipe options each for: breakfast, snackAm, lunch, snackPm, dinner. For one person in Australia using Aldi supermarket ingredients.
+
+Calorie budgets: breakfast ~${budgets.breakfast}kcal, snackAm ~${budgets.snackAm}kcal, lunch ~${budgets.lunch}kcal, snackPm ~${budgets.snackPm}kcal, dinner ~${budgets.dinner}kcal.
+
+Diet rules: ${dietNote}
+${meatOnly ? 'CRITICAL: Every single option must contain meat or fish. Zero vegetarian/vegan options.' : 'Include at least 1 vegan and 1 vegetarian option per meal where diet allows.'}
+
+For each recipe include "steps" array (3-5 steps, each under 15 words).
+
+Return ONLY compact valid JSON, no markdown:
+{"breakfast":[{"name":"","calories":0,"prepTime":"10 min","diet":"meat","icon":"🍳","desc":"","ingredients":[""],"steps":[""]}],"snackAm":[...],"lunch":[...],"snackPm":[...],"dinner":[...]}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    let text = data.content.map(b => b.text||'').join('');
+    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+    generatedRecipes = JSON.parse(jsonMatch[0]);
+    expandedRecipe = null;
+    weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
+    renderWeekBar();
+    renderAllRecipeCards();
+    document.getElementById('recipePanelContent').style.display = 'block';
+    document.getElementById('groceryCard').style.display = 'none';
+    document.getElementById('groceryBtn').style.display = 'flex';
+  } catch(e) {
+    alert('Could not generate recipes. Please try again.');
+    console.error(e);
+  }
+  btn.innerHTML = '✦ Regenerate Meal Plan';
+}
+
+// ── Render all cards ──
+function renderAllRecipeCards() {
+  MEAL_SLOTS.forEach(meal => {
+    const el = document.getElementById(meal + 'Cards');
+    if (!el) return;
+    const recipes = generatedRecipes[meal] || [];
+    el.innerHTML = recipes.length
+      ? recipes.map((r, i) => buildRecipeCard(r, meal, i)).join('')
+      : `<div class="no-recipes-msg">Generate a meal plan to see options.</div>`;
+  });
+}
+
+function buildRecipeCard(r, meal, idx) {
+  const isExpanded = expandedRecipe?.meal === meal && expandedRecipe?.idx === idx;
+  const dietBadge = r.diet === 'vegan'
+    ? '<span class="recipe-badge badge-vegan">🌱 Vegan</span>'
+    : r.diet === 'vegetarian'
+    ? '<span class="recipe-badge badge-veg">🥦 Vegetarian</span>'
+    : '<span class="recipe-badge badge-protein">🍗 Meat</span>';
+
+  // Day selector checkboxes — which days have this recipe assigned for this slot
+  const dayChecks = WEEK_DAYS_SHORT.map((d, di) => {
+    const checked = weekPlan[di][meal]?.name === r.name;
+    return `<label class="day-check-label ${checked?'checked':''}" onclick="event.stopPropagation()">
+      <input type="checkbox" style="display:none" ${checked?'checked':''} onchange="toggleRecipeDay('${meal}',${idx},${di},this)">
+      ${d}
+    </label>`;
+  }).join('');
+
+  const ingredientsList = (r.ingredients||[]).length
+    ? `<div class="recipe-expand-section">
+        <div class="recipe-expand-title">Ingredients</div>
+        <ul class="recipe-ingredient-list">${(r.ingredients||[]).map(i=>`<li>${i}</li>`).join('')}</ul>
+       </div>` : '';
+
+  const stepsList = (r.steps||[]).length
+    ? `<div class="recipe-expand-section">
+        <div class="recipe-expand-title">Method</div>
+        <ol class="recipe-steps-list">${(r.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>
+       </div>` : '';
+
+  // How many days selected
+  const daysSelected = WEEK_DAYS_SHORT.filter((_,di) => weekPlan[di][meal]?.name === r.name);
+  const selLabel = daysSelected.length > 0
+    ? `<div class="rc-sel-label">📅 Selected for: ${daysSelected.join(', ')}</div>` : '';
+
+  return `<div class="recipe-card${isExpanded?' expanded-card':''}" id="rc-${meal}-${idx}">
+    <div class="recipe-card-top" onclick="toggleRecipeExpand('${meal}',${idx})">
+      <div class="recipe-icon">${r.icon||'🍽'}</div>
+      <div class="recipe-info">
+        <div class="recipe-name">${r.name}</div>
+        <div class="recipe-meta">
+          <span class="recipe-badge badge-cal">🔥 ${r.calories} kcal</span>
+          ${dietBadge}
+          <span class="recipe-badge badge-time">⏱ ${r.prepTime||'15 min'}</span>
+        </div>
+        <div class="recipe-desc">${r.desc}</div>
+        ${selLabel}
+      </div>
+      <div class="recipe-chevron">${isExpanded?'▲':'▼'}</div>
+    </div>
+    ${isExpanded ? `
+    <div class="recipe-expanded-body">
+      ${ingredientsList}
+      ${stepsList}
+      <div class="recipe-expand-title" style="margin-bottom:8px">Add to days</div>
+      <div class="day-checks-row">${dayChecks}</div>
+    </div>` : ''}
+  </div>`;
+}
+
+function toggleRecipeExpand(meal, idx) {
+  expandedRecipe = (expandedRecipe?.meal===meal && expandedRecipe?.idx===idx) ? null : {meal, idx};
+  renderAllRecipeCards();
+}
+
+function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
+  const r = generatedRecipes[meal]?.[recipeIdx];
+  if (!r) return;
+  if (checkbox.checked) {
+    weekPlan[dayIdx][meal] = r;
+  } else {
+    weekPlan[dayIdx][meal] = null;
+  }
+  renderWeekBar();
+  // Re-render just this card to update day dots
+  const recipes = generatedRecipes[meal] || [];
+  const el = document.getElementById(meal + 'Cards');
+  if (el) el.innerHTML = recipes.map((rc, i) => buildRecipeCard(rc, meal, i)).join('');
+  // Keep card expanded
+  const card = document.getElementById(`rc-${meal}-${recipeIdx}`);
+  if (card) card.classList.add('expanded-card');
+  document.getElementById('groceryCard').style.display = 'none';
+}
+
+// ── Grocery list ──
+async function generateGroceryList() {
+  const allSelected = [];
+  weekPlan.forEach((dayMeals, di) => {
+    Object.values(dayMeals).forEach(m => { if (m) allSelected.push({day: WEEK_DAYS_SHORT[di], meal: m}); });
+  });
+  if (allSelected.length === 0) { alert('Please select at least one recipe first.'); return; }
+
+  const btn = document.getElementById('groceryBtnLabel');
+  btn.innerHTML = '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>';
+  document.getElementById('groceryBtn').disabled = true;
+
+  const days = [...new Set(allSelected.map(x => x.day))];
+  const mealList = allSelected.map(x => `${x.day} - ${x.meal.name}: ${x.meal.ingredients?.join(', ')||'standard ingredients'}`).join('\n');
+
+  const prompt = `Australian grocery list for ${days.length} day(s) of meals, 1 person. Consolidate duplicates. Aldi Australia prices AUD 2024-2025.
+
+Meals:
+${mealList}
+
+Return ONLY compact valid JSON no markdown:
+{"sections":[{"title":"Produce","items":[{"name":"","qty":"","price":0.00}]},{"title":"Dairy & Eggs","items":[]},{"title":"Pantry & Dry Goods","items":[]},{"title":"Meat & Fish","items":[]},{"title":"Frozen & Other","items":[]}],"totalCost":0.00,"note":""}
+
+Only include sections with items. totalCost = sum of all prices.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    let text = data.content.map(b => b.text||'').join('');
+    // Strip markdown fences and any leading/trailing whitespace
+    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    // Extract JSON object if there's surrounding text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response');
+    const grocery = JSON.parse(jsonMatch[0]);
+    // Normalise — handle both {sections:[]} and flat {Produce:[],Dairy:[]} shapes
+    if (!grocery.sections) {
+      const knownKeys = ['totalCost','note'];
+      grocery.sections = Object.entries(grocery)
+        .filter(([k]) => !knownKeys.includes(k) && Array.isArray(grocery[k]))
+        .map(([title, items]) => ({title, items}));
+    }
+    if (!Array.isArray(grocery.sections)) grocery.sections = [];
+    renderGroceryList(grocery, days);
+    document.getElementById('groceryCard').style.display = 'block';
+    document.getElementById('groceryCard').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch(e) {
+    console.error('Grocery list error:', e);
+    alert('Could not generate grocery list — please try again.');
+  }
+  btn.innerHTML = '🛒 Regenerate Grocery List';
+  document.getElementById('groceryBtn').disabled = false;
+}
+
+function renderGroceryList(grocery, days) {
+  groceryItems = [];
+  let html = '';
+  if (days && days.length > 1) {
+    html += `<div style="font-size:0.78rem;color:var(--green);margin-bottom:12px;font-weight:500">📅 Combined for: ${days.join(', ')}</div>`;
+  }
+  (grocery.sections||[]).forEach(section => {
+    if (!section.items?.length) return;
+    html += `<div class="grocery-section-title">${section.title}</div>`;
+    section.items.forEach(item => {
+      const uid = 'gi-' + groceryItems.length;
+      groceryItems.push({uid, name: item.name, qty: item.qty||'', price: item.price||0, section: section.title});
+      html += `<div class="grocery-item" id="${uid}">
+        <div class="grocery-check" onclick="toggleGrocery('${uid}')">✓</div>
+        <div class="grocery-name">${item.name}</div>
+        <div class="grocery-qty">${item.qty||''}</div>
+        <div class="grocery-price">$${Number(item.price).toFixed(2)}</div>
+      </div>`;
+    });
+  });
+  const total = grocery.totalCost || groceryItems.reduce((s,i)=>s+i.price,0);
+  html += `<div class="grocery-total-row">
+    <div class="grocery-total-label">ESTIMATED TOTAL</div>
+    <div class="grocery-total-val">$${Number(total).toFixed(2)}</div>
+  </div>`;
+  if (grocery.note) html += `<div style="margin-top:10px;font-size:0.78rem;color:var(--muted);font-style:italic">💡 ${grocery.note}</div>`;
+  document.getElementById('groceryContent').innerHTML = html;
+}
+
+function toggleGrocery(uid) {
+  const el = document.getElementById(uid);
+  if (!el) return;
+  el.classList.toggle('ticked');
+  updateSelectAllBtn();
+}
+
+function selectAllGrocery() {
+  const items = document.querySelectorAll('.grocery-item');
+  const allTicked = [...items].every(el => el.classList.contains('ticked'));
+  items.forEach(el => allTicked ? el.classList.remove('ticked') : el.classList.add('ticked'));
+  updateSelectAllBtn();
+}
+
+function updateSelectAllBtn() {
+  const items = document.querySelectorAll('.grocery-item');
+  const allTicked = items.length > 0 && [...items].every(el => el.classList.contains('ticked'));
+  const btn = document.getElementById('selectAllBtn');
+  if (btn) btn.textContent = allTicked ? '☒ Deselect All' : '☑ Select All';
+}
+
+function downloadGroceryList() {
+  const ticked = groceryItems.filter(item => {
+    const el = document.getElementById(item.uid);
+    return el && el.classList.contains('ticked');
+  });
+  if (ticked.length === 0) {
+    alert('Please tick at least one item first, or use "Select All".');
+    return;
+  }
+
+  // Group by section
+  const sections = {};
+  ticked.forEach(item => {
+    if (!sections[item.section]) sections[item.section] = [];
+    sections[item.section].push(item);
+  });
+
+  let text = 'ALDI GROCERY LIST\n';
+  text += 'Generated by Move & Burn tracker\n';
+  text += '==================================\n\n';
+
+  let grandTotal = 0;
+  Object.entries(sections).forEach(([sec, items]) => {
+    text += `${sec.toUpperCase()}\n`;
+    text += '-'.repeat(sec.length) + '\n';
+    items.forEach(item => {
+      const price = `$${Number(item.price).toFixed(2)}`;
+      text += `☐  ${item.name}${item.qty ? ' (' + item.qty + ')' : ''}  ${price}\n`;
+      grandTotal += item.price;
+    });
+    text += '\n';
+  });
+
+  text += '==================================\n';
+  text += `ESTIMATED TOTAL: $${grandTotal.toFixed(2)}\n`;
+  text += '\nPrices are approximate Aldi Australia estimates.\n';
+  text += 'Visit aldi.com.au for current specials.\n';
+
+  const blob = new Blob([text], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'aldi-grocery-list.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'calories') updateCalDisplay();
+  if (id === 'steps') updateStepDisplay();
+  if (id === 'weekly') { renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
+  if (id === 'recipes') { renderWeekBar(); }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderExercises();
+  updateWorkoutSummary();
+  renderDayGrid();
+  updateWeekSummary();
+  updateWeekHistory();
+  renderWeekBar();
+});
+</script>
+
+</body>
+</html>
