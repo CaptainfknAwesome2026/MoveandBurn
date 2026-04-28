@@ -1871,7 +1871,7 @@
   <!-- Diet filter -->
   <div class="card">
     <div class="card-title">Diet Preference</div>
-    <div class="card-desc">Select one or more — Meat only hides all vegetarian &amp; vegan options</div>
+    <div class="card-desc">Select one or more to filter recipes — tap Show Recipes to load your plan</div>
     <div class="diet-filters">
       <button class="diet-btn" data-diet="all" onclick="toggleDietFilter('all', this)">🍴 All</button>
       <button class="diet-btn" data-diet="vegetarian" onclick="toggleDietFilter('vegetarian', this)">🥦 Vegetarian</button>
@@ -1880,8 +1880,8 @@
       <button class="diet-btn" data-diet="high-protein" onclick="toggleDietFilter('high-protein', this)">💪 High Protein</button>
       <button class="diet-btn" data-diet="low-carb" onclick="toggleDietFilter('low-carb', this)">🥑 Low Carb</button>
     </div>
-    <button class="gen-grocery-btn" style="background:var(--orange);margin-top:0" onclick="generateRecipes()">
-      <span id="genRecipesLabel">✦ Generate Week Meal Plan</span>
+    <button class="gen-grocery-btn" style="background:var(--orange);margin-top:0" onclick="showRecipes()">
+      <span>✦ Show Recipes</span>
     </button>
   </div>
 
@@ -2528,19 +2528,198 @@ function updateWeekHistory() {
   document.getElementById('weekHistoryList').innerHTML = html;
 }
 
-// ─── RECIPES ───
+// Restore key input on load
+// ─── RECIPES — STATIC DATABASE ───
 const WEEK_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const WEEK_DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const MEAL_SLOTS = ['breakfast','snackAm','lunch','snackPm','dinner'];
-const MEAL_LABELS = { breakfast:'☀️ Breakfast', snackAm:'🍎 Morning Snack', lunch:'🥗 Lunch', snackPm:'🧃 Afternoon Snack', dinner:'🌙 Dinner' };
 
 let activeDiets = new Set(['meat']);
-let generatedRecipes = {};
-let expandedRecipe = null; // {meal, idx}
-// weekPlan[dayIdx][slot] = recipe object or null
+let expandedRecipe = null;
 let weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
-// groceryItems: flat array of {uid, name, qty, price, section}
 let groceryItems = [];
+
+// ── Static recipe database ──
+const RECIPE_DB = {
+  breakfast: [
+    { name:'Bacon & Egg Toast', calories:420, prepTime:'10 min', diet:'meat', icon:'🥓', tags:['high-protein'],
+      desc:'Crispy bacon rashers with fried eggs on toasted wholegrain bread.',
+      ingredients:['3 bacon rashers','2 eggs','2 slices wholegrain bread','butter','salt & pepper'],
+      steps:['Cook bacon in pan over medium heat until crispy, set aside.','Fry eggs in same pan to your liking.','Toast bread and butter lightly.','Top toast with bacon and eggs, season and serve.'] },
+    { name:'Bacon & Avocado Wrap', calories:450, prepTime:'10 min', diet:'meat', icon:'🌯', tags:['high-protein'],
+      desc:'Toasted wrap filled with crispy bacon, smashed avocado, tomato and spinach.',
+      ingredients:['1 wholegrain wrap','3 bacon rashers','½ avocado','1 tomato','handful spinach','lemon juice','salt & pepper'],
+      steps:['Cook bacon until crispy, drain on paper towel.','Smash avocado with lemon juice and seasoning.','Warm wrap in dry pan.','Layer spinach, tomato, bacon and avocado, roll and serve.'] },
+    { name:'Bacon, Egg & Cheese Muffin', calories:400, prepTime:'10 min', diet:'meat', icon:'🧀', tags:['high-protein'],
+      desc:'Toasted English muffin stacked with crispy bacon, fried egg and melted cheddar.',
+      ingredients:['1 English muffin','2 bacon rashers','1 egg','1 slice cheddar','butter','salt & pepper'],
+      steps:['Cook bacon until crispy.','Fry egg to your liking.','Toast and butter muffin halves.','Stack bacon, egg and cheese on muffin base, top and serve.'] },
+    { name:'BLT on Toast', calories:390, prepTime:'10 min', diet:'meat', icon:'🥓', tags:[],
+      desc:'Classic BLT — crispy bacon, lettuce and tomato on toasted wholegrain bread with light mayo.',
+      ingredients:['3 bacon rashers','2 slices wholegrain bread','2 lettuce leaves','1 tomato sliced','1 tbsp light mayo','salt & pepper'],
+      steps:['Cook bacon until crispy.','Toast bread.','Spread mayo on one slice.','Layer lettuce, tomato and bacon, season and sandwich together.'] },
+    { name:'Chicken & Egg Scramble', calories:380, prepTime:'10 min', diet:'meat', icon:'🍳', tags:['high-protein'],
+      desc:'Scrambled eggs with diced chicken breast, spinach and cherry tomatoes.',
+      ingredients:['2 eggs','100g chicken breast','handful spinach','6 cherry tomatoes','olive oil','salt & pepper'],
+      steps:['Dice chicken and cook in olive oil 4 min.','Add spinach and tomatoes, cook 1 min.','Whisk eggs, pour in and scramble until just set.','Season and serve.'] },
+    { name:'Greek Yogurt & Berry Bowl', calories:290, prepTime:'5 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
+      desc:'High-protein Greek yogurt with mixed berries, honey and granola.',
+      ingredients:['200g Greek yogurt','½ cup mixed berries','2 tbsp granola','1 tsp honey'],
+      steps:['Spoon yogurt into bowl.','Top with berries and granola.','Drizzle honey and serve.'] },
+    { name:'Avocado Toast with Egg', calories:350, prepTime:'8 min', diet:'vegetarian', icon:'🥑', tags:[],
+      desc:'Wholegrain toast topped with smashed avocado and a poached egg.',
+      ingredients:['2 slices wholegrain bread','1 avocado','2 eggs','lemon juice','chilli flakes','salt'],
+      steps:['Toast bread.','Smash avocado with lemon juice and salt.','Poach eggs 3 min in simmering water.','Spread avo on toast, top with egg and chilli flakes.'] },
+    { name:'Overnight Oats', calories:340, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
+      desc:'Creamy oats soaked overnight with banana, chia seeds and almond milk.',
+      ingredients:['½ cup rolled oats','1 cup almond milk','1 banana','1 tbsp chia seeds','1 tsp maple syrup'],
+      steps:['Combine oats, almond milk and chia seeds in jar.','Slice banana on top.','Drizzle maple syrup.','Refrigerate overnight, eat cold.'] },
+    { name:'Salmon & Cream Cheese Bagel', calories:420, prepTime:'5 min', diet:'meat', icon:'🥯', tags:['high-protein'],
+      desc:'Toasted bagel with smoked salmon, cream cheese and capers.',
+      ingredients:['1 wholegrain bagel','80g smoked salmon','2 tbsp cream cheese','1 tbsp capers','½ lemon','black pepper'],
+      steps:['Toast bagel halves.','Spread cream cheese on each half.','Layer smoked salmon and capers.','Squeeze lemon and season with pepper.'] },
+    { name:'Banana Peanut Butter Smoothie', calories:310, prepTime:'5 min', diet:'vegan', icon:'🍌', tags:[],
+      desc:'Filling vegan smoothie with banana, peanut butter and oat milk.',
+      ingredients:['1 banana','2 tbsp peanut butter','1 cup oat milk','1 tsp chia seeds','handful ice'],
+      steps:['Add all ingredients to blender.','Blend until smooth.','Pour and serve immediately.'] },
+    { name:'Tuna Omelette', calories:360, prepTime:'10 min', diet:'meat', icon:'🥚', tags:['high-protein','low-carb'],
+      desc:'Protein-packed omelette filled with canned tuna, spring onion and cheese.',
+      ingredients:['3 eggs','95g canned tuna','2 spring onions','30g cheddar cheese','olive oil','salt & pepper'],
+      steps:['Whisk eggs with salt and pepper.','Heat oil in pan, pour in eggs.','When nearly set, add tuna, onion and cheese to one half.','Fold omelette and serve.'] },
+    { name:'Veggie Breakfast Wrap', calories:370, prepTime:'10 min', diet:'vegetarian', icon:'🌯', tags:[],
+      desc:'Wholegrain wrap filled with scrambled eggs, roasted capsicum and feta.',
+      ingredients:['1 wholegrain wrap','2 eggs','½ capsicum diced','30g feta','handful spinach','olive oil'],
+      steps:['Sauté capsicum in oil 3 min.','Add spinach, wilt 1 min.','Scramble in eggs.','Fill wrap, crumble feta on top, roll and serve.'] },
+    { name:'Bircher Muesli', calories:320, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
+      desc:'Apple and oat bircher with sultanas, nuts and coconut yogurt.',
+      ingredients:['½ cup rolled oats','1 apple grated','½ cup coconut yogurt','2 tbsp sultanas','1 tbsp chopped walnuts','cinnamon'],
+      steps:['Mix oats, apple and yogurt together.','Stir in sultanas and cinnamon.','Top with walnuts.','Serve immediately or refrigerate overnight.'] },
+  ],
+  snackAm: [
+    { name:'Apple & Peanut Butter', calories:160, prepTime:'2 min', diet:'vegan', icon:'🍎', tags:[],
+      desc:'Crisp apple slices with natural peanut butter for dipping.',
+      ingredients:['1 apple','1½ tbsp peanut butter'],
+      steps:['Slice apple.','Serve with peanut butter for dipping.'] },
+    { name:'Hard Boiled Eggs', calories:140, prepTime:'10 min', diet:'vegetarian', icon:'🥚', tags:['high-protein','low-carb'],
+      desc:'Two hard boiled eggs with a pinch of salt — simple and filling.',
+      ingredients:['2 eggs','salt & pepper'],
+      steps:['Boil eggs 9 min.','Cool under cold water, peel and season.'] },
+    { name:'Tuna Rice Cakes', calories:150, prepTime:'3 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+      desc:'Rice cakes topped with canned tuna and a squeeze of lemon.',
+      ingredients:['3 rice cakes','95g canned tuna','lemon juice','black pepper'],
+      steps:['Drain and season tuna with lemon and pepper.','Pile onto rice cakes and serve.'] },
+    { name:'Mixed Nuts', calories:170, prepTime:'0 min', diet:'vegan', icon:'🥜', tags:['low-carb'],
+      desc:'A small handful of mixed nuts — almonds, cashews and walnuts.',
+      ingredients:['30g mixed nuts'],
+      steps:['Portion into a small bowl and enjoy.'] },
+    { name:'Carrot & Hummus', calories:130, prepTime:'3 min', diet:'vegan', icon:'🥕', tags:['low-carb'],
+      desc:'Crunchy carrot sticks with creamy hummus for dipping.',
+      ingredients:['2 medium carrots','3 tbsp hummus'],
+      steps:['Peel and cut carrots into sticks.','Serve with hummus.'] },
+    { name:'Cottage Cheese & Cucumber', calories:120, prepTime:'3 min', diet:'vegetarian', icon:'🥒', tags:['high-protein','low-carb'],
+      desc:'Light and protein-rich cottage cheese with sliced cucumber.',
+      ingredients:['½ cup cottage cheese','1 cucumber','black pepper','fresh dill'],
+      steps:['Slice cucumber.','Top cottage cheese with dill and pepper.','Serve alongside cucumber.'] },
+  ],
+  lunch: [
+    { name:'Grilled Chicken Salad', calories:420, prepTime:'15 min', diet:'meat', icon:'🥗', tags:['high-protein','low-carb'],
+      desc:'Juicy grilled chicken breast over mixed greens with avocado and lemon dressing.',
+      ingredients:['150g chicken breast','2 cups mixed greens','½ avocado','cherry tomatoes','cucumber','lemon juice','olive oil','salt & pepper'],
+      steps:['Season and grill chicken 5–6 min each side.','Slice chicken and let rest.','Assemble greens, tomatoes and cucumber.','Top with chicken and avocado.','Drizzle lemon and olive oil.'] },
+    { name:'Lentil & Vegetable Soup', calories:380, prepTime:'20 min', diet:'vegan', icon:'🍲', tags:[],
+      desc:'Hearty red lentil soup with carrot, celery, cumin and coriander.',
+      ingredients:['½ cup red lentils','1 carrot diced','2 celery stalks','1 onion','2 cloves garlic','1 tsp cumin','1 tsp coriander','500ml vegetable stock','olive oil'],
+      steps:['Sauté onion and garlic in oil 3 min.','Add carrot, celery and spices, cook 2 min.','Add lentils and stock, simmer 15 min.','Season and serve with crusty bread.'] },
+    { name:'Tuna Pasta Salad', calories:460, prepTime:'15 min', diet:'meat', icon:'🍝', tags:['high-protein'],
+      desc:'Pasta tossed with canned tuna, corn, capsicum and light mayo.',
+      ingredients:['1 cup pasta','185g canned tuna','½ cup corn','½ capsicum diced','2 tbsp light mayo','lemon juice','parsley'],
+      steps:['Cook pasta to packet directions, cool.','Drain tuna and mix with mayo and lemon.','Combine all ingredients.','Season and top with parsley.'] },
+    { name:'Chickpea & Spinach Wrap', calories:400, prepTime:'10 min', diet:'vegan', icon:'🌯', tags:[],
+      desc:'Protein-rich wrap with spiced chickpeas, spinach, tomato and tahini.',
+      ingredients:['1 wholegrain wrap','½ cup canned chickpeas','handful spinach','1 tomato','2 tbsp tahini','lemon juice','cumin','smoked paprika'],
+      steps:['Drain and season chickpeas with cumin and paprika.','Warm chickpeas in pan 2 min.','Mix tahini with lemon juice.','Layer wrap with spinach, tomato, chickpeas and tahini.','Roll and serve.'] },
+    { name:'Beef & Rice Bowl', calories:520, prepTime:'20 min', diet:'meat', icon:'🍚', tags:['high-protein'],
+      desc:'Lean beef mince with soy sauce over steamed rice and stir-fried vegetables.',
+      ingredients:['150g lean beef mince','1 cup cooked rice','1 cup bok choy','2 tbsp soy sauce','1 tsp sesame oil','garlic','ginger'],
+      steps:['Cook rice per packet.','Brown mince with garlic and ginger 5 min.','Add soy sauce and sesame oil.','Stir-fry bok choy 2 min.','Serve mince and veg over rice.'] },
+    { name:'Caprese & Quinoa Bowl', calories:430, prepTime:'15 min', diet:'vegetarian', icon:'🫙', tags:['high-protein'],
+      desc:'Protein-packed quinoa with fresh mozzarella, tomato, basil and balsamic.',
+      ingredients:['½ cup quinoa','125g fresh mozzarella','2 tomatoes','fresh basil','balsamic glaze','olive oil','salt'],
+      steps:['Cook quinoa per packet, cool slightly.','Slice tomatoes and mozzarella.','Plate quinoa, top with tomato and mozzarella.','Tear basil on top, drizzle oil and balsamic.'] },
+    { name:'Salmon & Sweet Potato', calories:490, prepTime:'25 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+      desc:'Baked salmon fillet with roasted sweet potato and steamed broccoli.',
+      ingredients:['150g salmon fillet','1 medium sweet potato','1 cup broccoli','olive oil','garlic powder','lemon','salt & pepper'],
+      steps:['Preheat oven 200°C. Cube sweet potato, toss in oil and roast 20 min.','Season salmon and bake 12 min.','Steam broccoli 5 min.','Serve with lemon wedge.'] },
+    { name:'Black Bean Tacos', calories:410, prepTime:'15 min', diet:'vegan', icon:'🌮', tags:[],
+      desc:'Two corn tortillas filled with spiced black beans, avocado, salsa and coriander.',
+      ingredients:['2 corn tortillas','½ cup canned black beans','½ avocado','salsa','½ lime','cumin','smoked paprika','fresh coriander'],
+      steps:['Heat beans with cumin and paprika 3 min.','Warm tortillas in dry pan.','Fill with beans, sliced avocado and salsa.','Squeeze lime and top with coriander.'] },
+  ],
+  snackPm: [
+    { name:'Banana & Almond Butter', calories:160, prepTime:'1 min', diet:'vegan', icon:'🍌', tags:[],
+      desc:'A ripe banana with a tablespoon of almond butter.',
+      ingredients:['1 banana','1 tbsp almond butter'],
+      steps:['Peel banana.','Dip or spread almond butter and enjoy.'] },
+    { name:'Cheese & Crackers', calories:170, prepTime:'2 min', diet:'vegetarian', icon:'🧀', tags:['low-carb'],
+      desc:'Wholegrain crackers with sliced cheddar and a few grapes.',
+      ingredients:['4 wholegrain crackers','40g cheddar','small bunch grapes'],
+      steps:['Slice cheese.','Serve on crackers with grapes on the side.'] },
+    { name:'Protein Bar', calories:150, prepTime:'0 min', diet:'meat', icon:'🍫', tags:['high-protein'],
+      desc:'A store-bought protein bar — aim for 15g+ protein and under 200 kcal.',
+      ingredients:['1 protein bar (Aldi "Protein Rex" or similar)'],
+      steps:['Grab and go!'] },
+    { name:'Edamame', calories:120, prepTime:'5 min', diet:'vegan', icon:'🫘', tags:['high-protein','low-carb'],
+      desc:'Steamed edamame pods with a pinch of sea salt.',
+      ingredients:['1 cup frozen edamame','sea salt'],
+      steps:['Microwave edamame 3 min or boil 5 min.','Drain, season with sea salt and serve.'] },
+    { name:'Greek Yogurt', calories:130, prepTime:'1 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
+      desc:'Plain Greek yogurt with a drizzle of honey.',
+      ingredients:['150g Greek yogurt','1 tsp honey'],
+      steps:['Spoon yogurt into bowl.','Drizzle honey and serve.'] },
+    { name:'Rice Cakes with Avocado', calories:140, prepTime:'3 min', diet:'vegan', icon:'🥑', tags:[],
+      desc:'Light rice cakes smeared with smashed avocado and chilli flakes.',
+      ingredients:['3 rice cakes','½ avocado','chilli flakes','lemon juice','salt'],
+      steps:['Smash avocado with lemon and salt.','Spread on rice cakes.','Sprinkle chilli flakes.'] },
+  ],
+  dinner: [
+    { name:'Grilled Salmon with Veggies', calories:520, prepTime:'20 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+      desc:'Pan-seared salmon with roasted zucchini, asparagus and lemon butter.',
+      ingredients:['180g salmon fillet','1 zucchini','1 bunch asparagus','2 tbsp butter','2 cloves garlic','lemon','olive oil','salt & pepper'],
+      steps:['Preheat oven 200°C. Toss veggies in oil, roast 15 min.','Season salmon and sear skin-side down 4 min, flip 3 min.','Melt butter with garlic and lemon.','Plate veggies and salmon, drizzle butter sauce.'] },
+    { name:'Chicken Stir-Fry', calories:490, prepTime:'20 min', diet:'meat', icon:'🥢', tags:['high-protein'],
+      desc:'Quick chicken stir-fry with bok choy, capsicum and oyster sauce over rice.',
+      ingredients:['180g chicken breast','1 cup rice','1 bok choy','1 capsicum','2 tbsp oyster sauce','1 tbsp soy sauce','garlic','ginger','sesame oil'],
+      steps:['Cook rice per packet.','Slice chicken and stir-fry with garlic and ginger 5 min.','Add capsicum and bok choy, cook 3 min.','Stir in oyster and soy sauce.','Serve over rice with sesame oil.'] },
+    { name:'Lentil Bolognese', calories:480, prepTime:'30 min', diet:'vegan', icon:'🍝', tags:[],
+      desc:'Rich tomato sauce with red lentils and herbs over wholegrain spaghetti.',
+      ingredients:['1 cup wholegrain spaghetti','½ cup red lentils','1 can crushed tomatoes','1 onion','2 cloves garlic','1 carrot','Italian herbs','olive oil','salt & pepper'],
+      steps:['Sauté onion, garlic and carrot in oil 5 min.','Add lentils, tomatoes and herbs.','Simmer 20 min until lentils are soft.','Cook pasta, drain and serve with sauce.'] },
+    { name:'Beef Stir-Fry with Noodles', calories:560, prepTime:'20 min', diet:'meat', icon:'🍜', tags:['high-protein'],
+      desc:'Lean beef strips with hokkien noodles, broccolini and hoisin sauce.',
+      ingredients:['180g lean beef strips','200g hokkien noodles','1 bunch broccolini','2 tbsp hoisin sauce','1 tbsp soy sauce','garlic','sesame seeds'],
+      steps:['Cook noodles per packet.','Stir-fry beef with garlic 3 min, set aside.','Stir-fry broccolini 2 min.','Add noodles and sauces, toss.','Return beef, scatter sesame seeds.'] },
+    { name:'Roast Veggie & Feta Tray Bake', calories:440, prepTime:'35 min', diet:'vegetarian', icon:'🥘', tags:[],
+      desc:'Colourful tray of roasted vegetables with chickpeas, feta and herbs.',
+      ingredients:['1 zucchini','1 red capsicum','1 red onion','½ cup canned chickpeas','80g feta','olive oil','oregano','balsamic vinegar','salt & pepper'],
+      steps:['Preheat oven 200°C.','Chop all veggies and toss with oil, oregano and salt.','Roast 25 min.','Add chickpeas for last 5 min.','Remove, crumble feta and drizzle balsamic.'] },
+    { name:'Prawn Fried Rice', calories:510, prepTime:'20 min', diet:'meat', icon:'🍤', tags:['high-protein'],
+      desc:'Quick fried rice with prawns, egg, peas and spring onion.',
+      ingredients:['150g cooked prawns','1½ cups cooked rice (cold)','2 eggs','½ cup frozen peas','2 spring onions','2 tbsp soy sauce','sesame oil','garlic'],
+      steps:['Heat oil in wok, fry garlic 30 sec.','Push aside, scramble eggs in wok.','Add cold rice and stir-fry 3 min.','Add prawns, peas and soy sauce.','Top with spring onion and sesame oil.'] },
+    { name:'Black Bean & Sweet Potato Curry', calories:470, prepTime:'25 min', diet:'vegan', icon:'🍛', tags:[],
+      desc:'Creamy coconut curry with black beans, sweet potato and spinach.',
+      ingredients:['1 sweet potato cubed','1 can black beans','1 can coconut milk','1 can crushed tomatoes','1 onion','2 cloves garlic','2 tsp curry powder','1 tsp cumin','spinach','rice to serve'],
+      steps:['Sauté onion and garlic 3 min.','Add curry powder and cumin, cook 1 min.','Add sweet potato, tomatoes and coconut milk.','Simmer 15 min until potato is soft.','Stir in black beans and spinach, serve over rice.'] },
+    { name:'Chicken & Vegetable Soup', calories:390, prepTime:'30 min', diet:'meat', icon:'🍲', tags:['high-protein','low-carb'],
+      desc:'Nourishing chicken soup with carrot, celery, zucchini and herbs.',
+      ingredients:['200g chicken breast','1 carrot','2 celery stalks','1 zucchini','1 onion','1L chicken stock','fresh parsley','garlic','salt & pepper'],
+      steps:['Dice all vegetables and chicken.','Sauté onion and garlic 2 min.','Add chicken, vegetables and stock.','Simmer 20 min.','Season, top with fresh parsley.'] },
+    { name:'Tofu & Vegetable Stir-Fry', calories:420, prepTime:'20 min', diet:'vegan', icon:'🥢', tags:['high-protein'],
+      desc:'Crispy tofu with mixed vegetables and teriyaki sauce over steamed rice.',
+      ingredients:['200g firm tofu','1 cup mixed vegetables (broccoli, capsicum, carrot)','2 tbsp teriyaki sauce','1 tbsp soy sauce','garlic','sesame oil','1 cup rice'],
+      steps:['Press and cube tofu, pan-fry until golden 8 min.','Cook rice per packet.','Stir-fry vegetables with garlic 4 min.','Add tofu and sauces, toss 1 min.','Serve over rice with sesame oil.'] },
+  ],
+};
 
 function toggleDietFilter(diet, el) {
   if (diet === 'all') {
@@ -2560,32 +2739,48 @@ function toggleDietFilter(diet, el) {
   });
 }
 
-function buildDietNote() {
-  if (activeDiets.has('all')) return 'Include a mix of meat, vegetarian and vegan options.';
-  const parts = [];
-  if (activeDiets.has('vegan')) parts.push('vegan');
-  if (activeDiets.has('vegetarian')) parts.push('vegetarian');
-  if (activeDiets.has('meat')) parts.push('meat-based');
-  if (activeDiets.has('high-protein')) parts.push('high protein');
-  if (activeDiets.has('low-carb')) parts.push('low carb');
-  const hasMeat = activeDiets.has('meat');
-  const hasVeg = activeDiets.has('vegetarian');
-  const hasVegan = activeDiets.has('vegan');
-  let note = `Only show ${parts.join(' and ')} recipes.`;
-  if (!hasVegan && !hasVeg && hasMeat) note += ' ALL 3 options per meal must contain meat or fish. Do NOT include any vegetarian or vegan options.';
-  else if (hasVegan && !hasMeat) note += ' All options must be fully vegan.';
-  else if (hasVeg && !hasVegan && !hasMeat) note += ' All options must be vegetarian — no meat.';
-  return note;
+function filterRecipes(slot) {
+  return RECIPE_DB[slot].filter(r => {
+    if (activeDiets.has('all')) return true;
+    // Diet type match
+    const dietMatch = activeDiets.has(r.diet) ||
+      (activeDiets.has('vegetarian') && (r.diet === 'vegetarian' || r.diet === 'vegan')) ||
+      (activeDiets.has('vegan') && r.diet === 'vegan');
+    // Tag match
+    const tagMatch = (activeDiets.has('high-protein') && r.tags.includes('high-protein')) ||
+      (activeDiets.has('low-carb') && r.tags.includes('low-carb'));
+    // If only diet filters (no tag filters), match diet only
+    const hasTagFilter = activeDiets.has('high-protein') || activeDiets.has('low-carb');
+    const hasDietFilter = activeDiets.has('meat') || activeDiets.has('vegetarian') || activeDiets.has('vegan');
+    if (hasTagFilter && hasDietFilter) return dietMatch && tagMatch;
+    if (hasTagFilter) return tagMatch;
+    return dietMatch;
+  });
 }
 
-// ── Week bar (overview of all 7 days) ──
+function showRecipes() {
+  // Update calorie budgets from profile
+  const target = state.calTarget || 1800;
+  document.getElementById('bfCalBudget').textContent = Math.round(target * 0.22);
+  document.getElementById('snackAmCalBudget').textContent = Math.round(target * 0.08);
+  document.getElementById('lunchCalBudget').textContent = Math.round(target * 0.28);
+  document.getElementById('snackPmCalBudget').textContent = Math.round(target * 0.08);
+  document.getElementById('dinnerCalBudget').textContent = Math.round(target * 0.34);
+  expandedRecipe = null;
+  renderAllRecipeCards();
+  document.getElementById('recipePanelContent').style.display = 'block';
+  document.getElementById('groceryCard').style.display = 'none';
+  renderWeekBar();
+}
+
+// ── Week bar ──
 function renderWeekBar() {
   const el = document.getElementById('rcWeekBar');
   if (!el) return;
   el.innerHTML = WEEK_DAYS_SHORT.map((d, i) => {
     const count = Object.values(weekPlan[i]).filter(Boolean).length;
     const totalCal = Object.values(weekPlan[i]).reduce((s,m) => s+(m?m.calories:0), 0);
-    return `<div class="rc-week-pill" onclick="rcShowDay(${i})" id="rcpill-${i}">
+    return `<div class="rc-week-pill" onclick="rcShowDay(${i})">
       <div class="rcpill-day">${d}</div>
       <div class="rcpill-count ${count>0?'has':''}">
         ${count > 0 ? count+'<span style="font-size:0.55rem;font-family:\'DM Sans\'"> meals</span>' : '—'}
@@ -2596,13 +2791,11 @@ function renderWeekBar() {
 }
 
 function rcShowDay(dayIdx) {
-  // Show calorie bar for that day
   const bar = document.getElementById('rcCalBar');
   bar.style.display = 'block';
-  document.getElementById('rcDayLabel').textContent = '📅 ' + WEEK_DAYS[dayIdx] + ' calories';
+  document.getElementById('rcDayLabel').textContent = '📅 ' + WEEK_DAYS[dayIdx];
   const target = state.calTarget || 0;
-  const dayMeals = weekPlan[dayIdx];
-  const selected = Object.values(dayMeals).reduce((s,m) => s+(m?m.calories:0), 0);
+  const selected = Object.values(weekPlan[dayIdx]).reduce((s,m) => s+(m?m.calories:0), 0);
   document.getElementById('rcCalTarget').textContent = target ? target.toLocaleString() + ' kcal target' : 'Set profile first';
   document.getElementById('rcCalSelected').textContent = selected + ' kcal';
   const remaining = target - selected;
@@ -2615,106 +2808,17 @@ function rcShowDay(dayIdx) {
   fill.className = 'day-cal-fill' + (pct > 100 ? ' over' : '');
 }
 
-function updateRecipeCalBar() {
-  // Update all day pills
-  renderWeekBar();
-}
+function updateRecipeCalBar() { renderWeekBar(); }
 
-// ── Generate recipes ──
-async function generateRecipes() {
-  const btn = document.getElementById('genRecipesLabel');
-  btn.innerHTML = '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>';
-  document.getElementById('recipePanelContent').style.display = 'none';
-
-  const target = state.calTarget || 1800;
-  const budgets = {
-    breakfast: Math.round(target * 0.22),
-    snackAm:   Math.round(target * 0.08),
-    lunch:     Math.round(target * 0.28),
-    snackPm:   Math.round(target * 0.08),
-    dinner:    Math.round(target * 0.34),
-  };
-
-  document.getElementById('bfCalBudget').textContent = budgets.breakfast;
-  document.getElementById('snackAmCalBudget').textContent = budgets.snackAm;
-  document.getElementById('lunchCalBudget').textContent = budgets.lunch;
-  document.getElementById('snackPmCalBudget').textContent = budgets.snackPm;
-  document.getElementById('dinnerCalBudget').textContent = budgets.dinner;
-
-  const dietNote = buildDietNote();
-  const meatOnly = activeDiets.has('meat') && !activeDiets.has('vegan') && !activeDiets.has('vegetarian') && !activeDiets.has('all');
-
-  const prompt = `Create 3 recipe options each for: breakfast, snackAm, lunch, snackPm, dinner. For one person in Australia using Aldi supermarket ingredients.
-
-Calorie budgets: breakfast ~${budgets.breakfast}kcal, snackAm ~${budgets.snackAm}kcal, lunch ~${budgets.lunch}kcal, snackPm ~${budgets.snackPm}kcal, dinner ~${budgets.dinner}kcal.
-
-Diet rules: ${dietNote}
-${meatOnly ? 'CRITICAL: Every single option must contain meat or fish. Zero vegetarian/vegan options.' : 'Include at least 1 vegan and 1 vegetarian option per meal where diet allows.'}
-
-For each recipe include "steps" array (3-5 steps, each under 15 words).
-
-Return ONLY compact valid JSON, no markdown:
-{"breakfast":[{"name":"","calories":0,"prepTime":"10 min","diet":"meat","icon":"🍳","desc":"","ingredients":[""],"steps":[""]}],"snackAm":[...],"lunch":[...],"snackPm":[...],"dinner":[...]}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    console.log('Recipe API response:', JSON.stringify(data).slice(0, 500));
-
-    if (data.error) throw new Error('API error: ' + data.error.message);
-    if (!data.content || !data.content.length) throw new Error('Empty response from API');
-
-    let text = data.content.map(b => b.text||'').join('');
-    console.log('Raw text:', text.slice(0, 300));
-    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON object found in: ' + text.slice(0,200));
-    generatedRecipes = JSON.parse(jsonMatch[0]);
-
-    // Validate structure
-    if (!generatedRecipes.breakfast) throw new Error('Missing breakfast in response');
-
-    expandedRecipe = null;
-    weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
-    renderWeekBar();
-    renderAllRecipeCards();
-    document.getElementById('recipePanelContent').style.display = 'block';
-    document.getElementById('groceryCard').style.display = 'none';
-    document.getElementById('groceryBtn').style.display = 'flex';
-  } catch(e) {
-    console.error('Recipe generation failed:', e);
-    document.getElementById('recipePanelContent').style.display = 'block';
-    document.getElementById('breakfastCards').innerHTML =
-      `<div class="no-recipes-msg" style="border-color:var(--red);text-align:left;padding:16px">
-        <strong style="color:var(--red)">⚠ Error details:</strong><br><br>
-        <code style="font-size:0.78rem;word-break:break-all">${e.message}</code><br><br>
-        <small style="color:var(--muted)">Please screenshot this and share it so the error can be fixed.</small>
-      </div>`;
-  }
-  btn.innerHTML = '✦ Regenerate Meal Plan';
-}
-
-// ── Render all cards ──
+// ── Render cards ──
 function renderAllRecipeCards() {
   MEAL_SLOTS.forEach(meal => {
     const el = document.getElementById(meal + 'Cards');
     if (!el) return;
-    const recipes = generatedRecipes[meal] || [];
+    const recipes = filterRecipes(meal);
     el.innerHTML = recipes.length
       ? recipes.map((r, i) => buildRecipeCard(r, meal, i)).join('')
-      : `<div class="no-recipes-msg">Generate a meal plan to see options.</div>`;
+      : `<div class="no-recipes-msg">No recipes match your current filters.</div>`;
   });
 }
 
@@ -2726,7 +2830,10 @@ function buildRecipeCard(r, meal, idx) {
     ? '<span class="recipe-badge badge-veg">🥦 Vegetarian</span>'
     : '<span class="recipe-badge badge-protein">🍗 Meat</span>';
 
-  // Day selector checkboxes — which days have this recipe assigned for this slot
+  const daysSelected = WEEK_DAYS_SHORT.filter((_,di) => weekPlan[di][meal]?.name === r.name);
+  const selLabel = daysSelected.length > 0
+    ? `<div class="rc-sel-label">📅 ${daysSelected.join(', ')}</div>` : '';
+
   const dayChecks = WEEK_DAYS_SHORT.map((d, di) => {
     const checked = weekPlan[di][meal]?.name === r.name;
     return `<label class="day-check-label ${checked?'checked':''}" onclick="event.stopPropagation()">
@@ -2738,19 +2845,14 @@ function buildRecipeCard(r, meal, idx) {
   const ingredientsList = (r.ingredients||[]).length
     ? `<div class="recipe-expand-section">
         <div class="recipe-expand-title">Ingredients</div>
-        <ul class="recipe-ingredient-list">${(r.ingredients||[]).map(i=>`<li>${i}</li>`).join('')}</ul>
+        <ul class="recipe-ingredient-list">${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
        </div>` : '';
 
   const stepsList = (r.steps||[]).length
     ? `<div class="recipe-expand-section">
         <div class="recipe-expand-title">Method</div>
-        <ol class="recipe-steps-list">${(r.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>
+        <ol class="recipe-steps-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
        </div>` : '';
-
-  // How many days selected
-  const daysSelected = WEEK_DAYS_SHORT.filter((_,di) => weekPlan[di][meal]?.name === r.name);
-  const selLabel = daysSelected.length > 0
-    ? `<div class="rc-sel-label">📅 Selected for: ${daysSelected.join(', ')}</div>` : '';
 
   return `<div class="recipe-card${isExpanded?' expanded-card':''}" id="rc-${meal}-${idx}">
     <div class="recipe-card-top" onclick="toggleRecipeExpand('${meal}',${idx})">
@@ -2760,7 +2862,7 @@ function buildRecipeCard(r, meal, idx) {
         <div class="recipe-meta">
           <span class="recipe-badge badge-cal">🔥 ${r.calories} kcal</span>
           ${dietBadge}
-          <span class="recipe-badge badge-time">⏱ ${r.prepTime||'15 min'}</span>
+          <span class="recipe-badge badge-time">⏱ ${r.prepTime}</span>
         </div>
         <div class="recipe-desc">${r.desc}</div>
         ${selLabel}
@@ -2783,123 +2885,192 @@ function toggleRecipeExpand(meal, idx) {
 }
 
 function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
-  const r = generatedRecipes[meal]?.[recipeIdx];
+  const recipes = filterRecipes(meal);
+  const r = recipes[recipeIdx];
   if (!r) return;
-  if (checkbox.checked) {
-    weekPlan[dayIdx][meal] = r;
-  } else {
-    weekPlan[dayIdx][meal] = null;
-  }
+  weekPlan[dayIdx][meal] = checkbox.checked ? r : null;
   renderWeekBar();
-  // Re-render just this card to update day dots
-  const recipes = generatedRecipes[meal] || [];
-  const el = document.getElementById(meal + 'Cards');
-  if (el) el.innerHTML = recipes.map((rc, i) => buildRecipeCard(rc, meal, i)).join('');
-  // Keep card expanded
-  const card = document.getElementById(`rc-${meal}-${recipeIdx}`);
-  if (card) card.classList.add('expanded-card');
+  const el = document.getElementById(meal+'Cards');
+  if (el) el.innerHTML = filterRecipes(meal).map((rc,i) => buildRecipeCard(rc, meal, i)).join('');
   document.getElementById('groceryCard').style.display = 'none';
 }
 
-// ── Grocery list ──
-async function generateGroceryList() {
+// ── Grocery list (static — Aldi AU prices) ──
+const ALDI_PRICES = {
+  'bacon': { price: 5.99, qty: '500g' },
+  'english muffin': { price: 3.49, qty: '6 pack' },
+  'lettuce': { price: 1.99, qty: 'head' },
+  'eggs': { price: 4.49, qty: '12 pack' },
+  'chicken breast': { price: 7.99, qty: '1kg' },
+  'spinach': { price: 2.99, qty: 'bag' },
+  'cherry tomatoes': { price: 2.49, qty: 'punnet' },
+  'olive oil': { price: 4.99, qty: '750ml' },
+  'greek yogurt': { price: 3.49, qty: '500g' },
+  'mixed berries': { price: 3.99, qty: '300g frozen' },
+  'granola': { price: 2.99, qty: '500g' },
+  'honey': { price: 3.99, qty: '500g' },
+  'avocado': { price: 1.99, qty: 'each' },
+  'wholegrain bread': { price: 3.49, qty: 'loaf' },
+  'rolled oats': { price: 2.49, qty: '1kg' },
+  'almond milk': { price: 2.99, qty: '1L' },
+  'chia seeds': { price: 3.99, qty: '250g' },
+  'maple syrup': { price: 4.99, qty: '250ml' },
+  'smoked salmon': { price: 5.99, qty: '150g' },
+  'cream cheese': { price: 2.99, qty: '250g' },
+  'capers': { price: 2.49, qty: 'jar' },
+  'banana': { price: 0.89, qty: 'each' },
+  'peanut butter': { price: 3.49, qty: '375g' },
+  'oat milk': { price: 2.99, qty: '1L' },
+  'canned tuna': { price: 1.79, qty: '95g tin' },
+  'rice cakes': { price: 1.99, qty: 'pack' },
+  'mixed nuts': { price: 4.99, qty: '500g' },
+  'carrot': { price: 1.29, qty: 'bunch' },
+  'hummus': { price: 2.99, qty: '200g' },
+  'cottage cheese': { price: 2.49, qty: '250g' },
+  'cucumber': { price: 1.29, qty: 'each' },
+  'mixed greens': { price: 2.99, qty: 'bag' },
+  'red lentils': { price: 2.49, qty: '500g' },
+  'vegetable stock': { price: 1.99, qty: '1L' },
+  'pasta': { price: 1.49, qty: '500g' },
+  'wholegrain wrap': { price: 3.49, qty: '8 pack' },
+  'canned chickpeas': { price: 1.29, qty: '400g tin' },
+  'tahini': { price: 4.49, qty: '250g' },
+  'lean beef mince': { price: 8.99, qty: '500g' },
+  'rice': { price: 2.99, qty: '1kg' },
+  'quinoa': { price: 3.99, qty: '500g' },
+  'mozzarella': { price: 4.49, qty: '125g' },
+  'tomatoes': { price: 2.49, qty: '6 pack' },
+  'salmon fillet': { price: 9.99, qty: '400g' },
+  'sweet potato': { price: 2.49, qty: '1kg' },
+  'broccoli': { price: 2.49, qty: 'head' },
+  'canned black beans': { price: 1.29, qty: '400g tin' },
+  'coconut milk': { price: 1.99, qty: '400ml tin' },
+  'crushed tomatoes': { price: 1.29, qty: '400g tin' },
+  'corn tortillas': { price: 3.49, qty: '12 pack' },
+  'hokkien noodles': { price: 2.49, qty: '440g' },
+  'beef strips': { price: 9.99, qty: '500g' },
+  'zucchini': { price: 2.99, qty: '3 pack' },
+  'capsicum': { price: 2.99, qty: 'each' },
+  'prawns': { price: 8.99, qty: '400g' },
+  'firm tofu': { price: 2.99, qty: '300g' },
+  'soy sauce': { price: 2.49, qty: '500ml' },
+  'sesame oil': { price: 3.49, qty: '250ml' },
+  'garlic': { price: 1.99, qty: 'bulb' },
+  'ginger': { price: 1.99, qty: 'piece' },
+  'feta': { price: 3.49, qty: '200g' },
+  'cheddar': { price: 4.99, qty: '250g' },
+  'butter': { price: 3.99, qty: '250g' },
+  'lemon': { price: 0.79, qty: 'each' },
+  'onion': { price: 1.99, qty: '1kg bag' },
+  'almond butter': { price: 5.99, qty: '250g' },
+  'edamame': { price: 3.49, qty: '500g frozen' },
+  'protein bar': { price: 2.99, qty: 'each' },
+  'coconut yogurt': { price: 3.99, qty: '500g' },
+  'walnuts': { price: 4.99, qty: '200g' },
+  'chicken stock': { price: 1.99, qty: '1L' },
+  'asparagus': { price: 3.49, qty: 'bunch' },
+  'broccolini': { price: 2.99, qty: 'bunch' },
+  'oyster sauce': { price: 2.99, qty: '300ml' },
+  'hoisin sauce': { price: 2.99, qty: '300ml' },
+  'teriyaki sauce': { price: 2.99, qty: '300ml' },
+  'balsamic vinegar': { price: 3.49, qty: '500ml' },
+  'corn': { price: 1.49, qty: '420g tin' },
+  'spring onions': { price: 1.49, qty: 'bunch' },
+  'fresh parsley': { price: 1.99, qty: 'bunch' },
+  'fresh coriander': { price: 1.99, qty: 'bunch' },
+  'celery': { price: 1.99, qty: 'bunch' },
+  'cumin': { price: 2.49, qty: 'jar' },
+  'smoked paprika': { price: 2.49, qty: 'jar' },
+  'curry powder': { price: 2.49, qty: 'jar' },
+  'italian herbs': { price: 2.29, qty: 'jar' },
+  'oregano': { price: 2.29, qty: 'jar' },
+  'chilli flakes': { price: 2.29, qty: 'jar' },
+  'wholegrain spaghetti': { price: 1.99, qty: '500g' },
+  'bok choy': { price: 2.49, qty: 'bunch' },
+  'grapes': { price: 3.99, qty: '500g' },
+  'wholegrain crackers': { price: 2.49, qty: 'pack' },
+  'light mayo': { price: 3.49, qty: '400g' },
+};
+
+function generateGroceryList() {
   const allSelected = [];
   weekPlan.forEach((dayMeals, di) => {
     Object.values(dayMeals).forEach(m => { if (m) allSelected.push({day: WEEK_DAYS_SHORT[di], meal: m}); });
   });
   if (allSelected.length === 0) { alert('Please select at least one recipe first.'); return; }
 
-  const btn = document.getElementById('groceryBtnLabel');
-  btn.innerHTML = '<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>';
-  document.getElementById('groceryBtn').disabled = true;
+  // Collect all ingredients, deduplicate
+  const ingredientMap = {};
+  allSelected.forEach(({meal: m}) => {
+    (m.ingredients || []).forEach(raw => {
+      // Normalise ingredient name
+      const name = raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i, '').toLowerCase().trim()
+        .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced)$/i,'').trim();
+      if (!ingredientMap[name]) ingredientMap[name] = { raw, count: 0 };
+      ingredientMap[name].count++;
+    });
+  });
+
+  // Match to ALDI prices
+  groceryItems = [];
+  const sections = { 'Produce': [], 'Meat & Fish': [], 'Dairy & Eggs': [], 'Pantry & Dry Goods': [], 'Frozen & Other': [] };
+  const produceKeys = ['tomato','cherry tomato','spinach','avocado','carrot','cucumber','zucchini','capsicum','bok choy','broccolini','asparagus','broccoli','sweet potato','lemon','onion','garlic','ginger','spring onion','celery','banana','grapes','fresh parsley','fresh coriander'];
+  const meatKeys = ['chicken breast','salmon','beef','prawn','tuna','smoked salmon','beef strip','bacon rasher','bacon'];
+  const dairyKeys = ['egg','yogurt','cheese','cream cheese','cottage cheese','butter','mozzarella','feta','cheddar','milk'];
+  const frozenKeys = ['edamame','frozen','ice'];
+
+  Object.entries(ingredientMap).forEach(([name, info]) => {
+    // Find best price match
+    const priceKey = Object.keys(ALDI_PRICES).find(k => name.includes(k) || k.includes(name.split(' ')[0]));
+    const priceInfo = priceKey ? ALDI_PRICES[priceKey] : { price: 2.99, qty: '1 unit' };
+    const uid = 'gi-' + groceryItems.length;
+    const item = { uid, name: info.raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i,'').trim(), qty: priceInfo.qty, price: priceInfo.price, section: '' };
+
+    if (produceKeys.some(k => name.includes(k))) item.section = 'Produce';
+    else if (meatKeys.some(k => name.includes(k))) item.section = 'Meat & Fish';
+    else if (dairyKeys.some(k => name.includes(k))) item.section = 'Dairy & Eggs';
+    else if (frozenKeys.some(k => name.includes(k))) item.section = 'Frozen & Other';
+    else item.section = 'Pantry & Dry Goods';
+
+    sections[item.section].push(item);
+    groceryItems.push(item);
+  });
 
   const days = [...new Set(allSelected.map(x => x.day))];
-  const mealList = allSelected.map(x => `${x.day} - ${x.meal.name}: ${x.meal.ingredients?.join(', ')||'standard ingredients'}`).join('\n');
-
-  const prompt = `Australian grocery list for ${days.length} day(s) of meals, 1 person. Consolidate duplicates. Aldi Australia prices AUD 2024-2025.
-
-Meals:
-${mealList}
-
-Return ONLY compact valid JSON no markdown:
-{"sections":[{"title":"Produce","items":[{"name":"","qty":"","price":0.00}]},{"title":"Dairy & Eggs","items":[]},{"title":"Pantry & Dry Goods","items":[]},{"title":"Meat & Fish","items":[]},{"title":"Frozen & Other","items":[]}],"totalCost":0.00,"note":""}
-
-Only include sections with items. totalCost = sum of all prices.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content.map(b => b.text||'').join('');
-    // Strip markdown fences and any leading/trailing whitespace
-    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-    // Extract JSON object if there's surrounding text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON found in response');
-    const grocery = JSON.parse(jsonMatch[0]);
-    // Normalise — handle both {sections:[]} and flat {Produce:[],Dairy:[]} shapes
-    if (!grocery.sections) {
-      const knownKeys = ['totalCost','note'];
-      grocery.sections = Object.entries(grocery)
-        .filter(([k]) => !knownKeys.includes(k) && Array.isArray(grocery[k]))
-        .map(([title, items]) => ({title, items}));
-    }
-    if (!Array.isArray(grocery.sections)) grocery.sections = [];
-    renderGroceryList(grocery, days);
-    document.getElementById('groceryCard').style.display = 'block';
-    document.getElementById('groceryCard').scrollIntoView({behavior:'smooth', block:'start'});
-  } catch(e) {
-    console.error('Grocery list error:', e);
-    alert('Could not generate grocery list — please try again.');
-  }
-  btn.innerHTML = '🛒 Regenerate Grocery List';
-  document.getElementById('groceryBtn').disabled = false;
+  renderGroceryList(sections, days);
+  document.getElementById('groceryCard').style.display = 'block';
+  document.getElementById('groceryCard').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-function renderGroceryList(grocery, days) {
-  groceryItems = [];
+function renderGroceryList(sections, days) {
   let html = '';
-  if (days && days.length > 1) {
+  if (days.length > 1) {
     html += `<div style="font-size:0.78rem;color:var(--green);margin-bottom:12px;font-weight:500">📅 Combined for: ${days.join(', ')}</div>`;
   }
-  (grocery.sections||[]).forEach(section => {
-    if (!section.items?.length) return;
-    html += `<div class="grocery-section-title">${section.title}</div>`;
-    section.items.forEach(item => {
-      const uid = 'gi-' + groceryItems.length;
-      groceryItems.push({uid, name: item.name, qty: item.qty||'', price: item.price||0, section: section.title});
-      html += `<div class="grocery-item" id="${uid}">
-        <div class="grocery-check" onclick="toggleGrocery('${uid}')">✓</div>
-        <div class="grocery-name">${item.name}</div>
-        <div class="grocery-qty">${item.qty||''}</div>
-        <div class="grocery-price">$${Number(item.price).toFixed(2)}</div>
+  let grandTotal = 0;
+  Object.entries(sections).forEach(([title, items]) => {
+    if (!items.length) return;
+    html += `<div class="grocery-section-title">${title}</div>`;
+    items.forEach(item => {
+      grandTotal += item.price;
+      html += `<div class="grocery-item" id="${item.uid}">
+        <div class="grocery-check" onclick="toggleGrocery('${item.uid}')">✓</div>
+        <div class="grocery-name" style="text-transform:capitalize">${item.name}</div>
+        <div class="grocery-qty">${item.qty}</div>
+        <div class="grocery-price">$${item.price.toFixed(2)}</div>
       </div>`;
     });
   });
-  const total = grocery.totalCost || groceryItems.reduce((s,i)=>s+i.price,0);
   html += `<div class="grocery-total-row">
     <div class="grocery-total-label">ESTIMATED TOTAL</div>
-    <div class="grocery-total-val">$${Number(total).toFixed(2)}</div>
-  </div>`;
-  if (grocery.note) html += `<div style="margin-top:10px;font-size:0.78rem;color:var(--muted);font-style:italic">💡 ${grocery.note}</div>`;
+    <div class="grocery-total-val">$${grandTotal.toFixed(2)}</div>
+  </div>
+  <div style="margin-top:8px;font-size:0.72rem;color:var(--muted);font-style:italic">💡 Prices are approximate Aldi Australia estimates — check aldi.com.au for current specials.</div>`;
   document.getElementById('groceryContent').innerHTML = html;
 }
 
 function toggleGrocery(uid) {
-  const el = document.getElementById(uid);
-  if (!el) return;
-  el.classList.toggle('ticked');
+  document.getElementById(uid)?.classList.toggle('ticked');
   updateSelectAllBtn();
 }
 
@@ -2918,50 +3089,28 @@ function updateSelectAllBtn() {
 }
 
 function downloadGroceryList() {
-  const ticked = groceryItems.filter(item => {
-    const el = document.getElementById(item.uid);
-    return el && el.classList.contains('ticked');
-  });
-  if (ticked.length === 0) {
-    alert('Please tick at least one item first, or use "Select All".');
-    return;
-  }
-
-  // Group by section
-  const sections = {};
+  const ticked = groceryItems.filter(item => document.getElementById(item.uid)?.classList.contains('ticked'));
+  if (ticked.length === 0) { alert('Please tick at least one item first, or use "Select All".'); return; }
+  const sectionMap = {};
   ticked.forEach(item => {
-    if (!sections[item.section]) sections[item.section] = [];
-    sections[item.section].push(item);
+    if (!sectionMap[item.section]) sectionMap[item.section] = [];
+    sectionMap[item.section].push(item);
   });
-
-  let text = 'ALDI GROCERY LIST\n';
-  text += 'Generated by Move & Burn tracker\n';
-  text += '==================================\n\n';
-
-  let grandTotal = 0;
-  Object.entries(sections).forEach(([sec, items]) => {
-    text += `${sec.toUpperCase()}\n`;
-    text += '-'.repeat(sec.length) + '\n';
-    items.forEach(item => {
-      const price = `$${Number(item.price).toFixed(2)}`;
-      text += `☐  ${item.name}${item.qty ? ' (' + item.qty + ')' : ''}  ${price}\n`;
-      grandTotal += item.price;
-    });
+  let text = 'ALDI GROCERY LIST — MOVE & BURN\n';
+  text += '=================================\n\n';
+  let total = 0;
+  Object.entries(sectionMap).forEach(([sec, items]) => {
+    text += `${sec.toUpperCase()}\n${'-'.repeat(sec.length)}\n`;
+    items.forEach(item => { text += `☐  ${item.name} (${item.qty})  $${item.price.toFixed(2)}\n`; total += item.price; });
     text += '\n';
   });
-
-  text += '==================================\n';
-  text += `ESTIMATED TOTAL: $${grandTotal.toFixed(2)}\n`;
-  text += '\nPrices are approximate Aldi Australia estimates.\n';
-  text += 'Visit aldi.com.au for current specials.\n';
-
-  const blob = new Blob([text], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
+  text += `=================================\nESTIMATED TOTAL: $${total.toFixed(2)}\n\nVisit aldi.com.au for current prices.\n`;
+  const blob = new Blob([text], {type:'text/plain'});
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'aldi-grocery-list.txt';
   a.click();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 }
 
 function switchTab(id) {
@@ -2972,7 +3121,7 @@ function switchTab(id) {
   if (id === 'calories') updateCalDisplay();
   if (id === 'steps') updateStepDisplay();
   if (id === 'weekly') { renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
-  if (id === 'recipes') { renderWeekBar(); }
+  if (id === 'recipes') renderWeekBar();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2987,3 +3136,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
