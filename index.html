@@ -872,6 +872,11 @@
 
   .walk-entry .walk-remove:hover { background: var(--red-dim); color: var(--red); }
 
+  .walk-auto {
+    border-color: rgba(46,125,94,0.3);
+    background: var(--green-dim);
+  }
+
   /* Day summary strip */
   .day-summary-strip {
     display: grid;
@@ -2268,6 +2273,7 @@ function updateSteps() {
   }
 
   updateCalDisplay();
+  syncTodayToWeekly();
   saveAll();
 }
 
@@ -2397,6 +2403,8 @@ function updateWorkoutSummary() {
   updateCalDisplay();
   // Refresh step goal reduction live
   updateSteps();
+  // Sync to weekly tracker
+  syncTodayToWeekly();
   saveAll();
 }
 
@@ -2439,6 +2447,36 @@ function getWeekDay(week, day) {
     saved: false
   };
   return weeklyData[week][day];
+}
+
+// Sync today's Steps tab count + Exercises tab ticks → Weekly tracker
+function syncTodayToWeekly() {
+  const todayDayIdx = (new Date().getDay() + 6) % 7; // Mon=0..Sun=6
+  const d = getWeekDay(currentWeek, todayDayIdx);
+
+  // Sync exercise ticks from Exercises tab
+  exercises.forEach((_, i) => {
+    // An exercise is "done" if all its sets are ticked
+    d.exercises[i] = tickedSets[i]?.size === exercises[i].numSets;
+  });
+
+  // Sync steps as a walk entry (update or create a "Steps tab" entry)
+  const steps = state.steps || 0;
+  if (steps > 0) {
+    const existingIdx = d.walks.findIndex(w => w.source === 'steps-tab');
+    const cal = Math.round(steps * (state.stepCalPerStep || 0.04));
+    const entry = { steps, cal, note: 'From Steps tab', source: 'steps-tab' };
+    if (existingIdx >= 0) {
+      d.walks[existingIdx] = entry;
+    } else {
+      d.walks.push(entry);
+    }
+  } else {
+    // Remove steps-tab entry if steps cleared
+    d.walks = d.walks.filter(w => w.source !== 'steps-tab');
+  }
+
+  saveAll();
 }
 
 function renderDayGrid() {
@@ -2527,9 +2565,10 @@ function renderDayDetail() {
   <div id="walkEntries-${i}">`;
 
   d.walks.forEach((w, wi) => {
-    html += `<div class="walk-entry">
-      <span>👟 ${w.steps?.toLocaleString() || '—'} steps${w.note ? ' — ' + w.note : ''}</span>
-      <span>${w.cal || 0} kcal <span class="walk-remove" onclick="removeWalk(${i},${wi})">✕</span></span>
+    const isAutoSync = w.source === 'steps-tab';
+    html += `<div class="walk-entry${isAutoSync ? ' walk-auto' : ''}">
+      <span>${isAutoSync ? '🔄' : '👟'} ${w.steps?.toLocaleString() || '—'} steps${w.note ? ' — ' + w.note : ''}</span>
+      <span>${w.cal || 0} kcal ${isAutoSync ? '<span style="font-size:0.65rem;color:var(--green);margin-left:4px">auto</span>' : `<span class="walk-remove" onclick="removeWalk(${i},${wi})">✕</span>`}</span>
     </div>`;
   });
   html += `</div>`;
@@ -3254,7 +3293,7 @@ function switchTab(id) {
   document.getElementById('panel-' + id).classList.add('active');
   if (id === 'calories') updateCalDisplay();
   if (id === 'steps') updateStepDisplay();
-  if (id === 'weekly') { renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
+  if (id === 'weekly') { syncTodayToWeekly(); renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
   if (id === 'recipes') renderWeekBar();
 }
 
