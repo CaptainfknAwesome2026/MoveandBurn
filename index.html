@@ -877,6 +877,35 @@
     background: var(--green-dim);
   }
 
+  /* ── STORE SELECTOR ── */
+  .store-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .store-btn:hover { border-color: rgba(0,0,0,0.2); }
+
+  .store-btn.active { border-color: var(--orange); background: white; box-shadow: 0 2px 8px rgba(232,93,38,0.15); }
+
+  .store-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+  }
+
+  .aldi-logo { color: #003087; }
+  .woolies-logo { color: #007837; }
+  .coles-logo { color: #e2001a; }
+
+  .store-btn.active .aldi-logo { color: #003087; }
+  .store-btn.active .woolies-logo { color: #007837; }
+  .store-btn.active .coles-logo { color: #e2001a; }
+
   /* Day summary strip */
   .day-summary-strip {
     display: grid;
@@ -1942,13 +1971,31 @@
       </div>
       <div class="card-desc">Tick what you need — download exports only ticked items</div>
       <div id="groceryContent"></div>
-      <div class="aldi-note">
+      <div id="storeNote" class="aldi-note">
         <span>🛍</span>
-        <span>Prices are approximate Aldi Australia estimates. Shop at <a href="https://www.aldi.com.au" target="_blank">aldi.com.au</a> to check current specials.</span>
+        <span id="storeNoteText">Prices are approximate Aldi Australia estimates. Shop at <a href="https://www.aldi.com.au" target="_blank">aldi.com.au</a></span>
       </div>
       <button onclick="downloadGroceryList()" style="width:100%;margin-top:14px;padding:12px;background:var(--charcoal);color:white;border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.07em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s" onmouseover="this.style.background='#333'" onmouseout="this.style.background='var(--charcoal)'">
         ⬇ Download Selected Items
       </button>
+    </div>
+
+    <!-- Store selector + generate button -->
+    <div class="card" style="padding:16px 20px">
+      <div class="card-title" style="font-size:1rem;margin-bottom:4px">Choose your supermarket</div>
+      <div class="card-desc" style="margin-bottom:14px">Prices are built-in estimates based on each store's typical pricing</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="store-btn active" data-store="aldi" onclick="selectStore('aldi',this)">
+          <span class="store-logo aldi-logo">ALDI</span>
+        </button>
+        <button class="store-btn" data-store="woolworths" onclick="selectStore('woolworths',this)">
+          <span class="store-logo woolies-logo">Woolworths</span>
+        </button>
+        <button class="store-btn" data-store="coles" onclick="selectStore('coles',this)">
+          <span class="store-logo coles-logo">Coles</span>
+        </button>
+      </div>
+      <div id="storeTagline" style="font-size:0.75rem;color:var(--muted);margin-bottom:14px">🏷 Aldi — typically the lowest prices, no loyalty program needed</div>
     </div>
 
     <button class="gen-grocery-btn" onclick="generateGroceryList()" id="groceryBtn">
@@ -3069,100 +3116,308 @@ function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
 }
 
 // ── Grocery list (static — Aldi AU prices) ──
-const ALDI_PRICES = {
-  'bacon': { price: 5.99, qty: '500g' },
-  'english muffin': { price: 3.49, qty: '6 pack' },
-  'lettuce': { price: 1.99, qty: 'head' },
-  'eggs': { price: 4.49, qty: '12 pack' },
-  'chicken breast': { price: 7.99, qty: '1kg' },
-  'spinach': { price: 2.99, qty: 'bag' },
-  'cherry tomatoes': { price: 2.49, qty: 'punnet' },
-  'olive oil': { price: 4.99, qty: '750ml' },
-  'greek yogurt': { price: 3.49, qty: '500g' },
-  'mixed berries': { price: 3.99, qty: '300g frozen' },
-  'granola': { price: 2.99, qty: '500g' },
-  'honey': { price: 3.99, qty: '500g' },
-  'avocado': { price: 1.99, qty: 'each' },
-  'wholegrain bread': { price: 3.49, qty: 'loaf' },
-  'rolled oats': { price: 2.49, qty: '1kg' },
-  'almond milk': { price: 2.99, qty: '1L' },
-  'chia seeds': { price: 3.99, qty: '250g' },
-  'maple syrup': { price: 4.99, qty: '250ml' },
-  'smoked salmon': { price: 5.99, qty: '150g' },
-  'cream cheese': { price: 2.99, qty: '250g' },
-  'capers': { price: 2.49, qty: 'jar' },
-  'banana': { price: 0.89, qty: 'each' },
-  'peanut butter': { price: 3.49, qty: '375g' },
-  'oat milk': { price: 2.99, qty: '1L' },
-  'canned tuna': { price: 1.79, qty: '95g tin' },
-  'rice cakes': { price: 1.99, qty: 'pack' },
-  'mixed nuts': { price: 4.99, qty: '500g' },
-  'carrot': { price: 1.29, qty: 'bunch' },
-  'hummus': { price: 2.99, qty: '200g' },
-  'cottage cheese': { price: 2.49, qty: '250g' },
-  'cucumber': { price: 1.29, qty: 'each' },
-  'mixed greens': { price: 2.99, qty: 'bag' },
-  'red lentils': { price: 2.49, qty: '500g' },
-  'vegetable stock': { price: 1.99, qty: '1L' },
-  'pasta': { price: 1.49, qty: '500g' },
-  'wholegrain wrap': { price: 3.49, qty: '8 pack' },
-  'canned chickpeas': { price: 1.29, qty: '400g tin' },
-  'tahini': { price: 4.49, qty: '250g' },
-  'lean beef mince': { price: 8.99, qty: '500g' },
-  'rice': { price: 2.99, qty: '1kg' },
-  'quinoa': { price: 3.99, qty: '500g' },
-  'mozzarella': { price: 4.49, qty: '125g' },
-  'tomatoes': { price: 2.49, qty: '6 pack' },
-  'salmon fillet': { price: 9.99, qty: '400g' },
-  'sweet potato': { price: 2.49, qty: '1kg' },
-  'broccoli': { price: 2.49, qty: 'head' },
-  'canned black beans': { price: 1.29, qty: '400g tin' },
-  'coconut milk': { price: 1.99, qty: '400ml tin' },
-  'crushed tomatoes': { price: 1.29, qty: '400g tin' },
-  'corn tortillas': { price: 3.49, qty: '12 pack' },
-  'hokkien noodles': { price: 2.49, qty: '440g' },
-  'beef strips': { price: 9.99, qty: '500g' },
-  'zucchini': { price: 2.99, qty: '3 pack' },
-  'capsicum': { price: 2.99, qty: 'each' },
-  'prawns': { price: 8.99, qty: '400g' },
-  'firm tofu': { price: 2.99, qty: '300g' },
-  'soy sauce': { price: 2.49, qty: '500ml' },
-  'sesame oil': { price: 3.49, qty: '250ml' },
-  'garlic': { price: 1.99, qty: 'bulb' },
-  'ginger': { price: 1.99, qty: 'piece' },
-  'feta': { price: 3.49, qty: '200g' },
-  'cheddar': { price: 4.99, qty: '250g' },
-  'butter': { price: 3.99, qty: '250g' },
-  'lemon': { price: 0.79, qty: 'each' },
-  'onion': { price: 1.99, qty: '1kg bag' },
-  'almond butter': { price: 5.99, qty: '250g' },
-  'edamame': { price: 3.49, qty: '500g frozen' },
-  'protein bar': { price: 2.99, qty: 'each' },
-  'coconut yogurt': { price: 3.99, qty: '500g' },
-  'walnuts': { price: 4.99, qty: '200g' },
-  'chicken stock': { price: 1.99, qty: '1L' },
-  'asparagus': { price: 3.49, qty: 'bunch' },
-  'broccolini': { price: 2.99, qty: 'bunch' },
-  'oyster sauce': { price: 2.99, qty: '300ml' },
-  'hoisin sauce': { price: 2.99, qty: '300ml' },
-  'teriyaki sauce': { price: 2.99, qty: '300ml' },
-  'balsamic vinegar': { price: 3.49, qty: '500ml' },
-  'corn': { price: 1.49, qty: '420g tin' },
-  'spring onions': { price: 1.49, qty: 'bunch' },
-  'fresh parsley': { price: 1.99, qty: 'bunch' },
-  'fresh coriander': { price: 1.99, qty: 'bunch' },
-  'celery': { price: 1.99, qty: 'bunch' },
-  'cumin': { price: 2.49, qty: 'jar' },
-  'smoked paprika': { price: 2.49, qty: 'jar' },
-  'curry powder': { price: 2.49, qty: 'jar' },
-  'italian herbs': { price: 2.29, qty: 'jar' },
-  'oregano': { price: 2.29, qty: 'jar' },
-  'chilli flakes': { price: 2.29, qty: 'jar' },
-  'wholegrain spaghetti': { price: 1.99, qty: '500g' },
-  'bok choy': { price: 2.49, qty: 'bunch' },
-  'grapes': { price: 3.99, qty: '500g' },
-  'wholegrain crackers': { price: 2.49, qty: 'pack' },
-  'light mayo': { price: 3.49, qty: '400g' },
+// ── Supermarket price databases ──
+let activeStore = 'aldi';
+
+const STORE_INFO = {
+  aldi:       { name: 'Aldi',       url: 'https://www.aldi.com.au',       tagline: '🏷 Aldi — typically the lowest prices, no loyalty program needed', noteColor: '#003087' },
+  woolworths: { name: 'Woolworths', url: 'https://www.woolworths.com.au', tagline: '🟢 Woolworths — Everyday Rewards points on every shop',            noteColor: '#007837' },
+  coles:      { name: 'Coles',      url: 'https://www.coles.com.au',      tagline: '🔴 Coles — Flybuys points, weekly half-price specials',            noteColor: '#e2001a' },
+};
+
+function selectStore(store, el) {
+  activeStore = store;
+  document.querySelectorAll('.store-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('storeTagline').textContent = STORE_INFO[store].tagline;
+}
+
+const PRICES = {
+  aldi: {
+    'bacon':               { price: 5.99,  qty: '500g' },
+    'english muffin':      { price: 3.49,  qty: '6 pack' },
+    'lettuce':             { price: 1.99,  qty: 'head' },
+    'eggs':                { price: 4.49,  qty: '12 pack' },
+    'chicken breast':      { price: 7.99,  qty: '1kg' },
+    'spinach':             { price: 2.99,  qty: 'bag' },
+    'cherry tomatoes':     { price: 2.49,  qty: 'punnet' },
+    'olive oil':           { price: 4.99,  qty: '750ml' },
+    'greek yogurt':        { price: 3.49,  qty: '500g' },
+    'mixed berries':       { price: 3.99,  qty: '300g frozen' },
+    'granola':             { price: 2.99,  qty: '500g' },
+    'honey':               { price: 3.99,  qty: '500g' },
+    'avocado':             { price: 1.99,  qty: 'each' },
+    'wholegrain bread':    { price: 3.49,  qty: 'loaf' },
+    'rolled oats':         { price: 2.49,  qty: '1kg' },
+    'almond milk':         { price: 2.99,  qty: '1L' },
+    'chia seeds':          { price: 3.99,  qty: '250g' },
+    'maple syrup':         { price: 4.99,  qty: '250ml' },
+    'smoked salmon':       { price: 5.99,  qty: '150g' },
+    'cream cheese':        { price: 2.99,  qty: '250g' },
+    'capers':              { price: 2.49,  qty: 'jar' },
+    'banana':              { price: 0.89,  qty: 'each' },
+    'peanut butter':       { price: 3.49,  qty: '375g' },
+    'oat milk':            { price: 2.99,  qty: '1L' },
+    'canned tuna':         { price: 1.79,  qty: '95g tin' },
+    'rice cakes':          { price: 1.99,  qty: 'pack' },
+    'mixed nuts':          { price: 4.99,  qty: '500g' },
+    'carrot':              { price: 1.29,  qty: 'bunch' },
+    'hummus':              { price: 2.99,  qty: '200g' },
+    'cottage cheese':      { price: 2.49,  qty: '250g' },
+    'cucumber':            { price: 1.29,  qty: 'each' },
+    'mixed greens':        { price: 2.99,  qty: 'bag' },
+    'red lentils':         { price: 2.49,  qty: '500g' },
+    'vegetable stock':     { price: 1.99,  qty: '1L' },
+    'pasta':               { price: 1.49,  qty: '500g' },
+    'wholegrain wrap':     { price: 3.49,  qty: '8 pack' },
+    'canned chickpeas':    { price: 1.29,  qty: '400g tin' },
+    'tahini':              { price: 4.49,  qty: '250g' },
+    'lean beef mince':     { price: 8.99,  qty: '500g' },
+    'rice':                { price: 2.99,  qty: '1kg' },
+    'quinoa':              { price: 3.99,  qty: '500g' },
+    'mozzarella':          { price: 4.49,  qty: '125g' },
+    'tomatoes':            { price: 2.49,  qty: '6 pack' },
+    'salmon fillet':       { price: 9.99,  qty: '400g' },
+    'sweet potato':        { price: 2.49,  qty: '1kg' },
+    'broccoli':            { price: 2.49,  qty: 'head' },
+    'canned black beans':  { price: 1.29,  qty: '400g tin' },
+    'coconut milk':        { price: 1.99,  qty: '400ml tin' },
+    'crushed tomatoes':    { price: 1.29,  qty: '400g tin' },
+    'corn tortillas':      { price: 3.49,  qty: '12 pack' },
+    'hokkien noodles':     { price: 2.49,  qty: '440g' },
+    'beef strips':         { price: 9.99,  qty: '500g' },
+    'zucchini':            { price: 2.99,  qty: '3 pack' },
+    'capsicum':            { price: 2.99,  qty: 'each' },
+    'prawns':              { price: 8.99,  qty: '400g' },
+    'firm tofu':           { price: 2.99,  qty: '300g' },
+    'soy sauce':           { price: 2.49,  qty: '500ml' },
+    'sesame oil':          { price: 3.49,  qty: '250ml' },
+    'garlic':              { price: 1.99,  qty: 'bulb' },
+    'ginger':              { price: 1.99,  qty: 'piece' },
+    'feta':                { price: 3.49,  qty: '200g' },
+    'cheddar':             { price: 4.99,  qty: '250g' },
+    'butter':              { price: 3.99,  qty: '250g' },
+    'lemon':               { price: 0.79,  qty: 'each' },
+    'onion':               { price: 1.99,  qty: '1kg bag' },
+    'almond butter':       { price: 5.99,  qty: '250g' },
+    'edamame':             { price: 3.49,  qty: '500g frozen' },
+    'protein bar':         { price: 2.99,  qty: 'each' },
+    'coconut yogurt':      { price: 3.99,  qty: '500g' },
+    'walnuts':             { price: 4.99,  qty: '200g' },
+    'chicken stock':       { price: 1.99,  qty: '1L' },
+    'asparagus':           { price: 3.49,  qty: 'bunch' },
+    'broccolini':          { price: 2.99,  qty: 'bunch' },
+    'oyster sauce':        { price: 2.99,  qty: '300ml' },
+    'hoisin sauce':        { price: 2.99,  qty: '300ml' },
+    'teriyaki sauce':      { price: 2.99,  qty: '300ml' },
+    'balsamic vinegar':    { price: 3.49,  qty: '500ml' },
+    'corn':                { price: 1.49,  qty: '420g tin' },
+    'spring onions':       { price: 1.49,  qty: 'bunch' },
+    'fresh parsley':       { price: 1.99,  qty: 'bunch' },
+    'fresh coriander':     { price: 1.99,  qty: 'bunch' },
+    'celery':              { price: 1.99,  qty: 'bunch' },
+    'cumin':               { price: 2.49,  qty: 'jar' },
+    'smoked paprika':      { price: 2.49,  qty: 'jar' },
+    'curry powder':        { price: 2.49,  qty: 'jar' },
+    'italian herbs':       { price: 2.29,  qty: 'jar' },
+    'oregano':             { price: 2.29,  qty: 'jar' },
+    'chilli flakes':       { price: 2.29,  qty: 'jar' },
+    'wholegrain spaghetti':{ price: 1.99,  qty: '500g' },
+    'bok choy':            { price: 2.49,  qty: 'bunch' },
+    'grapes':              { price: 3.99,  qty: '500g' },
+    'wholegrain crackers': { price: 2.49,  qty: 'pack' },
+    'light mayo':          { price: 3.49,  qty: '400g' },
+  },
+  woolworths: {
+    'bacon':               { price: 7.00,  qty: '500g' },
+    'english muffin':      { price: 4.00,  qty: '6 pack' },
+    'lettuce':             { price: 2.50,  qty: 'head' },
+    'eggs':                { price: 6.00,  qty: '12 pack' },
+    'chicken breast':      { price: 11.00, qty: '1kg' },
+    'spinach':             { price: 3.50,  qty: 'bag' },
+    'cherry tomatoes':     { price: 3.50,  qty: 'punnet' },
+    'olive oil':           { price: 6.00,  qty: '750ml' },
+    'greek yogurt':        { price: 4.50,  qty: '500g' },
+    'mixed berries':       { price: 5.00,  qty: '300g frozen' },
+    'granola':             { price: 5.00,  qty: '500g' },
+    'honey':               { price: 5.50,  qty: '500g' },
+    'avocado':             { price: 2.50,  qty: 'each' },
+    'wholegrain bread':    { price: 4.50,  qty: 'loaf' },
+    'rolled oats':         { price: 3.00,  qty: '1kg' },
+    'almond milk':         { price: 3.50,  qty: '1L' },
+    'chia seeds':          { price: 5.50,  qty: '250g' },
+    'maple syrup':         { price: 6.00,  qty: '250ml' },
+    'smoked salmon':       { price: 8.00,  qty: '150g' },
+    'cream cheese':        { price: 4.00,  qty: '250g' },
+    'capers':              { price: 3.50,  qty: 'jar' },
+    'banana':              { price: 1.10,  qty: 'each' },
+    'peanut butter':       { price: 5.00,  qty: '375g' },
+    'oat milk':            { price: 3.50,  qty: '1L' },
+    'canned tuna':         { price: 2.50,  qty: '95g tin' },
+    'rice cakes':          { price: 2.80,  qty: 'pack' },
+    'mixed nuts':          { price: 7.00,  qty: '500g' },
+    'carrot':              { price: 1.80,  qty: 'bunch' },
+    'hummus':              { price: 4.00,  qty: '200g' },
+    'cottage cheese':      { price: 3.50,  qty: '250g' },
+    'cucumber':            { price: 1.80,  qty: 'each' },
+    'mixed greens':        { price: 3.50,  qty: 'bag' },
+    'red lentils':         { price: 3.00,  qty: '500g' },
+    'vegetable stock':     { price: 2.80,  qty: '1L' },
+    'pasta':               { price: 2.00,  qty: '500g' },
+    'wholegrain wrap':     { price: 4.50,  qty: '8 pack' },
+    'canned chickpeas':    { price: 1.80,  qty: '400g tin' },
+    'tahini':              { price: 6.00,  qty: '250g' },
+    'lean beef mince':     { price: 12.00, qty: '500g' },
+    'rice':                { price: 4.00,  qty: '1kg' },
+    'quinoa':              { price: 5.50,  qty: '500g' },
+    'mozzarella':          { price: 5.50,  qty: '125g' },
+    'tomatoes':            { price: 3.50,  qty: '6 pack' },
+    'salmon fillet':       { price: 14.00, qty: '400g' },
+    'sweet potato':        { price: 3.00,  qty: '1kg' },
+    'broccoli':            { price: 3.50,  qty: 'head' },
+    'canned black beans':  { price: 1.80,  qty: '400g tin' },
+    'coconut milk':        { price: 2.50,  qty: '400ml tin' },
+    'crushed tomatoes':    { price: 1.80,  qty: '400g tin' },
+    'corn tortillas':      { price: 4.50,  qty: '12 pack' },
+    'hokkien noodles':     { price: 3.00,  qty: '440g' },
+    'beef strips':         { price: 14.00, qty: '500g' },
+    'zucchini':            { price: 3.50,  qty: '3 pack' },
+    'capsicum':            { price: 3.50,  qty: 'each' },
+    'prawns':              { price: 13.00, qty: '400g' },
+    'firm tofu':           { price: 4.00,  qty: '300g' },
+    'soy sauce':           { price: 3.00,  qty: '500ml' },
+    'sesame oil':          { price: 4.50,  qty: '250ml' },
+    'garlic':              { price: 2.50,  qty: 'bulb' },
+    'ginger':              { price: 2.50,  qty: 'piece' },
+    'feta':                { price: 5.00,  qty: '200g' },
+    'cheddar':             { price: 7.00,  qty: '250g' },
+    'butter':              { price: 5.50,  qty: '250g' },
+    'lemon':               { price: 1.00,  qty: 'each' },
+    'onion':               { price: 2.50,  qty: '1kg bag' },
+    'almond butter':       { price: 8.00,  qty: '250g' },
+    'edamame':             { price: 5.00,  qty: '500g frozen' },
+    'protein bar':         { price: 4.00,  qty: 'each' },
+    'coconut yogurt':      { price: 5.50,  qty: '500g' },
+    'walnuts':             { price: 7.00,  qty: '200g' },
+    'chicken stock':       { price: 2.80,  qty: '1L' },
+    'asparagus':           { price: 4.50,  qty: 'bunch' },
+    'broccolini':          { price: 3.50,  qty: 'bunch' },
+    'oyster sauce':        { price: 3.50,  qty: '300ml' },
+    'hoisin sauce':        { price: 3.50,  qty: '300ml' },
+    'teriyaki sauce':      { price: 3.50,  qty: '300ml' },
+    'balsamic vinegar':    { price: 4.50,  qty: '500ml' },
+    'corn':                { price: 2.00,  qty: '420g tin' },
+    'spring onions':       { price: 2.00,  qty: 'bunch' },
+    'fresh parsley':       { price: 2.50,  qty: 'bunch' },
+    'fresh coriander':     { price: 2.50,  qty: 'bunch' },
+    'celery':              { price: 2.50,  qty: 'bunch' },
+    'cumin':               { price: 3.50,  qty: 'jar' },
+    'smoked paprika':      { price: 3.50,  qty: 'jar' },
+    'curry powder':        { price: 3.50,  qty: 'jar' },
+    'italian herbs':       { price: 3.00,  qty: 'jar' },
+    'oregano':             { price: 3.00,  qty: 'jar' },
+    'chilli flakes':       { price: 3.00,  qty: 'jar' },
+    'wholegrain spaghetti':{ price: 2.50,  qty: '500g' },
+    'bok choy':            { price: 3.00,  qty: 'bunch' },
+    'grapes':              { price: 5.00,  qty: '500g' },
+    'wholegrain crackers': { price: 3.50,  qty: 'pack' },
+    'light mayo':          { price: 4.50,  qty: '400g' },
+  },
+  coles: {
+    'bacon':               { price: 6.50,  qty: '500g' },
+    'english muffin':      { price: 3.80,  qty: '6 pack' },
+    'lettuce':             { price: 2.20,  qty: 'head' },
+    'eggs':                { price: 5.50,  qty: '12 pack' },
+    'chicken breast':      { price: 10.00, qty: '1kg' },
+    'spinach':             { price: 3.20,  qty: 'bag' },
+    'cherry tomatoes':     { price: 3.20,  qty: 'punnet' },
+    'olive oil':           { price: 5.50,  qty: '750ml' },
+    'greek yogurt':        { price: 4.20,  qty: '500g' },
+    'mixed berries':       { price: 4.80,  qty: '300g frozen' },
+    'granola':             { price: 4.80,  qty: '500g' },
+    'honey':               { price: 5.20,  qty: '500g' },
+    'avocado':             { price: 2.20,  qty: 'each' },
+    'wholegrain bread':    { price: 4.20,  qty: 'loaf' },
+    'rolled oats':         { price: 2.80,  qty: '1kg' },
+    'almond milk':         { price: 3.20,  qty: '1L' },
+    'chia seeds':          { price: 5.20,  qty: '250g' },
+    'maple syrup':         { price: 5.80,  qty: '250ml' },
+    'smoked salmon':       { price: 7.50,  qty: '150g' },
+    'cream cheese':        { price: 3.80,  qty: '250g' },
+    'capers':              { price: 3.20,  qty: 'jar' },
+    'banana':              { price: 1.00,  qty: 'each' },
+    'peanut butter':       { price: 4.80,  qty: '375g' },
+    'oat milk':            { price: 3.20,  qty: '1L' },
+    'canned tuna':         { price: 2.20,  qty: '95g tin' },
+    'rice cakes':          { price: 2.50,  qty: 'pack' },
+    'mixed nuts':          { price: 6.50,  qty: '500g' },
+    'carrot':              { price: 1.60,  qty: 'bunch' },
+    'hummus':              { price: 3.80,  qty: '200g' },
+    'cottage cheese':      { price: 3.20,  qty: '250g' },
+    'cucumber':            { price: 1.60,  qty: 'each' },
+    'mixed greens':        { price: 3.20,  qty: 'bag' },
+    'red lentils':         { price: 2.80,  qty: '500g' },
+    'vegetable stock':     { price: 2.50,  qty: '1L' },
+    'pasta':               { price: 1.80,  qty: '500g' },
+    'wholegrain wrap':     { price: 4.20,  qty: '8 pack' },
+    'canned chickpeas':    { price: 1.60,  qty: '400g tin' },
+    'tahini':              { price: 5.80,  qty: '250g' },
+    'lean beef mince':     { price: 11.00, qty: '500g' },
+    'rice':                { price: 3.80,  qty: '1kg' },
+    'quinoa':              { price: 5.20,  qty: '500g' },
+    'mozzarella':          { price: 5.20,  qty: '125g' },
+    'tomatoes':            { price: 3.20,  qty: '6 pack' },
+    'salmon fillet':       { price: 13.00, qty: '400g' },
+    'sweet potato':        { price: 2.80,  qty: '1kg' },
+    'broccoli':            { price: 3.20,  qty: 'head' },
+    'canned black beans':  { price: 1.60,  qty: '400g tin' },
+    'coconut milk':        { price: 2.20,  qty: '400ml tin' },
+    'crushed tomatoes':    { price: 1.60,  qty: '400g tin' },
+    'corn tortillas':      { price: 4.20,  qty: '12 pack' },
+    'hokkien noodles':     { price: 2.80,  qty: '440g' },
+    'beef strips':         { price: 13.00, qty: '500g' },
+    'zucchini':            { price: 3.20,  qty: '3 pack' },
+    'capsicum':            { price: 3.20,  qty: 'each' },
+    'prawns':              { price: 12.00, qty: '400g' },
+    'firm tofu':           { price: 3.80,  qty: '300g' },
+    'soy sauce':           { price: 2.80,  qty: '500ml' },
+    'sesame oil':          { price: 4.20,  qty: '250ml' },
+    'garlic':              { price: 2.20,  qty: 'bulb' },
+    'ginger':              { price: 2.20,  qty: 'piece' },
+    'feta':                { price: 4.80,  qty: '200g' },
+    'cheddar':             { price: 6.50,  qty: '250g' },
+    'butter':              { price: 5.20,  qty: '250g' },
+    'lemon':               { price: 0.90,  qty: 'each' },
+    'onion':               { price: 2.20,  qty: '1kg bag' },
+    'almond butter':       { price: 7.50,  qty: '250g' },
+    'edamame':             { price: 4.80,  qty: '500g frozen' },
+    'protein bar':         { price: 3.80,  qty: 'each' },
+    'coconut yogurt':      { price: 5.20,  qty: '500g' },
+    'walnuts':             { price: 6.80,  qty: '200g' },
+    'chicken stock':       { price: 2.50,  qty: '1L' },
+    'asparagus':           { price: 4.20,  qty: 'bunch' },
+    'broccolini':          { price: 3.20,  qty: 'bunch' },
+    'oyster sauce':        { price: 3.20,  qty: '300ml' },
+    'hoisin sauce':        { price: 3.20,  qty: '300ml' },
+    'teriyaki sauce':      { price: 3.20,  qty: '300ml' },
+    'balsamic vinegar':    { price: 4.20,  qty: '500ml' },
+    'corn':                { price: 1.80,  qty: '420g tin' },
+    'spring onions':       { price: 1.80,  qty: 'bunch' },
+    'fresh parsley':       { price: 2.20,  qty: 'bunch' },
+    'fresh coriander':     { price: 2.20,  qty: 'bunch' },
+    'celery':              { price: 2.20,  qty: 'bunch' },
+    'cumin':               { price: 3.20,  qty: 'jar' },
+    'smoked paprika':      { price: 3.20,  qty: 'jar' },
+    'curry powder':        { price: 3.20,  qty: 'jar' },
+    'italian herbs':       { price: 2.80,  qty: 'jar' },
+    'oregano':             { price: 2.80,  qty: 'jar' },
+    'chilli flakes':       { price: 2.80,  qty: 'jar' },
+    'wholegrain spaghetti':{ price: 2.20,  qty: '500g' },
+    'bok choy':            { price: 2.80,  qty: 'bunch' },
+    'grapes':              { price: 4.80,  qty: '500g' },
+    'wholegrain crackers': { price: 3.20,  qty: 'pack' },
+    'light mayo':          { price: 4.20,  qty: '400g' },
+  },
 };
 
 function generateGroceryList() {
@@ -3172,11 +3427,10 @@ function generateGroceryList() {
   });
   if (allSelected.length === 0) { alert('Please select at least one recipe first.'); return; }
 
-  // Collect all ingredients, deduplicate
+  const storePrices = PRICES[activeStore];
   const ingredientMap = {};
   allSelected.forEach(({meal: m}) => {
     (m.ingredients || []).forEach(raw => {
-      // Normalise ingredient name
       const name = raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i, '').toLowerCase().trim()
         .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced)$/i,'').trim();
       if (!ingredientMap[name]) ingredientMap[name] = { raw, count: 0 };
@@ -3184,18 +3438,16 @@ function generateGroceryList() {
     });
   });
 
-  // Match to ALDI prices
   groceryItems = [];
   const sections = { 'Produce': [], 'Meat & Fish': [], 'Dairy & Eggs': [], 'Pantry & Dry Goods': [], 'Frozen & Other': [] };
-  const produceKeys = ['tomato','cherry tomato','spinach','avocado','carrot','cucumber','zucchini','capsicum','bok choy','broccolini','asparagus','broccoli','sweet potato','lemon','onion','garlic','ginger','spring onion','celery','banana','grapes','fresh parsley','fresh coriander'];
+  const produceKeys = ['tomato','cherry tomato','spinach','avocado','carrot','cucumber','zucchini','capsicum','bok choy','broccolini','asparagus','broccoli','sweet potato','lemon','onion','garlic','ginger','spring onion','celery','banana','grapes','fresh parsley','fresh coriander','lettuce'];
   const meatKeys = ['chicken breast','salmon','beef','prawn','tuna','smoked salmon','beef strip','bacon rasher','bacon'];
   const dairyKeys = ['egg','yogurt','cheese','cream cheese','cottage cheese','butter','mozzarella','feta','cheddar','milk'];
   const frozenKeys = ['edamame','frozen','ice'];
 
   Object.entries(ingredientMap).forEach(([name, info]) => {
-    // Find best price match
-    const priceKey = Object.keys(ALDI_PRICES).find(k => name.includes(k) || k.includes(name.split(' ')[0]));
-    const priceInfo = priceKey ? ALDI_PRICES[priceKey] : { price: 2.99, qty: '1 unit' };
+    const priceKey = Object.keys(storePrices).find(k => name.includes(k) || k.includes(name.split(' ')[0]));
+    const priceInfo = priceKey ? storePrices[priceKey] : { price: 2.99, qty: '1 unit' };
     const uid = 'gi-' + groceryItems.length;
     const item = { uid, name: info.raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i,'').trim(), qty: priceInfo.qty, price: priceInfo.price, section: '' };
 
@@ -3216,6 +3468,7 @@ function generateGroceryList() {
 }
 
 function renderGroceryList(sections, days) {
+  const info = STORE_INFO[activeStore];
   let html = '';
   if (days.length > 1) {
     html += `<div style="font-size:0.78rem;color:var(--green);margin-bottom:12px;font-weight:500">📅 Combined for: ${days.join(', ')}</div>`;
@@ -3227,7 +3480,7 @@ function renderGroceryList(sections, days) {
     items.forEach(item => {
       grandTotal += item.price;
       html += `<div class="grocery-item" id="${item.uid}">
-        <div class="grocery-check" onclick="toggleGrocery('${item.uid}')">✓</div>
+        <div class="grocery-check" onclick="toggleGrocery('${item.uid}')">&#10003;</div>
         <div class="grocery-name" style="text-transform:capitalize">${item.name}</div>
         <div class="grocery-qty">${item.qty}</div>
         <div class="grocery-price">$${item.price.toFixed(2)}</div>
@@ -3237,9 +3490,11 @@ function renderGroceryList(sections, days) {
   html += `<div class="grocery-total-row">
     <div class="grocery-total-label">ESTIMATED TOTAL</div>
     <div class="grocery-total-val">$${grandTotal.toFixed(2)}</div>
-  </div>
-  <div style="margin-top:8px;font-size:0.72rem;color:var(--muted);font-style:italic">💡 Prices are approximate Aldi Australia estimates — check aldi.com.au for current specials.</div>`;
+  </div>`;
   document.getElementById('groceryContent').innerHTML = html;
+  document.getElementById('storeNoteText').innerHTML =
+    `Prices are approximate <strong>${info.name}</strong> estimates. Shop at <a href="${info.url}" target="_blank" style="color:#f9c623">${info.url.replace('https://www.','')}</a> to check current specials.`;
+  document.getElementById('storeNote').style.background = info.noteColor;
 }
 
 function toggleGrocery(uid) {
@@ -3258,33 +3513,35 @@ function updateSelectAllBtn() {
   const items = document.querySelectorAll('.grocery-item');
   const allTicked = items.length > 0 && [...items].every(el => el.classList.contains('ticked'));
   const btn = document.getElementById('selectAllBtn');
-  if (btn) btn.textContent = allTicked ? '☒ Deselect All' : '☑ Select All';
+  if (btn) btn.textContent = allTicked ? '&#9746; Deselect All' : '&#9745; Select All';
 }
 
 function downloadGroceryList() {
   const ticked = groceryItems.filter(item => document.getElementById(item.uid)?.classList.contains('ticked'));
   if (ticked.length === 0) { alert('Please tick at least one item first, or use "Select All".'); return; }
+  const info = STORE_INFO[activeStore];
   const sectionMap = {};
   ticked.forEach(item => {
     if (!sectionMap[item.section]) sectionMap[item.section] = [];
     sectionMap[item.section].push(item);
   });
-  let text = 'ALDI GROCERY LIST — MOVE & BURN\n';
+  let text = `${info.name.toUpperCase()} GROCERY LIST - MOVE & BURN\n`;
   text += '=================================\n\n';
   let total = 0;
   Object.entries(sectionMap).forEach(([sec, items]) => {
     text += `${sec.toUpperCase()}\n${'-'.repeat(sec.length)}\n`;
-    items.forEach(item => { text += `☐  ${item.name} (${item.qty})  $${item.price.toFixed(2)}\n`; total += item.price; });
+    items.forEach(item => { text += `[ ]  ${item.name} (${item.qty})  $${item.price.toFixed(2)}\n`; total += item.price; });
     text += '\n';
   });
-  text += `=================================\nESTIMATED TOTAL: $${total.toFixed(2)}\n\nVisit aldi.com.au for current prices.\n`;
+  text += `=================================\nESTIMATED TOTAL: $${total.toFixed(2)}\n\nVisit ${info.url} for current prices.\n`;
   const blob = new Blob([text], {type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'aldi-grocery-list.txt';
+  a.download = `${activeStore}-grocery-list.txt`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
 
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
