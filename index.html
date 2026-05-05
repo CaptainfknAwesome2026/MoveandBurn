@@ -877,6 +877,95 @@
     background: var(--green-dim);
   }
 
+  /* ── DAY MEAL MODAL ── */
+  .modal-meal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+
+  .modal-meal-row.modal-meal-logged {
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .modal-meal-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    color: transparent;
+    transition: all 0.2s;
+  }
+
+  .modal-meal-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  /* ── SERVINGS STEPPER ── */
+  .servings-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px 0 4px;
+  }
+
+  .servings-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--orange);
+    background: var(--orange-dim);
+    color: var(--orange);
+    font-size: 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .servings-btn:hover { background: rgba(232,93,38,0.25); }
+  .servings-btn:active { transform: scale(0.92); }
+
+  .servings-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+  }
+
+  .servings-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+
+  .servings-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
   /* ── STORE SELECTOR ── */
   .store-btn {
     padding: 10px 18px;
@@ -1670,19 +1759,19 @@
 
     <div class="cal-row">
       <span class="cal-row-label">🎯 Daily target</span>
-      <span class="cal-row-val" id="calTargetDisplay">— kcal</span>
+      <span class="cal-row-val" id="calTargetDisplay">— Cal</span>
     </div>
     <div class="cal-row">
       <span class="cal-row-label">🍽 Consumed</span>
-      <span class="cal-row-val" id="calConsumedDisplay">0 kcal</span>
+      <span class="cal-row-val" id="calConsumedDisplay">0 Cal</span>
     </div>
     <div class="cal-row">
       <span class="cal-row-label">🔥 Burned (exercise)</span>
-      <span class="cal-row-val" id="calBurnedDisplay">0 kcal</span>
+      <span class="cal-row-val" id="calBurnedDisplay">0 Cal</span>
     </div>
     <div class="cal-row">
       <span class="cal-row-label">👟 Burned (steps)</span>
-      <span class="cal-row-val" id="calStepBurnDisplay">0 kcal</span>
+      <span class="cal-row-val" id="calStepBurnDisplay">0 Cal</span>
     </div>
   </div>
 
@@ -1691,7 +1780,7 @@
     <div class="card-desc">Add meals or snacks to track intake</div>
     <div class="input-row">
       <input type="text" id="foodName" placeholder="Food / meal name">
-      <input type="number" id="foodCal" placeholder="kcal" style="width:90px;flex:none">
+      <input type="number" id="foodCal" placeholder="Cal" style="width:90px;flex:none">
       <button class="add-btn" onclick="addFood()">Add</button>
     </div>
     <div class="consumed-list" id="foodList"></div>
@@ -1702,7 +1791,7 @@
     <div class="card-desc">Manually add calories burned from any workout</div>
     <div class="input-row">
       <input type="text" id="exName" placeholder="Exercise name">
-      <input type="number" id="exCal" placeholder="kcal" style="width:90px;flex:none">
+      <input type="number" id="exCal" placeholder="Cal" style="width:90px;flex:none">
       <button class="add-btn green" onclick="addExerciseCal()">Add</button>
     </div>
     <div class="consumed-list" id="exList"></div>
@@ -1736,7 +1825,7 @@
     <div class="step-stats">
       <div class="step-stat">
         <div class="step-stat-val" id="statCal">0</div>
-        <div class="step-stat-label">kcal burned</div>
+        <div class="step-stat-label">Cal burned</div>
       </div>
       <div class="step-stat">
         <div class="step-stat-val" id="statKm">0.0</div>
@@ -1779,7 +1868,7 @@
       <span class="cal-row-val">12,000–15,000</span>
     </div>
     <div class="tip-strip">
-      <strong>Tip:</strong> Every 2,000 steps burns roughly 80–100 kcal depending on your weight. Breaking it up — morning walk + evening walk — is just as effective as one long session.
+      <strong>Tip:</strong> Every 2,000 steps burns roughly 80–100 Cal depending on your weight. Breaking it up — morning walk + evening walk — is just as effective as one long session.
     </div>
   </div>
 </div>
@@ -1794,7 +1883,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:1;color:var(--orange)" id="woBurnedBig">0</div>
-        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)">kcal burned today</div>
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted)">Cal burned today</div>
       </div>
       <div style="text-align:center">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;line-height:1;color:var(--charcoal)" id="woSetsCompleted">0</div>
@@ -1861,7 +1950,7 @@
     <div class="day-summary-strip" id="weekTotals">
       <div class="day-summary-box"><div class="day-summary-val" id="wtExDays">0</div><div class="day-summary-lbl">Workout days</div></div>
       <div class="day-summary-box"><div class="day-summary-val" id="wtWalkDays">0</div><div class="day-summary-lbl">Walk days</div></div>
-      <div class="day-summary-box"><div class="day-summary-val" id="wtCalBurned">0</div><div class="day-summary-lbl">kcal burned</div></div>
+      <div class="day-summary-box"><div class="day-summary-val" id="wtCalBurned">0</div><div class="day-summary-lbl">Cal burned</div></div>
     </div>
     <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:8px">
       <div id="weekScoreBar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:3px;width:0%;transition:width 0.5s ease"></div>
@@ -1888,11 +1977,11 @@
   <div class="day-cal-bar" id="rcCalBar" style="display:none">
     <div class="day-cal-row">
       <span class="day-cal-label" id="rcDayLabel">Monday</span>
-      <span class="day-cal-val" id="rcCalTarget">— kcal target</span>
+      <span class="day-cal-val" id="rcCalTarget">— Cal target</span>
     </div>
     <div class="day-cal-row">
       <span class="day-cal-label">🍽 Meals selected</span>
-      <span class="day-cal-val" id="rcCalSelected">0 kcal</span>
+      <span class="day-cal-val" id="rcCalSelected">0 Cal</span>
     </div>
     <div class="day-cal-row" style="margin-bottom:10px">
       <span class="day-cal-label">✅ Remaining</span>
@@ -1926,7 +2015,7 @@
     <div class="meal-section">
       <div class="meal-section-header">
         <div class="meal-section-title">☀️ Breakfast</div>
-        <div class="meal-cal-budget">~<span id="bfCalBudget">400</span> kcal</div>
+        <div class="meal-cal-budget" id="bfCalBudget">— Cal</div>
       </div>
       <div class="recipe-cards" id="breakfastCards"></div>
     </div>
@@ -1934,7 +2023,7 @@
     <div class="meal-section">
       <div class="meal-section-header">
         <div class="meal-section-title">🍎 Morning Snack</div>
-        <div class="meal-cal-budget">~<span id="snackAmCalBudget">150</span> kcal</div>
+        <div class="meal-cal-budget" id="snackAmCalBudget">— Cal</div>
       </div>
       <div class="recipe-cards" id="snackAmCards"></div>
     </div>
@@ -1942,7 +2031,7 @@
     <div class="meal-section">
       <div class="meal-section-header">
         <div class="meal-section-title">🥗 Lunch</div>
-        <div class="meal-cal-budget">~<span id="lunchCalBudget">500</span> kcal</div>
+        <div class="meal-cal-budget" id="lunchCalBudget">— Cal</div>
       </div>
       <div class="recipe-cards" id="lunchCards"></div>
     </div>
@@ -1950,7 +2039,7 @@
     <div class="meal-section">
       <div class="meal-section-header">
         <div class="meal-section-title">🧃 Afternoon Snack</div>
-        <div class="meal-cal-budget">~<span id="snackPmCalBudget">150</span> kcal</div>
+        <div class="meal-cal-budget" id="snackPmCalBudget">— Cal</div>
       </div>
       <div class="recipe-cards" id="snackPmCards"></div>
     </div>
@@ -1958,7 +2047,7 @@
     <div class="meal-section">
       <div class="meal-section-header">
         <div class="meal-section-title">🌙 Dinner</div>
-        <div class="meal-cal-budget">~<span id="dinnerCalBudget">600</span> kcal</div>
+        <div class="meal-cal-budget" id="dinnerCalBudget">— Cal</div>
       </div>
       <div class="recipe-cards" id="dinnerCards"></div>
     </div>
@@ -2034,7 +2123,9 @@ function saveAll() {
       currentWeek,
       selectedDay,
       weekPlan,
+      weekPlanServings,
       activeDiets: [...activeDiets],
+      loggedMeals,
       profile: {
         age: document.getElementById('age')?.value || '',
         sex: document.getElementById('sex')?.value || 'male',
@@ -2073,9 +2164,13 @@ function loadAll() {
 
     // Restore week meal plan
     if (data.weekPlan) weekPlan = data.weekPlan;
+    if (data.weekPlanServings) weekPlanServings = data.weekPlanServings;
 
     // Restore diet filters
     if (data.activeDiets) activeDiets = new Set(data.activeDiets);
+
+    // Restore logged meals
+    if (data.loggedMeals) Object.assign(loggedMeals, data.loggedMeals);
 
     // Restore profile form fields
     if (data.profile) {
@@ -2104,11 +2199,11 @@ function restoreUI() {
     document.getElementById('resultsCard').style.display = 'block';
     document.getElementById('r-bmr').textContent = '—';
     document.getElementById('r-tdee').textContent = state.tdee?.toLocaleString() || '—';
-    document.getElementById('r-calTarget').textContent = state.calTarget.toLocaleString() + ' kcal';
+    document.getElementById('r-calTarget').textContent = state.calTarget.toLocaleString()  + " Cal";
     document.getElementById('r-steps').textContent = state.stepGoal?.toLocaleString() || '—';
-    document.getElementById('r-stepCal').textContent = Math.round((state.stepGoal||0) * (state.stepCalPerStep||0.04)) + ' kcal';
+    document.getElementById('r-stepCal').textContent = Math.round((state.stepGoal||0) * (state.stepCalPerStep||0.04))  + " Cal";
     document.getElementById('stepRingGoal').textContent = (state.stepGoal||10000).toLocaleString();
-    document.getElementById('calTargetDisplay').textContent = state.calTarget.toLocaleString() + ' kcal';
+    document.getElementById('calTargetDisplay').textContent = state.calTarget.toLocaleString()  + " Cal";
   }
 
   renderFoodList();
@@ -2182,9 +2277,9 @@ function calculate() {
 
   document.getElementById('r-bmr').textContent = Math.round(bmr).toLocaleString();
   document.getElementById('r-tdee').textContent = tdee.toLocaleString();
-  document.getElementById('r-calTarget').textContent = calTarget.toLocaleString() + ' kcal';
+  document.getElementById('r-calTarget').textContent = calTarget.toLocaleString()  + " Cal";
   document.getElementById('r-steps').textContent = stepGoal.toLocaleString();
-  document.getElementById('r-stepCal').textContent = Math.round(stepGoal * calPerStep) + ' kcal';
+  document.getElementById('r-stepCal').textContent = Math.round(stepGoal * calPerStep)  + " Cal";
 
   const weeklyLoss = (deficit * 7 / 7700).toFixed(2);
   document.getElementById('profileTip').innerHTML =
@@ -2192,7 +2287,7 @@ function calculate() {
 
   document.getElementById('resultsCard').style.display = 'block';
   document.getElementById('stepRingGoal').textContent = stepGoal.toLocaleString();
-  document.getElementById('calTargetDisplay').textContent = calTarget.toLocaleString() + ' kcal';
+  document.getElementById('calTargetDisplay').textContent = calTarget.toLocaleString()  + " Cal";
   updateCalDisplay();
   saveAll();
 }
@@ -2270,9 +2365,9 @@ function updateCalDisplay() {
     ? 'calorie deficit — great work!'
     : 'right on target';
 
-  document.getElementById('calConsumedDisplay').textContent = state.consumed.toLocaleString() + ' kcal';
-  document.getElementById('calBurnedDisplay').textContent = Math.round(state.burned + (state.calisthenicsCalBurned || 0)).toLocaleString() + ' kcal';
-  document.getElementById('calStepBurnDisplay').textContent = Math.round(state.stepsBurned).toLocaleString() + ' kcal';
+  document.getElementById('calConsumedDisplay').textContent = state.consumed.toLocaleString()  + " Cal";
+  document.getElementById('calBurnedDisplay').textContent = Math.round(state.burned + (state.calisthenicsCalBurned || 0)).toLocaleString()  + " Cal";
+  document.getElementById('calStepBurnDisplay').textContent = Math.round(state.stepsBurned).toLocaleString()  + " Cal";
 
   const pct = Math.min(100, (state.consumed / target) * 100);
   document.getElementById('calBarConsumed').style.width = pct + '%';
@@ -2386,7 +2481,7 @@ function renderExercises() {
       ${allDone ? '<div class="ex-done-badge">✓ Done</div>' : ''}
       <span class="ex-icon">${e.icon}</span>
       <div class="ex-name">${e.name}</div>
-      <div class="ex-cal">${e.calPerSet} kcal/set</div>
+      <div class="ex-cal">${e.calPerSet} Cal/set</div>
       <span class="ex-tag">${e.tag}</span>
       <div class="ex-set-mini-progress">
         ${Array.from({length: e.numSets}, (_, s) =>
@@ -2579,7 +2674,7 @@ function renderDayDetail() {
   html += `<div class="day-summary-strip">
     <div class="day-summary-box"><div class="day-summary-val">${exCount}</div><div class="day-summary-lbl">Exercises done</div></div>
     <div class="day-summary-box"><div class="day-summary-val">${d.walks.length}</div><div class="day-summary-lbl">Walks logged</div></div>
-    <div class="day-summary-box"><div class="day-summary-val">${totalCal}</div><div class="day-summary-lbl">kcal burned</div></div>
+    <div class="day-summary-box"><div class="day-summary-val">${totalCal}</div><div class="day-summary-lbl">Cal burned</div></div>
   </div>`;
 
   // Exercises section (all days can tick exercises)
@@ -2884,7 +2979,7 @@ const RECIPE_DB = {
       ingredients:['4 wholegrain crackers','40g cheddar','small bunch grapes'],
       steps:['Slice cheese.','Serve on crackers with grapes on the side.'] },
     { name:'Protein Bar', calories:150, prepTime:'0 min', diet:'meat', icon:'🍫', tags:['high-protein'],
-      desc:'A store-bought protein bar — aim for 15g+ protein and under 200 kcal.',
+      desc:'A store-bought protein bar — aim for 15g+ protein and under 200 Cal.',
       ingredients:['1 protein bar (Aldi "Protein Rex" or similar)'],
       steps:['Grab and go!'] },
     { name:'Edamame', calories:120, prepTime:'5 min', diet:'vegan', icon:'🫘', tags:['high-protein','low-carb'],
@@ -2978,18 +3073,34 @@ function filterRecipes(slot) {
 }
 
 function showRecipes() {
-  // Update calorie budgets from profile
-  const target = state.calTarget || 1800;
-  document.getElementById('bfCalBudget').textContent = Math.round(target * 0.22);
-  document.getElementById('snackAmCalBudget').textContent = Math.round(target * 0.08);
-  document.getElementById('lunchCalBudget').textContent = Math.round(target * 0.28);
-  document.getElementById('snackPmCalBudget').textContent = Math.round(target * 0.08);
-  document.getElementById('dinnerCalBudget').textContent = Math.round(target * 0.34);
   expandedRecipe = null;
   renderAllRecipeCards();
+  updateMealHeaders();
   document.getElementById('recipePanelContent').style.display = 'block';
   document.getElementById('groceryCard').style.display = 'none';
   renderWeekBar();
+}
+
+function updateMealHeaders() {
+  // Show actual selected Cal for currently viewed day (default Monday)
+  const slotIds = { breakfast:'bfCalBudget', snackAm:'snackAmCalBudget', lunch:'lunchCalBudget', snackPm:'snackPmCalBudget', dinner:'dinnerCalBudget' };
+  // Find first day with meals, or default to day 0
+  const refDay = weekPlan.findIndex(d => Object.values(d).some(Boolean));
+  const dayIdx = refDay >= 0 ? refDay : 0;
+  MEAL_SLOTS.forEach(slot => {
+    const el = document.getElementById(slotIds[slot]);
+    if (!el) return;
+    // Count how many days have this slot filled
+    const daysWithSlot = weekPlan.filter(d => d[slot]).length;
+    const exampleMeal = weekPlan[dayIdx][slot] || weekPlan.find(d => d[slot])?.[slot];
+    if (exampleMeal) {
+      el.textContent = exampleMeal.calories + ' Cal';
+      el.style.color = 'var(--orange)';
+    } else {
+      el.textContent = '— Cal';
+      el.style.color = '';
+    }
+  });
 }
 
 // ── Week bar ──
@@ -2999,35 +3110,129 @@ function renderWeekBar() {
   el.innerHTML = WEEK_DAYS_SHORT.map((d, i) => {
     const count = Object.values(weekPlan[i]).filter(Boolean).length;
     const totalCal = Object.values(weekPlan[i]).reduce((s,m) => s+(m?m.calories:0), 0);
-    return `<div class="rc-week-pill" onclick="rcShowDay(${i})">
+    return `<div class="rc-week-pill" onclick="openDayModal(${i})">
       <div class="rcpill-day">${d}</div>
       <div class="rcpill-count ${count>0?'has':''}">
         ${count > 0 ? count+'<span style="font-size:0.55rem;font-family:\'DM Sans\'"> meals</span>' : '—'}
       </div>
-      ${count>0 ? `<div class="rcpill-cal">${totalCal} kcal</div>` : ''}
+      ${count>0 ? `<div class="rcpill-cal">${totalCal} Cal</div>` : ''}
     </div>`;
   }).join('');
 }
 
-function rcShowDay(dayIdx) {
-  const bar = document.getElementById('rcCalBar');
-  bar.style.display = 'block';
-  document.getElementById('rcDayLabel').textContent = '📅 ' + WEEK_DAYS[dayIdx];
+// Track which meals have been logged per day to avoid double-adding
+const loggedMeals = {}; // key: "dayIdx-slot"
+
+function openDayModal(dayIdx) {
+  const dayMeals = weekPlan[dayIdx];
+  const hasMeals = Object.values(dayMeals).some(Boolean);
   const target = state.calTarget || 0;
-  const selected = Object.values(weekPlan[dayIdx]).reduce((s,m) => s+(m?m.calories:0), 0);
-  document.getElementById('rcCalTarget').textContent = target ? target.toLocaleString() + ' kcal target' : 'Set profile first';
-  document.getElementById('rcCalSelected').textContent = selected + ' kcal';
-  const remaining = target - selected;
-  const remEl = document.getElementById('rcCalRemaining');
-  remEl.textContent = target ? (remaining >= 0 ? remaining.toLocaleString() : '−'+Math.abs(remaining).toLocaleString()) + ' kcal' : '—';
-  remEl.className = 'day-cal-val' + (remaining < 0 ? ' over' : remaining < 100 ? ' under' : '');
-  const pct = target ? Math.min(100,(selected/target)*100) : 0;
-  const fill = document.getElementById('rcCalFill');
-  fill.style.width = pct + '%';
-  fill.className = 'day-cal-fill' + (pct > 100 ? ' over' : '');
+  const totalCal = Object.values(dayMeals).reduce((s,m) => s+(m?m.calories:0), 0);
+
+  document.getElementById('modalDayTitle').textContent = WEEK_DAYS[dayIdx];
+  document.getElementById('modalDaySubtitle').textContent =
+    hasMeals
+      ? `${totalCal} Cal planned${target ? ' · ' + Math.round(totalCal/target*100) + '% of your ' + target + ' Cal target' : ''}`
+      : 'No meals planned for this day yet.';
+
+  const MEAL_DISPLAY = [
+    { slot:'breakfast', label:'☀️ Breakfast' },
+    { slot:'snackAm',   label:'🍎 Morning Snack' },
+    { slot:'lunch',     label:'🥗 Lunch' },
+    { slot:'snackPm',   label:'🧃 Afternoon Snack' },
+    { slot:'dinner',    label:'🌙 Dinner' },
+  ];
+
+  let html = '';
+  MEAL_DISPLAY.forEach(({ slot, label }) => {
+    const meal = dayMeals[slot];
+    if (!meal) return;
+    const key = `${dayIdx}-${slot}`;
+    const isLogged = !!loggedMeals[key];
+    const servings = getServings(dayIdx, slot);
+    const displayCal = meal.calories; // already scaled if servings > 1
+    html += `<div class="modal-meal-row${isLogged ? ' modal-meal-logged' : ''}" id="mmr-${key}">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="modal-meal-check${isLogged ? ' checked' : ''}" onclick="toggleMealLog(${dayIdx},'${slot}')">✓</div>
+        <div>
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:2px">${label}</div>
+          <div style="font-size:0.92rem;font-weight:500;color:var(--charcoal)">${meal.icon || '🍽'} ${meal.name}</div>
+          ${servings > 1 ? `<div style="font-size:0.72rem;color:var(--orange);margin-top:2px">${servings} servings</div>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${isLogged ? 'var(--green)' : 'var(--orange)'}">${displayCal} Cal</div>
+        ${isLogged ? '<div style="font-size:0.65rem;color:var(--green)">✓ Logged</div>' : '<div style="font-size:0.65rem;color:var(--muted)">Tap to log</div>'}
+      </div>
+    </div>`;
+  });
+
+  if (!html) {
+    html = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.85rem">No meals planned for this day.<br>Go to the recipe cards below and select meals for ${WEEK_DAYS_SHORT[dayIdx]}.</div>`;
+  }
+
+  document.getElementById('modalMealList').innerHTML = html;
+  document.getElementById('dayMealModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function toggleMealLog(dayIdx, slot) {
+  const key = `${dayIdx}-${slot}`;
+  const meal = weekPlan[dayIdx][slot];
+  if (!meal) return;
+
+  if (loggedMeals[key]) {
+    // Un-log: remove from food log
+    const idx = state.foods.findIndex(f => f._mealKey === key);
+    if (idx >= 0) {
+      state.consumed -= state.foods[idx].cal;
+      state.foods.splice(idx, 1);
+    }
+    delete loggedMeals[key];
+  } else {
+    // Log: add to food log
+    state.foods.push({ name: meal.name, cal: meal.calories, _mealKey: key });
+    state.consumed += meal.calories;
+    loggedMeals[key] = true;
+  }
+
+  renderFoodList();
+  updateCalDisplay();
+  saveAll();
+  // Re-render just this modal row
+  openDayModal(dayIdx);
+}
+
+function closeDayModal() {
+  document.getElementById('dayMealModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function rcShowDay(dayIdx) {
+  openDayModal(dayIdx);
 }
 
 function updateRecipeCalBar() { renderWeekBar(); }
+
+// ── Servings: stored as weekPlanServings[dayIdx][meal] = number ──
+let weekPlanServings = Array.from({length:7}, () => ({breakfast:1,snackAm:1,lunch:1,snackPm:1,dinner:1}));
+
+function getServings(dayIdx, meal) {
+  return weekPlanServings[dayIdx]?.[meal] || 1;
+}
+
+// Scale an ingredient string quantity by a multiplier
+function scaleIngredient(raw, mult) {
+  if (mult === 1) return raw;
+  return raw.replace(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/, (_, num) => {
+    // Handle fractions like ½
+    let val = parseFloat(num);
+    if (isNaN(val)) return _;
+    const scaled = val * mult;
+    // Show nicely: integer if whole, 1dp otherwise
+    return (Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1))) + ' ';
+  });
+}
 
 // ── Render cards ──
 function renderAllRecipeCards() {
@@ -3043,6 +3248,12 @@ function renderAllRecipeCards() {
 
 function buildRecipeCard(r, meal, idx) {
   const isExpanded = expandedRecipe?.meal === meal && expandedRecipe?.idx === idx;
+
+  // Work out representative servings (use first day this recipe is selected, or 1)
+  const selectedDayIdx = WEEK_DAYS_SHORT.findIndex((_,di) => weekPlan[di][meal]?.name === r.name);
+  const servings = selectedDayIdx >= 0 ? getServings(selectedDayIdx, meal) : 1;
+  const scaledCal = Math.round(r.calories * servings);
+
   const dietBadge = r.diet === 'vegan'
     ? '<span class="recipe-badge badge-vegan">🌱 Vegan</span>'
     : r.diet === 'vegetarian'
@@ -3051,8 +3262,9 @@ function buildRecipeCard(r, meal, idx) {
 
   const daysSelected = WEEK_DAYS_SHORT.filter((_,di) => weekPlan[di][meal]?.name === r.name);
   const selLabel = daysSelected.length > 0
-    ? `<div class="rc-sel-label">📅 ${daysSelected.join(', ')}</div>` : '';
+    ? `<div class="rc-sel-label">📅 ${daysSelected.join(', ')}${servings > 1 ? ' · ' + servings + ' servings' : ''}</div>` : '';
 
+  // Day checkboxes
   const dayChecks = WEEK_DAYS_SHORT.map((d, di) => {
     const checked = weekPlan[di][meal]?.name === r.name;
     return `<label class="day-check-label ${checked?'checked':''}" onclick="event.stopPropagation()">
@@ -3061,10 +3273,12 @@ function buildRecipeCard(r, meal, idx) {
     </label>`;
   }).join('');
 
-  const ingredientsList = (r.ingredients||[]).length
+  // Scaled ingredients
+  const scaledIngredients = (r.ingredients||[]).map(i => scaleIngredient(i, servings));
+  const ingredientsList = scaledIngredients.length
     ? `<div class="recipe-expand-section">
-        <div class="recipe-expand-title">Ingredients</div>
-        <ul class="recipe-ingredient-list">${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
+        <div class="recipe-expand-title">Ingredients${servings > 1 ? ' <span style="color:var(--orange);font-weight:500">× '+servings+'</span>' : ''}</div>
+        <ul class="recipe-ingredient-list">${scaledIngredients.map(i=>`<li>${i}</li>`).join('')}</ul>
        </div>` : '';
 
   const stepsList = (r.steps||[]).length
@@ -3073,13 +3287,31 @@ function buildRecipeCard(r, meal, idx) {
         <ol class="recipe-steps-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
        </div>` : '';
 
+  // Servings stepper — only shows when expanded
+  const servingsStepper = `
+    <div class="recipe-expand-section">
+      <div class="recipe-expand-title">Servings</div>
+      <div class="servings-stepper">
+        <button class="servings-btn" onclick="changeServings('${meal}',${idx},-1,event)">−</button>
+        <div class="servings-display">
+          <span class="servings-num" id="srv-${meal}-${idx}">${servings}</span>
+          <span class="servings-label">serving${servings !== 1 ? 's' : ''}</span>
+        </div>
+        <button class="servings-btn" onclick="changeServings('${meal}',${idx},1,event)">+</button>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;text-align:center">
+        Total: <strong style="color:var(--orange)">${scaledCal} Cal</strong>
+        ${servings > 1 ? `<span style="color:var(--muted)"> (${r.calories} Cal × ${servings})</span>` : ''}
+      </div>
+    </div>`;
+
   return `<div class="recipe-card${isExpanded?' expanded-card':''}" id="rc-${meal}-${idx}">
     <div class="recipe-card-top" onclick="toggleRecipeExpand('${meal}',${idx})">
       <div class="recipe-icon">${r.icon||'🍽'}</div>
       <div class="recipe-info">
         <div class="recipe-name">${r.name}</div>
         <div class="recipe-meta">
-          <span class="recipe-badge badge-cal">🔥 ${r.calories} kcal</span>
+          <span class="recipe-badge badge-cal">🔥 ${scaledCal} Cal${servings > 1 ? ' ×'+servings : ''}</span>
           ${dietBadge}
           <span class="recipe-badge badge-time">⏱ ${r.prepTime}</span>
         </div>
@@ -3090,12 +3322,45 @@ function buildRecipeCard(r, meal, idx) {
     </div>
     ${isExpanded ? `
     <div class="recipe-expanded-body">
+      ${servingsStepper}
       ${ingredientsList}
       ${stepsList}
       <div class="recipe-expand-title" style="margin-bottom:8px">Add to days</div>
       <div class="day-checks-row">${dayChecks}</div>
     </div>` : ''}
   </div>`;
+}
+
+function changeServings(meal, recipeIdx, delta, event) {
+  event.stopPropagation();
+  const recipes = filterRecipes(meal);
+  const r = recipes[recipeIdx];
+  if (!r) return;
+
+  // Find a selected day to anchor servings to, or use day 0
+  const anchorDay = WEEK_DAYS_SHORT.findIndex((_,di) => weekPlan[di][meal]?.name === r.name);
+  const targetDays = anchorDay >= 0
+    ? WEEK_DAYS_SHORT.reduce((acc,_,di) => { if (weekPlan[di][meal]?.name === r.name) acc.push(di); return acc; }, [])
+    : [];
+
+  const currentServings = anchorDay >= 0 ? getServings(anchorDay, meal) : 1;
+  const newServings = Math.max(1, Math.min(10, currentServings + delta));
+
+  // Apply to all days that have this recipe in this slot
+  targetDays.forEach(di => {
+    weekPlanServings[di][meal] = newServings;
+    // Update stored meal calories to scaled version
+    if (weekPlan[di][meal]) {
+      weekPlan[di][meal] = { ...r, calories: Math.round(r.calories * newServings), _baseCalories: r.calories, _servings: newServings };
+    }
+  });
+
+  renderWeekBar();
+  updateMealHeaders();
+  // Re-render just this meal section
+  const el = document.getElementById(meal+'Cards');
+  if (el) el.innerHTML = filterRecipes(meal).map((rc,i) => buildRecipeCard(rc, meal, i)).join('');
+  saveAll();
 }
 
 function toggleRecipeExpand(meal, idx) {
@@ -3107,8 +3372,17 @@ function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
   const recipes = filterRecipes(meal);
   const r = recipes[recipeIdx];
   if (!r) return;
-  weekPlan[dayIdx][meal] = checkbox.checked ? r : null;
+  if (checkbox.checked) {
+    const servings = weekPlanServings[dayIdx][meal] || 1;
+    weekPlan[dayIdx][meal] = servings > 1
+      ? { ...r, calories: Math.round(r.calories * servings), _baseCalories: r.calories, _servings: servings }
+      : r;
+  } else {
+    weekPlan[dayIdx][meal] = null;
+    weekPlanServings[dayIdx][meal] = 1;
+  }
   renderWeekBar();
+  updateMealHeaders();
   const el = document.getElementById(meal+'Cards');
   if (el) el.innerHTML = filterRecipes(meal).map((rc,i) => buildRecipeCard(rc, meal, i)).join('');
   document.getElementById('groceryCard').style.display = 'none';
@@ -3572,6 +3846,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<!-- ── DAY MEAL MODAL ── -->
+<div id="dayMealModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);padding:20px;overflow-y:auto">
+  <div style="background:var(--card);border-radius:20px;max-width:520px;margin:0 auto;padding:28px 24px;position:relative">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div id="modalDayTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.05em;color:var(--charcoal)">Monday</div>
+      <button onclick="closeDayModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div id="modalDaySubtitle" style="font-size:0.8rem;color:var(--muted);margin-bottom:20px"></div>
+    <div id="modalMealList"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:0.8rem;color:var(--muted)">Ticked meals are added to your food log</div>
+      <button onclick="closeDayModal()" style="padding:10px 22px;background:var(--orange);color:white;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.05em;cursor:pointer">Done</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
