@@ -1522,6 +1522,264 @@
     border-radius: 10px;
   }
 
+  /* ── TODAY DASHBOARD ── */
+  .dash-greeting {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--charcoal);
+    margin-bottom: 16px;
+    padding: 0 4px;
+    line-height: 1.3;
+  }
+
+  .dash-greeting span { color: var(--orange); }
+
+  .dash-cal-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+  }
+
+  .dash-cal-ring-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dash-cal-ring-text {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dash-cal-ring-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--charcoal);
+  }
+
+  .dash-cal-ring-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+
+  .dash-cal-stats { flex: 1; }
+
+  .dash-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dash-stat-row:last-child { border-bottom: none; }
+
+  .dash-stat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dash-stat-label { flex: 1; font-size: 0.82rem; color: var(--muted); }
+
+  .dash-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--charcoal);
+  }
+
+  /* Quick action cards */
+  .dash-quick-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .dash-quick-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dash-quick-card:hover {
+    border-color: var(--orange);
+    background: var(--orange-dim);
+    transform: translateY(-2px);
+  }
+
+  .dash-quick-icon { font-size: 1.5rem; margin-bottom: 5px; }
+
+  .dash-quick-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Macro mini boxes */
+  .dash-macro-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .dash-macro-box {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .dash-macro-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .dash-macro-val.protein { color: #4a6fa5; }
+  .dash-macro-val.carbs   { color: #b8932a; }
+  .dash-macro-val.fat     { color: var(--orange); }
+
+  .dash-macro-lbl {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .dash-macro-bar-wrap {
+    height: 4px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .dash-macro-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Exercise mini grid */
+  .dash-ex-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .dash-ex-mini {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .dash-ex-mini.done {
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .dash-ex-mini-icon { font-size: 1.1rem; }
+
+  .dash-ex-mini-dots {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  .dash-ex-mini-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .dash-ex-mini-dot.done { background: var(--orange); }
+  .dash-ex-mini.done .dash-ex-mini-dot { background: var(--green); }
+
+  /* Planned meals on dashboard */
+  .dash-meal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+
+  .dash-meal-row:last-child { border-bottom: none; }
+
+  .dash-meal-check {
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    color: transparent;
+    transition: all 0.2s;
+  }
+
+  .dash-meal-check.logged {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .dash-meal-info { flex: 1; min-width: 0; }
+
+  .dash-meal-slot {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 1px;
+  }
+
+  .dash-meal-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-meal-cal {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .dash-quick-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
   /* ── RECIPE DAY TABS ── */
   .recipe-day-tab {
     display: flex;
@@ -1749,7 +2007,8 @@
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('profile')">Profile</button>
+  <button class="tab active" onclick="switchTab('today')">⚡ Today</button>
+  <button class="tab" onclick="switchTab('profile')">Profile</button>
   <button class="tab" onclick="switchTab('calories')">Calories</button>
   <button class="tab" onclick="switchTab('steps')">Steps</button>
   <button class="tab" onclick="switchTab('exercises')">Exercises</button>
@@ -1758,8 +2017,149 @@
   <button class="tab" onclick="switchTab('macros')">📊 Macros</button>
 </div>
 
+<!-- ── TODAY DASHBOARD ── -->
+<div class="panel active" id="panel-today">
+
+  <!-- Greeting + date -->
+  <div class="dash-greeting" id="dashGreeting"></div>
+
+  <!-- Calorie ring card -->
+  <div class="card dash-cal-card">
+    <div class="dash-cal-ring-wrap">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="58" fill="none" stroke="var(--surface)" stroke-width="12"/>
+        <circle cx="70" cy="70" r="58" fill="none" stroke="var(--orange)" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="364"
+          id="dashCalRing" style="transform:rotate(-90deg);transform-origin:70px 70px;transition:stroke-dashoffset 0.6s ease"/>
+      </svg>
+      <div class="dash-cal-ring-text">
+        <div class="dash-cal-ring-num" id="dashCalRemaining">—</div>
+        <div class="dash-cal-ring-label">Cal left</div>
+      </div>
+    </div>
+    <div class="dash-cal-stats">
+      <div class="dash-stat-row">
+        <span class="dash-stat-dot" style="background:var(--orange)"></span>
+        <span class="dash-stat-label">Target</span>
+        <span class="dash-stat-val" id="dashCalTarget">— Cal</span>
+      </div>
+      <div class="dash-stat-row">
+        <span class="dash-stat-dot" style="background:#e2001a"></span>
+        <span class="dash-stat-label">Consumed</span>
+        <span class="dash-stat-val" id="dashConsumed">0 Cal</span>
+      </div>
+      <div class="dash-stat-row">
+        <span class="dash-stat-dot" style="background:var(--green)"></span>
+        <span class="dash-stat-label">Burned</span>
+        <span class="dash-stat-val" id="dashBurned">0 Cal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick log row -->
+  <div class="dash-quick-row">
+    <div class="dash-quick-card" onclick="switchTabDirect('calories')">
+      <div class="dash-quick-icon">🍽</div>
+      <div class="dash-quick-label">Log Food</div>
+    </div>
+    <div class="dash-quick-card" onclick="switchTabDirect('steps')">
+      <div class="dash-quick-icon">👟</div>
+      <div class="dash-quick-label">Log Steps</div>
+    </div>
+    <div class="dash-quick-card" onclick="switchTabDirect('exercises')">
+      <div class="dash-quick-icon">💪</div>
+      <div class="dash-quick-label">Exercises</div>
+    </div>
+    <div class="dash-quick-card" onclick="switchTabDirect('recipes')">
+      <div class="dash-quick-icon">🥗</div>
+      <div class="dash-quick-label">Recipes</div>
+    </div>
+  </div>
+
+  <!-- Steps progress -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div class="card-title" style="margin-bottom:0">Today's Steps</div>
+        <div class="card-desc" style="margin-bottom:0">Tap to update</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--orange)" id="dashStepCount">0</div>
+        <div style="font-size:0.7rem;color:var(--muted)">of <span id="dashStepGoal">10,000</span></div>
+      </div>
+    </div>
+    <div style="height:8px;background:var(--surface);border-radius:4px;overflow:hidden;margin-bottom:10px">
+      <div id="dashStepBar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:4px;width:0%;transition:width 0.5s ease"></div>
+    </div>
+    <div class="dash-quick-input-row">
+      <input type="number" id="dashStepInput" placeholder="Enter steps" min="0"
+        style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none">
+      <button onclick="dashUpdateSteps()" style="padding:10px 18px;background:var(--orange);color:white;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:0.05em;cursor:pointer">Update</button>
+    </div>
+  </div>
+
+  <!-- Macros summary -->
+  <div class="card">
+    <div class="card-title">Today's Macros</div>
+    <div class="dash-macro-row" id="dashMacroRow">
+      <div class="dash-macro-box">
+        <div class="dash-macro-val protein" id="dashProtein">0g</div>
+        <div class="dash-macro-lbl">Protein</div>
+        <div class="dash-macro-bar-wrap"><div class="dash-macro-bar protein-fill" id="dashProteinBar" style="width:0%"></div></div>
+      </div>
+      <div class="dash-macro-box">
+        <div class="dash-macro-val carbs" id="dashCarbs">0g</div>
+        <div class="dash-macro-lbl">Carbs</div>
+        <div class="dash-macro-bar-wrap"><div class="dash-macro-bar carbs-fill" id="dashCarbsBar" style="width:0%"></div></div>
+      </div>
+      <div class="dash-macro-box">
+        <div class="dash-macro-val fat" id="dashFat">0g</div>
+        <div class="dash-macro-lbl">Fat</div>
+        <div class="dash-macro-bar-wrap"><div class="dash-macro-bar fat-fill" id="dashFatBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise progress -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:0">Exercises</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--orange)" id="dashExSets">0/24 sets</div>
+    </div>
+    <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:10px">
+      <div id="dashExBar" style="height:100%;background:var(--orange);border-radius:3px;width:0%;transition:width 0.5s ease"></div>
+    </div>
+    <div class="dash-ex-mini-grid" id="dashExMiniGrid"></div>
+  </div>
+
+  <!-- Today's planned meals -->
+  <div class="card" id="dashMealsCard">
+    <div class="card-title">Today's Planned Meals</div>
+    <div class="card-desc">From your recipe plan — tap to log</div>
+    <div id="dashMealsList"></div>
+  </div>
+
+  <!-- Quick add food inline -->
+  <div class="card">
+    <div class="card-title">Quick Add Food</div>
+    <div class="card-desc">Log a meal or snack without leaving the dashboard</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <input type="text" id="dashFoodName" placeholder="Food name"
+        style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none">
+      <div style="display:flex;gap:8px">
+        <input type="number" id="dashFoodCal" placeholder="Cal" min="0"
+          style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none">
+        <input type="number" id="dashFoodProtein" placeholder="Protein g" min="0"
+          style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none">
+        <button onclick="dashAddFood()" style="padding:10px 18px;background:var(--green);color:white;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:0.05em;cursor:pointer;white-space:nowrap">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ── PROFILE ── -->
-<div class="panel active" id="panel-profile">
+<div class="panel" id="panel-profile">
   <div class="card">
     <div class="card-title">Your Details</div>
     <div class="card-desc">Enter your stats to calculate your personalised daily targets</div>
@@ -2433,6 +2833,7 @@ function restoreUI() {
     updateWeekSummary();
     updateWeekHistory();
     renderWeekBar();
+    renderDashboard();
 
     // Restore diet filter button states
     document.querySelectorAll('.diet-btn').forEach(b => {
@@ -2598,6 +2999,10 @@ function updateCalDisplay() {
 
   const pct = Math.min(100, (state.consumed / target) * 100);
   document.getElementById('calBarConsumed').style.width = pct + '%';
+  // Refresh dashboard if visible
+  if (document.getElementById('panel-today')?.classList.contains('active')) {
+    renderDashCalRing();
+  }
 }
 
 // ─── STEPS ───
@@ -2770,11 +3175,12 @@ function updateWorkoutSummary() {
   // Feed into calorie balance — replace calisthenics burned
   state.calisthenicsCalBurned = totalCal;
   updateCalDisplay();
-  // Refresh step goal reduction live
   updateSteps();
-  // Sync to weekly tracker
   syncTodayToWeekly();
   saveAll();
+  if (document.getElementById('panel-today')?.classList.contains('active')) {
+    renderDashExercises();
+  }
 }
 
 function resetWorkout() {
@@ -4387,14 +4793,197 @@ function restoreMacroTargetInputs() {
   s('targetFatInput',     macroTargets.fat     || '');
 }
 
+// ─── TODAY DASHBOARD ───
+function renderDashboard() {
+  renderDashGreeting();
+  renderDashCalRing();
+  renderDashSteps();
+  renderDashMacros();
+  renderDashExercises();
+  renderDashMeals();
+}
+
+function renderDashGreeting() {
+  const el = document.getElementById('dashGreeting');
+  if (!el) return;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const day = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
+  el.innerHTML = `${greeting} 👋<br><span style="font-size:0.85rem;font-family:'DM Sans',sans-serif;color:var(--muted);font-weight:300">${day}</span>`;
+}
+
+function renderDashCalRing() {
+  const target = state.calTarget || 0;
+  const totalBurned = state.burned + state.stepsBurned + (state.calisthenicsCalBurned || 0);
+  const net = state.consumed - totalBurned;
+  const remaining = target ? target - net : 0;
+  const pct = target ? Math.min(1, net / target) : 0;
+
+  const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  s('dashCalRemaining', target ? Math.abs(Math.round(remaining)).toLocaleString() : '—');
+  s('dashCalTarget', target ? target.toLocaleString() + ' Cal' : 'Set profile');
+  s('dashConsumed', state.consumed.toLocaleString() + ' Cal');
+  s('dashBurned', Math.round(totalBurned).toLocaleString() + ' Cal');
+
+  const ring = document.getElementById('dashCalRing');
+  if (ring) {
+    const circ = 364;
+    ring.style.strokeDashoffset = circ * (1 - pct);
+    ring.style.stroke = pct > 1 ? 'var(--red)' : 'var(--orange)';
+  }
+
+  // Update ring label
+  const label = document.querySelector('.dash-cal-ring-label');
+  if (label) label.textContent = remaining < 0 ? 'Cal over' : 'Cal left';
+}
+
+function renderDashSteps() {
+  const steps = state.steps || 0;
+  const { effectiveGoal } = getEffectiveStepGoal();
+  const pct = effectiveGoal > 0 ? Math.min(100, (steps / effectiveGoal) * 100) : 0;
+  const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  s('dashStepCount', steps.toLocaleString());
+  s('dashStepGoal', effectiveGoal.toLocaleString());
+  const bar = document.getElementById('dashStepBar');
+  if (bar) bar.style.width = pct + '%';
+  // Sync step input
+  const input = document.getElementById('dashStepInput');
+  if (input && steps > 0) input.value = steps;
+}
+
+function dashUpdateSteps() {
+  const val = parseFloat(document.getElementById('dashStepInput')?.value) || 0;
+  const stepInput = document.getElementById('stepInput');
+  if (stepInput) stepInput.value = val;
+  updateSteps();
+  renderDashSteps();
+  renderDashCalRing();
+}
+
+function renderDashMacros() {
+  const totals = macroLog.reduce((acc, e) => {
+    acc.protein += e.protein || 0;
+    acc.carbs   += e.carbs   || 0;
+    acc.fat     += e.fat     || 0;
+    return acc;
+  }, { protein:0, carbs:0, fat:0 });
+
+  const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  s('dashProtein', Math.round(totals.protein) + 'g');
+  s('dashCarbs',   Math.round(totals.carbs)   + 'g');
+  s('dashFat',     Math.round(totals.fat)     + 'g');
+
+  const pct = (val, target) => target > 0 ? Math.min(100, (val/target)*100) : 0;
+  const b = (id, p) => { const el = document.getElementById(id); if (el) el.style.width = p + '%'; };
+  b('dashProteinBar', pct(totals.protein, macroTargets.protein));
+  b('dashCarbsBar',   pct(totals.carbs,   macroTargets.carbs));
+  b('dashFatBar',     pct(totals.fat,     macroTargets.fat));
+}
+
+function renderDashExercises() {
+  const grid = document.getElementById('dashExMiniGrid');
+  if (!grid) return;
+  let totalSets = 0, doneSets = 0;
+  grid.innerHTML = exercises.map((ex, i) => {
+    const ticked = tickedSets[i]?.size || 0;
+    const done = ticked === ex.numSets;
+    totalSets += ex.numSets;
+    doneSets  += ticked;
+    const dots = Array.from({length: ex.numSets}, (_, s) =>
+      `<div class="dash-ex-mini-dot${tickedSets[i]?.has(s) ? ' done' : ''}"></div>`
+    ).join('');
+    return `<div class="dash-ex-mini${done ? ' done' : ''}">
+      <div class="dash-ex-mini-icon">${ex.icon}</div>
+      <div class="dash-ex-mini-dots">${dots}</div>
+    </div>`;
+  }).join('');
+
+  const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  s('dashExSets', doneSets + '/' + totalSets + ' sets');
+  const bar = document.getElementById('dashExBar');
+  if (bar) bar.style.width = (totalSets > 0 ? (doneSets/totalSets)*100 : 0) + '%';
+}
+
+function renderDashMeals() {
+  const el = document.getElementById('dashMealsList');
+  if (!el) return;
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const dayMeals = weekPlan[todayIdx];
+  const SLOT_LABELS = { breakfast:'Breakfast', snackAm:'Morning Snack', lunch:'Lunch', snackPm:'Afternoon Snack', dinner:'Dinner' };
+  let html = '';
+  MEAL_SLOTS.forEach(slot => {
+    const meal = dayMeals[slot];
+    if (!meal) return;
+    const key = `${todayIdx}-${slot}`;
+    const isLogged = !!loggedMeals[key];
+    html += `<div class="dash-meal-row">
+      <div class="dash-meal-check${isLogged ? ' logged' : ''}" onclick="dashToggleMealLog(${todayIdx},'${slot}')">✓</div>
+      <div class="dash-meal-info">
+        <div class="dash-meal-slot">${SLOT_LABELS[slot]}</div>
+        <div class="dash-meal-name">${meal.icon || '🍽'} ${meal.name}</div>
+      </div>
+      <div class="dash-meal-cal">${meal.calories} Cal</div>
+    </div>`;
+  });
+  if (!html) {
+    html = `<div style="text-align:center;padding:16px;color:var(--muted);font-size:0.82rem">No meals planned for today.<br>
+      <span onclick="switchTabDirect('recipes')" style="color:var(--orange);cursor:pointer;text-decoration:underline">Go to Recipes →</span></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function dashToggleMealLog(dayIdx, slot) {
+  toggleMealLog(dayIdx, slot);
+  renderDashboard();
+}
+
+function dashAddFood() {
+  const name    = document.getElementById('dashFoodName')?.value.trim();
+  const cal     = parseFloat(document.getElementById('dashFoodCal')?.value)     || 0;
+  const protein = parseFloat(document.getElementById('dashFoodProtein')?.value) || 0;
+  if (!name) { document.getElementById('dashFoodName')?.focus(); return; }
+
+  state.foods.push({ name, cal });
+  state.consumed += cal;
+  if (protein > 0 || cal > 0) {
+    macroLog.push({ id: macroIdCounter++, name, cal, protein, carbs: 0, fat: 0, source: 'manual' });
+  }
+  renderFoodList();
+  updateCalDisplay();
+  updateMacroDisplay();
+  saveAll();
+
+  // Clear inputs
+  ['dashFoodName','dashFoodCal','dashFoodProtein'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  renderDashboard();
+}
+
+function switchTabDirect(id) {
+  const tab = document.querySelector(`.tab[onclick="switchTab('${id}')"]`);
+  if (tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + id)?.classList.add('active');
+    if (id === 'calories') updateCalDisplay();
+    if (id === 'steps') updateStepDisplay();
+    if (id === 'weekly') { syncTodayToWeekly(); renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
+    if (id === 'recipes') renderWeekBar();
+    if (id === 'macros') { updateMacroDisplay(); restoreMacroTargetInputs(); }
+  }
+}
+
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   event.currentTarget.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'today')   renderDashboard();
   if (id === 'calories') updateCalDisplay();
-  if (id === 'steps') updateStepDisplay();
-  if (id === 'weekly') { syncTodayToWeekly(); renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
+  if (id === 'steps')   updateStepDisplay();
+  if (id === 'weekly')  { syncTodayToWeekly(); renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
   if (id === 'recipes') renderWeekBar();
   if (id === 'macros')  { updateMacroDisplay(); restoreMacroTargetInputs(); }
 }
@@ -4415,6 +5004,7 @@ document.addEventListener('DOMContentLoaded', function() {
       updateWeekSummary();
       updateWeekHistory();
       renderWeekBar();
+      renderDashboard();
     }, 0);
   }
 });
