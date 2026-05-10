@@ -916,7 +916,110 @@
     color: white;
   }
 
-  /* ── SERVINGS STEPPER ── */
+  /* ── MACRO MINI BADGES ── */
+  .macro-mini-row {
+    display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;
+  }
+
+  .macro-mini {
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  .macro-mini.protein { background: rgba(74,111,165,0.12); color: #4a6fa5; }
+  .macro-mini.carbs   { background: rgba(212,168,75,0.15);  color: #b8932a; }
+  .macro-mini.fat     { background: rgba(232,93,38,0.1);    color: var(--orange); }
+
+  /* ── MACRO TOTALS ── */
+  .macro-totals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .macro-total-box {
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+  }
+
+  .protein-box { background: rgba(74,111,165,0.07); border-color: rgba(74,111,165,0.2); }
+  .carbs-box   { background: rgba(212,168,75,0.07); border-color: rgba(212,168,75,0.2); }
+  .fat-box     { background: rgba(232,93,38,0.07);  border-color: rgba(232,93,38,0.2); }
+
+  .macro-total-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .protein-box .macro-total-val { color: #4a6fa5; }
+  .carbs-box   .macro-total-val { color: #b8932a; }
+  .fat-box     .macro-total-val { color: var(--orange); }
+
+  .macro-total-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .macro-total-target {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .macro-bar-wrap {
+    height: 4px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .protein-fill { background: #4a6fa5; }
+  .carbs-fill   { background: #b8932a; }
+  .fat-fill     { background: var(--orange); }
+
+  /* ── MACRO LOG ITEMS ── */
+  .macro-log-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.2s ease;
+  }
+
+  .macro-log-item:last-child { border-bottom: none; }
+
+  .macro-log-name { flex: 1; font-size: 0.85rem; font-weight: 500; }
+  .macro-log-source { font-size: 0.65rem; color: var(--muted); }
+
+  .macro-log-values {
+    display: flex; gap: 6px; align-items: center; flex-shrink: 0;
+  }
+
+  .macro-log-cal {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--charcoal);
+    width: 52px;
+    text-align: right;
+  }
   .servings-stepper {
     display: flex;
     align-items: center;
@@ -1652,6 +1755,7 @@
   <button class="tab" onclick="switchTab('exercises')">Exercises</button>
   <button class="tab" onclick="switchTab('weekly')">📅 Weekly</button>
   <button class="tab" onclick="switchTab('recipes')">🍽 Recipes</button>
+  <button class="tab" onclick="switchTab('macros')">📊 Macros</button>
 </div>
 
 <!-- ── PROFILE ── -->
@@ -1967,6 +2071,93 @@
 
 </div>
 
+<!-- ── MACROS ── -->
+<div class="panel" id="panel-macros">
+
+  <!-- Today's macro totals -->
+  <div class="card">
+    <div class="card-title">Today's Macros</div>
+    <div class="card-desc">From logged meals + manual entries</div>
+    <div class="macro-totals-grid" id="macroTotalsGrid">
+      <div class="macro-total-box protein-box">
+        <div class="macro-total-val" id="totalProtein">0g</div>
+        <div class="macro-total-label">Protein</div>
+        <div class="macro-total-target" id="targetProtein">Target: —</div>
+        <div class="macro-bar-wrap"><div class="macro-bar-fill protein-fill" id="proteinBar" style="width:0%"></div></div>
+      </div>
+      <div class="macro-total-box carbs-box">
+        <div class="macro-total-val" id="totalCarbs">0g</div>
+        <div class="macro-total-label">Carbs</div>
+        <div class="macro-total-target" id="targetCarbs">Target: —</div>
+        <div class="macro-bar-wrap"><div class="macro-bar-fill carbs-fill" id="carbsBar" style="width:0%"></div></div>
+      </div>
+      <div class="macro-total-box fat-box">
+        <div class="macro-total-val" id="totalFat">0g</div>
+        <div class="macro-total-label">Fat</div>
+        <div class="macro-total-target" id="targetFat">Target: —</div>
+        <div class="macro-bar-wrap"><div class="macro-bar-fill fat-fill" id="fatBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Macro targets -->
+  <div class="card">
+    <div class="card-title">Daily Macro Targets</div>
+    <div class="card-desc">Set your daily goals in grams</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Protein (g)</label>
+        <input type="number" id="targetProteinInput" placeholder="e.g. 150" min="0" oninput="saveMacroTargets()">
+      </div>
+      <div class="form-group">
+        <label>Carbs (g)</label>
+        <input type="number" id="targetCarbsInput" placeholder="e.g. 200" min="0" oninput="saveMacroTargets()">
+      </div>
+      <div class="form-group">
+        <label>Fat (g)</label>
+        <input type="number" id="targetFatInput" placeholder="e.g. 65" min="0" oninput="saveMacroTargets()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual macro log -->
+  <div class="card">
+    <div class="card-title">Log Macros Manually</div>
+    <div class="card-desc">Add a meal or food item with its macros</div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>Food / Meal name</label>
+      <input type="text" id="macroFoodName" placeholder="e.g. Chicken breast 150g" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none">
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="form-group">
+        <label>Cal</label>
+        <input type="number" id="macroCalInput" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Protein (g)</label>
+        <input type="number" id="macroProteinInput" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Carbs (g)</label>
+        <input type="number" id="macroCarbsInput" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Fat (g)</label>
+        <input type="number" id="macroFatInput" placeholder="0" min="0">
+      </div>
+    </div>
+    <button class="calc-btn" style="margin-top:0" onclick="addMacroEntry()">+ Log Entry</button>
+  </div>
+
+  <!-- Macro log list -->
+  <div class="card">
+    <div class="card-title">Today's Macro Log</div>
+    <div class="card-desc">All logged meals including recipe meals</div>
+    <div id="macroLogList"></div>
+  </div>
+
+</div>
+
 <!-- ── RECIPES ── -->
 <div class="panel" id="panel-recipes">
 
@@ -1994,8 +2185,18 @@
 
   <!-- Diet filter -->
   <div class="card">
-    <div class="card-title">Diet Preference</div>
-    <div class="card-desc">Select one or more to filter recipes — tap Show Recipes to load your plan</div>
+    <div class="card-title">Recipe Source</div>
+    <div class="card-desc">Choose your recipe collection</div>
+    <div class="diet-filters" style="margin-bottom:16px">
+      <button class="diet-btn active" data-source="standard" onclick="setRecipeSource('standard', this)">🍽 Standard Recipes</button>
+      <button class="diet-btn" data-source="ag" onclick="setRecipeSource('ag', this)">💪 AG Coaching</button>
+    </div>
+    <div id="agBadge" style="display:none;font-size:0.75rem;color:var(--green);background:var(--green-dim);border:1px solid rgba(46,125,94,0.2);border-radius:8px;padding:8px 12px;margin-bottom:14px">
+      🏋️ <strong>Alex Gamble Coaching</strong> — high protein, macro-tracked recipes from <a href="https://90day.alexgamblecoaching.com" target="_blank" style="color:var(--green)">alexgamblecoaching.com</a>. Recipes sourced from publicly shared content.
+    </div>
+
+    <div class="card-title" style="font-size:1rem;margin-bottom:4px">Diet Preference</div>
+    <div class="card-desc" style="margin-bottom:12px">Select one or more to filter recipes — tap Show Recipes to load your plan</div>
     <div class="diet-filters">
       <button class="diet-btn" data-diet="all" onclick="toggleDietFilter('all', this)">🍴 All</button>
       <button class="diet-btn" data-diet="vegetarian" onclick="toggleDietFilter('vegetarian', this)">🥦 Vegetarian</button>
@@ -2111,7 +2312,12 @@ let state = {
   exercises: [],
 };
 
-// ─── PERSISTENCE ───
+// ─── ADDITIONAL STATE (must be before saveAll/loadAll) ───
+const loggedMeals = {};     // key: "dayIdx-slot" → true
+let macroLog = [];          // { id, name, cal, protein, carbs, fat, source, mealKey? }
+let macroTargets = { protein: 0, carbs: 0, fat: 0 };
+let macroIdCounter = 0;
+let weekPlanServings = Array.from({length:7}, () => ({breakfast:1,snackAm:1,lunch:1,snackPm:1,dinner:1}));
 const SAVE_KEY = 'moveandburn_v1';
 
 function saveAll() {
@@ -2125,7 +2331,11 @@ function saveAll() {
       weekPlan,
       weekPlanServings,
       activeDiets: [...activeDiets],
+      activeRecipeSource,
       loggedMeals,
+      macroLog,
+      macroTargets,
+      macroIdCounter,
       profile: {
         age: document.getElementById('age')?.value || '',
         sex: document.getElementById('sex')?.value || 'male',
@@ -2168,9 +2378,13 @@ function loadAll() {
 
     // Restore diet filters
     if (data.activeDiets) activeDiets = new Set(data.activeDiets);
+    if (data.activeRecipeSource) activeRecipeSource = data.activeRecipeSource;
 
     // Restore logged meals
     if (data.loggedMeals) Object.assign(loggedMeals, data.loggedMeals);
+    if (data.macroLog) macroLog = data.macroLog;
+    if (data.macroTargets) Object.assign(macroTargets, data.macroTargets);
+    if (data.macroIdCounter) macroIdCounter = data.macroIdCounter;
 
     // Restore profile form fields
     if (data.profile) {
@@ -2194,39 +2408,52 @@ function loadAll() {
 }
 
 function restoreUI() {
-  // Re-render everything from restored state
-  if (state.calTarget > 0) {
-    document.getElementById('resultsCard').style.display = 'block';
-    document.getElementById('r-bmr').textContent = '—';
-    document.getElementById('r-tdee').textContent = state.tdee?.toLocaleString() || '—';
-    document.getElementById('r-calTarget').textContent = state.calTarget.toLocaleString()  + " Cal";
-    document.getElementById('r-steps').textContent = state.stepGoal?.toLocaleString() || '—';
-    document.getElementById('r-stepCal').textContent = Math.round((state.stepGoal||0) * (state.stepCalPerStep||0.04))  + " Cal";
-    document.getElementById('stepRingGoal').textContent = (state.stepGoal||10000).toLocaleString();
-    document.getElementById('calTargetDisplay').textContent = state.calTarget.toLocaleString()  + " Cal";
-  }
+  // Defer all rendering until after all functions are defined
+  setTimeout(() => {
+    // Re-render everything from restored state
+    if (state.calTarget > 0) {
+      const s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      document.getElementById('resultsCard').style.display = 'block';
+      s('r-bmr', '—');
+      s('r-tdee', state.tdee?.toLocaleString() || '—');
+      s('r-calTarget', state.calTarget.toLocaleString() + ' Cal');
+      s('r-steps', state.stepGoal?.toLocaleString() || '—');
+      s('r-stepCal', Math.round((state.stepGoal||0) * (state.stepCalPerStep||0.04)) + ' Cal');
+      s('stepRingGoal', (state.stepGoal||10000).toLocaleString());
+      s('calTargetDisplay', state.calTarget.toLocaleString() + ' Cal');
+    }
 
-  renderFoodList();
-  renderExList();
-  updateCalDisplay();
-  updateSteps();
-  renderExercises();
-  updateWorkoutSummary();
-  renderDayGrid();
-  updateWeekSummary();
-  updateWeekHistory();
-  renderWeekBar();
+    renderFoodList();
+    renderExList();
+    updateCalDisplay();
+    updateSteps();
+    renderExercises();
+    updateWorkoutSummary();
+    renderDayGrid();
+    updateWeekSummary();
+    updateWeekHistory();
+    renderWeekBar();
 
-  // Restore diet filter button states
-  document.querySelectorAll('.diet-btn').forEach(b => {
-    b.classList.toggle('active', activeDiets.has(b.dataset.diet));
-  });
+    // Restore diet filter button states
+    document.querySelectorAll('.diet-btn').forEach(b => {
+      b.classList.toggle('active', activeDiets.has(b.dataset.diet));
+    });
 
-  // Show recipe panel content if meals planned
-  const hasMeals = weekPlan.some(d => Object.values(d).some(Boolean));
-  if (hasMeals) {
-    showRecipes();
-  }
+    // Restore recipe source button state
+    document.querySelectorAll('[data-source]').forEach(b => {
+      b.classList.toggle('active', b.dataset.source === activeRecipeSource);
+    });
+    const agBadge = document.getElementById('agBadge');
+    if (agBadge) agBadge.style.display = activeRecipeSource === 'ag' ? 'block' : 'none';
+
+    // Restore macro display
+    updateMacroDisplay();
+    restoreMacroTargetInputs();
+
+    // Show recipe panel content if meals planned
+    const hasMeals = weekPlan.some(d => Object.values(d).some(Boolean));
+    if (hasMeals) showRecipes();
+  }, 0);
 }
 
 // Auto-save: patch key mutating functions to save after changes
@@ -2853,253 +3080,340 @@ let expandedRecipe = null;
 let weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
 let groceryItems = [];
 
-// ── Static recipe database ──
 const RECIPE_DB = {
   breakfast: [
-    { name:'Bacon & Egg Toast', calories:420, prepTime:'10 min', diet:'meat', icon:'🥓', tags:['high-protein'],
+    { name:'Bacon & Egg Toast', calories:420, protein:28, carbs:32, fat:18, prepTime:'10 min', diet:'meat', icon:'🥓', tags:['high-protein'],
       desc:'Crispy bacon rashers with fried eggs on toasted wholegrain bread.',
       ingredients:['3 bacon rashers','2 eggs','2 slices wholegrain bread','butter','salt & pepper'],
       steps:['Cook bacon in pan over medium heat until crispy, set aside.','Fry eggs in same pan to your liking.','Toast bread and butter lightly.','Top toast with bacon and eggs, season and serve.'] },
-    { name:'Bacon & Avocado Wrap', calories:450, prepTime:'10 min', diet:'meat', icon:'🌯', tags:['high-protein'],
+    { name:'Bacon & Avocado Wrap', calories:450, protein:26, carbs:28, fat:24, prepTime:'10 min', diet:'meat', icon:'🌯', tags:['high-protein'],
       desc:'Toasted wrap filled with crispy bacon, smashed avocado, tomato and spinach.',
       ingredients:['1 wholegrain wrap','3 bacon rashers','½ avocado','1 tomato','handful spinach','lemon juice','salt & pepper'],
       steps:['Cook bacon until crispy, drain on paper towel.','Smash avocado with lemon juice and seasoning.','Warm wrap in dry pan.','Layer spinach, tomato, bacon and avocado, roll and serve.'] },
-    { name:'Bacon, Egg & Cheese Muffin', calories:400, prepTime:'10 min', diet:'meat', icon:'🧀', tags:['high-protein'],
+    { name:'Bacon, Egg & Cheese Muffin', calories:400, protein:24, carbs:30, fat:20, prepTime:'10 min', diet:'meat', icon:'🧀', tags:['high-protein'],
       desc:'Toasted English muffin stacked with crispy bacon, fried egg and melted cheddar.',
       ingredients:['1 English muffin','2 bacon rashers','1 egg','1 slice cheddar','butter','salt & pepper'],
       steps:['Cook bacon until crispy.','Fry egg to your liking.','Toast and butter muffin halves.','Stack bacon, egg and cheese on muffin base, top and serve.'] },
-    { name:'BLT on Toast', calories:390, prepTime:'10 min', diet:'meat', icon:'🥓', tags:[],
+    { name:'BLT on Toast', calories:390, protein:22, carbs:34, fat:16, prepTime:'10 min', diet:'meat', icon:'🥓', tags:[],
       desc:'Classic BLT — crispy bacon, lettuce and tomato on toasted wholegrain bread with light mayo.',
       ingredients:['3 bacon rashers','2 slices wholegrain bread','2 lettuce leaves','1 tomato sliced','1 tbsp light mayo','salt & pepper'],
       steps:['Cook bacon until crispy.','Toast bread.','Spread mayo on one slice.','Layer lettuce, tomato and bacon, season and sandwich together.'] },
-    { name:'Chicken & Egg Scramble', calories:380, prepTime:'10 min', diet:'meat', icon:'🍳', tags:['high-protein'],
+    { name:'Chicken & Egg Scramble', calories:380, protein:38, carbs:4, fat:22, prepTime:'10 min', diet:'meat', icon:'🍳', tags:['high-protein'],
       desc:'Scrambled eggs with diced chicken breast, spinach and cherry tomatoes.',
       ingredients:['2 eggs','100g chicken breast','handful spinach','6 cherry tomatoes','olive oil','salt & pepper'],
       steps:['Dice chicken and cook in olive oil 4 min.','Add spinach and tomatoes, cook 1 min.','Whisk eggs, pour in and scramble until just set.','Season and serve.'] },
-    { name:'Greek Yogurt & Berry Bowl', calories:290, prepTime:'5 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
+    { name:'Greek Yogurt & Berry Bowl', calories:290, protein:20, carbs:36, fat:6, prepTime:'5 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
       desc:'High-protein Greek yogurt with mixed berries, honey and granola.',
       ingredients:['200g Greek yogurt','½ cup mixed berries','2 tbsp granola','1 tsp honey'],
       steps:['Spoon yogurt into bowl.','Top with berries and granola.','Drizzle honey and serve.'] },
-    { name:'Avocado Toast with Egg', calories:350, prepTime:'8 min', diet:'vegetarian', icon:'🥑', tags:[],
+    { name:'Avocado Toast with Egg', calories:350, protein:16, carbs:30, fat:20, prepTime:'8 min', diet:'vegetarian', icon:'🥑', tags:[],
       desc:'Wholegrain toast topped with smashed avocado and a poached egg.',
       ingredients:['2 slices wholegrain bread','1 avocado','2 eggs','lemon juice','chilli flakes','salt'],
       steps:['Toast bread.','Smash avocado with lemon juice and salt.','Poach eggs 3 min in simmering water.','Spread avo on toast, top with egg and chilli flakes.'] },
-    { name:'Overnight Oats', calories:340, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
+    { name:'Overnight Oats', calories:340, protein:10, carbs:54, fat:8, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
       desc:'Creamy oats soaked overnight with banana, chia seeds and almond milk.',
       ingredients:['½ cup rolled oats','1 cup almond milk','1 banana','1 tbsp chia seeds','1 tsp maple syrup'],
       steps:['Combine oats, almond milk and chia seeds in jar.','Slice banana on top.','Drizzle maple syrup.','Refrigerate overnight, eat cold.'] },
-    { name:'Salmon & Cream Cheese Bagel', calories:420, prepTime:'5 min', diet:'meat', icon:'🥯', tags:['high-protein'],
+    { name:'Salmon & Cream Cheese Bagel', calories:420, protein:28, carbs:38, fat:16, prepTime:'5 min', diet:'meat', icon:'🥯', tags:['high-protein'],
       desc:'Toasted bagel with smoked salmon, cream cheese and capers.',
       ingredients:['1 wholegrain bagel','80g smoked salmon','2 tbsp cream cheese','1 tbsp capers','½ lemon','black pepper'],
       steps:['Toast bagel halves.','Spread cream cheese on each half.','Layer smoked salmon and capers.','Squeeze lemon and season with pepper.'] },
-    { name:'Banana Peanut Butter Smoothie', calories:310, prepTime:'5 min', diet:'vegan', icon:'🍌', tags:[],
+    { name:'Banana Peanut Butter Smoothie', calories:310, protein:10, carbs:44, fat:12, prepTime:'5 min', diet:'vegan', icon:'🍌', tags:[],
       desc:'Filling vegan smoothie with banana, peanut butter and oat milk.',
       ingredients:['1 banana','2 tbsp peanut butter','1 cup oat milk','1 tsp chia seeds','handful ice'],
       steps:['Add all ingredients to blender.','Blend until smooth.','Pour and serve immediately.'] },
-    { name:'Tuna Omelette', calories:360, prepTime:'10 min', diet:'meat', icon:'🥚', tags:['high-protein','low-carb'],
+    { name:'Tuna Omelette', calories:360, protein:42, carbs:2, fat:20, prepTime:'10 min', diet:'meat', icon:'🥚', tags:['high-protein','low-carb'],
       desc:'Protein-packed omelette filled with canned tuna, spring onion and cheese.',
       ingredients:['3 eggs','95g canned tuna','2 spring onions','30g cheddar cheese','olive oil','salt & pepper'],
       steps:['Whisk eggs with salt and pepper.','Heat oil in pan, pour in eggs.','When nearly set, add tuna, onion and cheese to one half.','Fold omelette and serve.'] },
-    { name:'Veggie Breakfast Wrap', calories:370, prepTime:'10 min', diet:'vegetarian', icon:'🌯', tags:[],
+    { name:'Veggie Breakfast Wrap', calories:370, protein:18, carbs:36, fat:16, prepTime:'10 min', diet:'vegetarian', icon:'🌯', tags:[],
       desc:'Wholegrain wrap filled with scrambled eggs, roasted capsicum and feta.',
       ingredients:['1 wholegrain wrap','2 eggs','½ capsicum diced','30g feta','handful spinach','olive oil'],
       steps:['Sauté capsicum in oil 3 min.','Add spinach, wilt 1 min.','Scramble in eggs.','Fill wrap, crumble feta on top, roll and serve.'] },
-    { name:'Bircher Muesli', calories:320, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
+    { name:'Bircher Muesli', calories:320, protein:8, carbs:50, fat:10, prepTime:'5 min', diet:'vegan', icon:'🥣', tags:[],
       desc:'Apple and oat bircher with sultanas, nuts and coconut yogurt.',
       ingredients:['½ cup rolled oats','1 apple grated','½ cup coconut yogurt','2 tbsp sultanas','1 tbsp chopped walnuts','cinnamon'],
       steps:['Mix oats, apple and yogurt together.','Stir in sultanas and cinnamon.','Top with walnuts.','Serve immediately or refrigerate overnight.'] },
   ],
   snackAm: [
-    { name:'Apple & Peanut Butter', calories:160, prepTime:'2 min', diet:'vegan', icon:'🍎', tags:[],
+    { name:'Apple & Peanut Butter', calories:160, protein:4, carbs:20, fat:8, prepTime:'2 min', diet:'vegan', icon:'🍎', tags:[],
       desc:'Crisp apple slices with natural peanut butter for dipping.',
       ingredients:['1 apple','1½ tbsp peanut butter'],
       steps:['Slice apple.','Serve with peanut butter for dipping.'] },
-    { name:'Hard Boiled Eggs', calories:140, prepTime:'10 min', diet:'vegetarian', icon:'🥚', tags:['high-protein','low-carb'],
+    { name:'Hard Boiled Eggs', calories:140, protein:12, carbs:0, fat:10, prepTime:'10 min', diet:'vegetarian', icon:'🥚', tags:['high-protein','low-carb'],
       desc:'Two hard boiled eggs with a pinch of salt — simple and filling.',
       ingredients:['2 eggs','salt & pepper'],
       steps:['Boil eggs 9 min.','Cool under cold water, peel and season.'] },
-    { name:'Tuna Rice Cakes', calories:150, prepTime:'3 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+    { name:'Tuna Rice Cakes', calories:150, protein:18, carbs:14, fat:2, prepTime:'3 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
       desc:'Rice cakes topped with canned tuna and a squeeze of lemon.',
       ingredients:['3 rice cakes','95g canned tuna','lemon juice','black pepper'],
       steps:['Drain and season tuna with lemon and pepper.','Pile onto rice cakes and serve.'] },
-    { name:'Mixed Nuts', calories:170, prepTime:'0 min', diet:'vegan', icon:'🥜', tags:['low-carb'],
+    { name:'Mixed Nuts', calories:170, protein:5, carbs:6, fat:15, prepTime:'0 min', diet:'vegan', icon:'🥜', tags:['low-carb'],
       desc:'A small handful of mixed nuts — almonds, cashews and walnuts.',
       ingredients:['30g mixed nuts'],
       steps:['Portion into a small bowl and enjoy.'] },
-    { name:'Carrot & Hummus', calories:130, prepTime:'3 min', diet:'vegan', icon:'🥕', tags:['low-carb'],
+    { name:'Carrot & Hummus', calories:130, protein:5, carbs:16, fat:5, prepTime:'3 min', diet:'vegan', icon:'🥕', tags:['low-carb'],
       desc:'Crunchy carrot sticks with creamy hummus for dipping.',
       ingredients:['2 medium carrots','3 tbsp hummus'],
       steps:['Peel and cut carrots into sticks.','Serve with hummus.'] },
-    { name:'Cottage Cheese & Cucumber', calories:120, prepTime:'3 min', diet:'vegetarian', icon:'🥒', tags:['high-protein','low-carb'],
+    { name:'Cottage Cheese & Cucumber', calories:120, protein:14, carbs:4, fat:4, prepTime:'3 min', diet:'vegetarian', icon:'🥒', tags:['high-protein','low-carb'],
       desc:'Light and protein-rich cottage cheese with sliced cucumber.',
       ingredients:['½ cup cottage cheese','1 cucumber','black pepper','fresh dill'],
       steps:['Slice cucumber.','Top cottage cheese with dill and pepper.','Serve alongside cucumber.'] },
   ],
   lunch: [
-    { name:'Grilled Chicken Salad', calories:420, prepTime:'15 min', diet:'meat', icon:'🥗', tags:['high-protein','low-carb'],
+    { name:'Grilled Chicken Salad', calories:420, protein:42, carbs:12, fat:22, prepTime:'15 min', diet:'meat', icon:'🥗', tags:['high-protein','low-carb'],
       desc:'Juicy grilled chicken breast over mixed greens with avocado and lemon dressing.',
       ingredients:['150g chicken breast','2 cups mixed greens','½ avocado','cherry tomatoes','cucumber','lemon juice','olive oil','salt & pepper'],
       steps:['Season and grill chicken 5–6 min each side.','Slice chicken and let rest.','Assemble greens, tomatoes and cucumber.','Top with chicken and avocado.','Drizzle lemon and olive oil.'] },
-    { name:'Lentil & Vegetable Soup', calories:380, prepTime:'20 min', diet:'vegan', icon:'🍲', tags:[],
+    { name:'Lentil & Vegetable Soup', calories:380, protein:18, carbs:58, fat:8, prepTime:'20 min', diet:'vegan', icon:'🍲', tags:[],
       desc:'Hearty red lentil soup with carrot, celery, cumin and coriander.',
       ingredients:['½ cup red lentils','1 carrot diced','2 celery stalks','1 onion','2 cloves garlic','1 tsp cumin','1 tsp coriander','500ml vegetable stock','olive oil'],
       steps:['Sauté onion and garlic in oil 3 min.','Add carrot, celery and spices, cook 2 min.','Add lentils and stock, simmer 15 min.','Season and serve with crusty bread.'] },
-    { name:'Tuna Pasta Salad', calories:460, prepTime:'15 min', diet:'meat', icon:'🍝', tags:['high-protein'],
+    { name:'Tuna Pasta Salad', calories:460, protein:32, carbs:54, fat:10, prepTime:'15 min', diet:'meat', icon:'🍝', tags:['high-protein'],
       desc:'Pasta tossed with canned tuna, corn, capsicum and light mayo.',
       ingredients:['1 cup pasta','185g canned tuna','½ cup corn','½ capsicum diced','2 tbsp light mayo','lemon juice','parsley'],
       steps:['Cook pasta to packet directions, cool.','Drain tuna and mix with mayo and lemon.','Combine all ingredients.','Season and top with parsley.'] },
-    { name:'Chickpea & Spinach Wrap', calories:400, prepTime:'10 min', diet:'vegan', icon:'🌯', tags:[],
+    { name:'Chickpea & Spinach Wrap', calories:400, protein:16, carbs:54, fat:12, prepTime:'10 min', diet:'vegan', icon:'🌯', tags:[],
       desc:'Protein-rich wrap with spiced chickpeas, spinach, tomato and tahini.',
       ingredients:['1 wholegrain wrap','½ cup canned chickpeas','handful spinach','1 tomato','2 tbsp tahini','lemon juice','cumin','smoked paprika'],
       steps:['Drain and season chickpeas with cumin and paprika.','Warm chickpeas in pan 2 min.','Mix tahini with lemon juice.','Layer wrap with spinach, tomato, chickpeas and tahini.','Roll and serve.'] },
-    { name:'Beef & Rice Bowl', calories:520, prepTime:'20 min', diet:'meat', icon:'🍚', tags:['high-protein'],
+    { name:'Beef & Rice Bowl', calories:520, protein:38, carbs:48, fat:16, prepTime:'20 min', diet:'meat', icon:'🍚', tags:['high-protein'],
       desc:'Lean beef mince with soy sauce over steamed rice and stir-fried vegetables.',
       ingredients:['150g lean beef mince','1 cup cooked rice','1 cup bok choy','2 tbsp soy sauce','1 tsp sesame oil','garlic','ginger'],
       steps:['Cook rice per packet.','Brown mince with garlic and ginger 5 min.','Add soy sauce and sesame oil.','Stir-fry bok choy 2 min.','Serve mince and veg over rice.'] },
-    { name:'Caprese & Quinoa Bowl', calories:430, prepTime:'15 min', diet:'vegetarian', icon:'🫙', tags:['high-protein'],
+    { name:'Caprese & Quinoa Bowl', calories:430, protein:22, carbs:44, fat:18, prepTime:'15 min', diet:'vegetarian', icon:'🫙', tags:['high-protein'],
       desc:'Protein-packed quinoa with fresh mozzarella, tomato, basil and balsamic.',
       ingredients:['½ cup quinoa','125g fresh mozzarella','2 tomatoes','fresh basil','balsamic glaze','olive oil','salt'],
       steps:['Cook quinoa per packet, cool slightly.','Slice tomatoes and mozzarella.','Plate quinoa, top with tomato and mozzarella.','Tear basil on top, drizzle oil and balsamic.'] },
-    { name:'Salmon & Sweet Potato', calories:490, prepTime:'25 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+    { name:'Salmon & Sweet Potato', calories:490, protein:36, carbs:38, fat:18, prepTime:'25 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
       desc:'Baked salmon fillet with roasted sweet potato and steamed broccoli.',
       ingredients:['150g salmon fillet','1 medium sweet potato','1 cup broccoli','olive oil','garlic powder','lemon','salt & pepper'],
       steps:['Preheat oven 200°C. Cube sweet potato, toss in oil and roast 20 min.','Season salmon and bake 12 min.','Steam broccoli 5 min.','Serve with lemon wedge.'] },
-    { name:'Black Bean Tacos', calories:410, prepTime:'15 min', diet:'vegan', icon:'🌮', tags:[],
+    { name:'Black Bean Tacos', calories:410, protein:14, carbs:62, fat:12, prepTime:'15 min', diet:'vegan', icon:'🌮', tags:[],
       desc:'Two corn tortillas filled with spiced black beans, avocado, salsa and coriander.',
       ingredients:['2 corn tortillas','½ cup canned black beans','½ avocado','salsa','½ lime','cumin','smoked paprika','fresh coriander'],
       steps:['Heat beans with cumin and paprika 3 min.','Warm tortillas in dry pan.','Fill with beans, sliced avocado and salsa.','Squeeze lime and top with coriander.'] },
   ],
   snackPm: [
-    { name:'Banana & Almond Butter', calories:160, prepTime:'1 min', diet:'vegan', icon:'🍌', tags:[],
+    { name:'Banana & Almond Butter', calories:160, protein:4, carbs:22, fat:7, prepTime:'1 min', diet:'vegan', icon:'🍌', tags:[],
       desc:'A ripe banana with a tablespoon of almond butter.',
       ingredients:['1 banana','1 tbsp almond butter'],
       steps:['Peel banana.','Dip or spread almond butter and enjoy.'] },
-    { name:'Cheese & Crackers', calories:170, prepTime:'2 min', diet:'vegetarian', icon:'🧀', tags:['low-carb'],
+    { name:'Cheese & Crackers', calories:170, protein:8, carbs:14, fat:10, prepTime:'2 min', diet:'vegetarian', icon:'🧀', tags:['low-carb'],
       desc:'Wholegrain crackers with sliced cheddar and a few grapes.',
       ingredients:['4 wholegrain crackers','40g cheddar','small bunch grapes'],
       steps:['Slice cheese.','Serve on crackers with grapes on the side.'] },
-    { name:'Protein Bar', calories:150, prepTime:'0 min', diet:'meat', icon:'🍫', tags:['high-protein'],
+    { name:'Protein Bar', calories:150, protein:15, carbs:14, fat:5, prepTime:'0 min', diet:'meat', icon:'🍫', tags:['high-protein'],
       desc:'A store-bought protein bar — aim for 15g+ protein and under 200 Cal.',
       ingredients:['1 protein bar (Aldi "Protein Rex" or similar)'],
       steps:['Grab and go!'] },
-    { name:'Edamame', calories:120, prepTime:'5 min', diet:'vegan', icon:'🫘', tags:['high-protein','low-carb'],
+    { name:'Edamame', calories:120, protein:12, carbs:8, fat:5, prepTime:'5 min', diet:'vegan', icon:'🫘', tags:['high-protein','low-carb'],
       desc:'Steamed edamame pods with a pinch of sea salt.',
       ingredients:['1 cup frozen edamame','sea salt'],
       steps:['Microwave edamame 3 min or boil 5 min.','Drain, season with sea salt and serve.'] },
-    { name:'Greek Yogurt', calories:130, prepTime:'1 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
+    { name:'Greek Yogurt', calories:130, protein:14, carbs:10, fat:3, prepTime:'1 min', diet:'vegetarian', icon:'🫙', tags:['high-protein','low-carb'],
       desc:'Plain Greek yogurt with a drizzle of honey.',
       ingredients:['150g Greek yogurt','1 tsp honey'],
       steps:['Spoon yogurt into bowl.','Drizzle honey and serve.'] },
-    { name:'Rice Cakes with Avocado', calories:140, prepTime:'3 min', diet:'vegan', icon:'🥑', tags:[],
+    { name:'Rice Cakes with Avocado', calories:140, protein:3, carbs:18, fat:7, prepTime:'3 min', diet:'vegan', icon:'🥑', tags:[],
       desc:'Light rice cakes smeared with smashed avocado and chilli flakes.',
       ingredients:['3 rice cakes','½ avocado','chilli flakes','lemon juice','salt'],
       steps:['Smash avocado with lemon and salt.','Spread on rice cakes.','Sprinkle chilli flakes.'] },
   ],
   dinner: [
-    { name:'Grilled Salmon with Veggies', calories:520, prepTime:'20 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
+    { name:'Grilled Salmon with Veggies', calories:520, protein:44, carbs:14, fat:30, prepTime:'20 min', diet:'meat', icon:'🐟', tags:['high-protein','low-carb'],
       desc:'Pan-seared salmon with roasted zucchini, asparagus and lemon butter.',
       ingredients:['180g salmon fillet','1 zucchini','1 bunch asparagus','2 tbsp butter','2 cloves garlic','lemon','olive oil','salt & pepper'],
       steps:['Preheat oven 200°C. Toss veggies in oil, roast 15 min.','Season salmon and sear skin-side down 4 min, flip 3 min.','Melt butter with garlic and lemon.','Plate veggies and salmon, drizzle butter sauce.'] },
-    { name:'Chicken Stir-Fry', calories:490, prepTime:'20 min', diet:'meat', icon:'🥢', tags:['high-protein'],
+    { name:'Chicken Stir-Fry', calories:490, protein:42, carbs:46, fat:14, prepTime:'20 min', diet:'meat', icon:'🥢', tags:['high-protein'],
       desc:'Quick chicken stir-fry with bok choy, capsicum and oyster sauce over rice.',
       ingredients:['180g chicken breast','1 cup rice','1 bok choy','1 capsicum','2 tbsp oyster sauce','1 tbsp soy sauce','garlic','ginger','sesame oil'],
       steps:['Cook rice per packet.','Slice chicken and stir-fry with garlic and ginger 5 min.','Add capsicum and bok choy, cook 3 min.','Stir in oyster and soy sauce.','Serve over rice with sesame oil.'] },
-    { name:'Lentil Bolognese', calories:480, prepTime:'30 min', diet:'vegan', icon:'🍝', tags:[],
+    { name:'Lentil Bolognese', calories:480, protein:22, carbs:72, fat:10, prepTime:'30 min', diet:'vegan', icon:'🍝', tags:[],
       desc:'Rich tomato sauce with red lentils and herbs over wholegrain spaghetti.',
       ingredients:['1 cup wholegrain spaghetti','½ cup red lentils','1 can crushed tomatoes','1 onion','2 cloves garlic','1 carrot','Italian herbs','olive oil','salt & pepper'],
       steps:['Sauté onion, garlic and carrot in oil 5 min.','Add lentils, tomatoes and herbs.','Simmer 20 min until lentils are soft.','Cook pasta, drain and serve with sauce.'] },
-    { name:'Beef Stir-Fry with Noodles', calories:560, prepTime:'20 min', diet:'meat', icon:'🍜', tags:['high-protein'],
+    { name:'Beef Stir-Fry with Noodles', calories:560, protein:38, carbs:58, fat:18, prepTime:'20 min', diet:'meat', icon:'🍜', tags:['high-protein'],
       desc:'Lean beef strips with hokkien noodles, broccolini and hoisin sauce.',
       ingredients:['180g lean beef strips','200g hokkien noodles','1 bunch broccolini','2 tbsp hoisin sauce','1 tbsp soy sauce','garlic','sesame seeds'],
       steps:['Cook noodles per packet.','Stir-fry beef with garlic 3 min, set aside.','Stir-fry broccolini 2 min.','Add noodles and sauces, toss.','Return beef, scatter sesame seeds.'] },
-    { name:'Roast Veggie & Feta Tray Bake', calories:440, prepTime:'35 min', diet:'vegetarian', icon:'🥘', tags:[],
+    { name:'Roast Veggie & Feta Tray Bake', calories:440, protein:16, carbs:46, fat:22, prepTime:'35 min', diet:'vegetarian', icon:'🥘', tags:[],
       desc:'Colourful tray of roasted vegetables with chickpeas, feta and herbs.',
       ingredients:['1 zucchini','1 red capsicum','1 red onion','½ cup canned chickpeas','80g feta','olive oil','oregano','balsamic vinegar','salt & pepper'],
       steps:['Preheat oven 200°C.','Chop all veggies and toss with oil, oregano and salt.','Roast 25 min.','Add chickpeas for last 5 min.','Remove, crumble feta and drizzle balsamic.'] },
-    { name:'Prawn Fried Rice', calories:510, prepTime:'20 min', diet:'meat', icon:'🍤', tags:['high-protein'],
+    { name:'Prawn Fried Rice', calories:510, protein:32, carbs:58, fat:14, prepTime:'20 min', diet:'meat', icon:'🍤', tags:['high-protein'],
       desc:'Quick fried rice with prawns, egg, peas and spring onion.',
       ingredients:['150g cooked prawns','1½ cups cooked rice (cold)','2 eggs','½ cup frozen peas','2 spring onions','2 tbsp soy sauce','sesame oil','garlic'],
       steps:['Heat oil in wok, fry garlic 30 sec.','Push aside, scramble eggs in wok.','Add cold rice and stir-fry 3 min.','Add prawns, peas and soy sauce.','Top with spring onion and sesame oil.'] },
-    { name:'Black Bean & Sweet Potato Curry', calories:470, prepTime:'25 min', diet:'vegan', icon:'🍛', tags:[],
+    { name:'Black Bean & Sweet Potato Curry', calories:470, protein:16, carbs:72, fat:14, prepTime:'25 min', diet:'vegan', icon:'🍛', tags:[],
       desc:'Creamy coconut curry with black beans, sweet potato and spinach.',
       ingredients:['1 sweet potato cubed','1 can black beans','1 can coconut milk','1 can crushed tomatoes','1 onion','2 cloves garlic','2 tsp curry powder','1 tsp cumin','spinach','rice to serve'],
       steps:['Sauté onion and garlic 3 min.','Add curry powder and cumin, cook 1 min.','Add sweet potato, tomatoes and coconut milk.','Simmer 15 min until potato is soft.','Stir in black beans and spinach, serve over rice.'] },
-    { name:'Chicken & Vegetable Soup', calories:390, prepTime:'30 min', diet:'meat', icon:'🍲', tags:['high-protein','low-carb'],
+    { name:'Chicken & Vegetable Soup', calories:390, protein:38, carbs:20, fat:12, prepTime:'30 min', diet:'meat', icon:'🍲', tags:['high-protein','low-carb'],
       desc:'Nourishing chicken soup with carrot, celery, zucchini and herbs.',
       ingredients:['200g chicken breast','1 carrot','2 celery stalks','1 zucchini','1 onion','1L chicken stock','fresh parsley','garlic','salt & pepper'],
       steps:['Dice all vegetables and chicken.','Sauté onion and garlic 2 min.','Add chicken, vegetables and stock.','Simmer 20 min.','Season, top with fresh parsley.'] },
-    { name:'Tofu & Vegetable Stir-Fry', calories:420, prepTime:'20 min', diet:'vegan', icon:'🥢', tags:['high-protein'],
+    { name:'Tofu & Vegetable Stir-Fry', calories:420, protein:22, carbs:38, fat:18, prepTime:'20 min', diet:'vegan', icon:'🥢', tags:['high-protein'],
       desc:'Crispy tofu with mixed vegetables and teriyaki sauce over steamed rice.',
       ingredients:['200g firm tofu','1 cup mixed vegetables (broccoli, capsicum, carrot)','2 tbsp teriyaki sauce','1 tbsp soy sauce','garlic','sesame oil','1 cup rice'],
       steps:['Press and cube tofu, pan-fry until golden 8 min.','Cook rice per packet.','Stir-fry vegetables with garlic 4 min.','Add tofu and sauces, toss 1 min.','Serve over rice with sesame oil.'] },
   ],
 };
 
-function toggleDietFilter(diet, el) {
-  if (diet === 'all') {
-    activeDiets.clear();
-    activeDiets.add('all');
-  } else {
-    activeDiets.delete('all');
-    if (activeDiets.has(diet)) {
-      activeDiets.delete(diet);
-      if (activeDiets.size === 0) activeDiets.add('all');
+// ── Alex Gamble Coaching Recipe Database ──
+// Sourced from publicly shared content on TikTok & social media (@alexgamblecoach)
+const AG_RECIPE_DB = {
+  breakfast: [
+    { name:'Protein Oat Bowl', calories:467, protein:47, carbs:54, fat:7, prepTime:'5 min', diet:'meat', icon:'🥣', tags:['high-protein'],
+      desc:'Alex\'s go-to high protein breakfast — oats, whey and Greek yogurt prepped the night before.',
+      ingredients:['60g rolled oats','30g whey protein powder','100g fat-free Greek yogurt','120ml skim or almond milk','80g mixed berries','dash of cinnamon'],
+      steps:['Mix oats, whey protein and milk in a jar.','Stir in Greek yogurt until smooth.','Top with berries and cinnamon.','Refrigerate overnight — ready in the morning.'] },
+    { name:'Overnight Mixed Berry Protein Oats', calories:499, protein:48, carbs:52, fat:11, prepTime:'5 min', diet:'meat', icon:'🫐', tags:['high-protein'],
+      desc:'Full-week prep-able berry oats with whey, peanut butter powder and chia seeds.',
+      ingredients:['60g rolled oats','30g whey protein powder','10g peanut butter powder','5g chia seeds','100g fat-free Greek yogurt','120ml almond milk','80g mixed berries'],
+      steps:['Combine oats, whey, PB powder and chia seeds in a jar.','Add yogurt and almond milk, stir well.','Top with mixed berries.','Refrigerate overnight — lasts up to 5 days in the fridge.'] },
+    { name:'Overnight Blueberry Protein Weetbix', calories:336, protein:26, carbs:42, fat:4, prepTime:'5 min', diet:'meat', icon:'🫐', tags:['high-protein'],
+      desc:'Weetbix soaked overnight with YoPro, whey and blueberries.',
+      ingredients:['4 Weet-Bix','150ml almond milk','140g salted caramel YoPro yogurt','18g whey protein','100g blueberries','dash of cinnamon','sugar-free maple syrup (optional)'],
+      steps:['Place Weetbix in a container.','Mix almond milk, YoPro and whey, pour over Weetbix.','Top with blueberries.','Refrigerate overnight. Add cinnamon and maple syrup before eating.'] },
+    { name:'Coffee Protein Frappe', calories:176, protein:25, carbs:8, fat:3, prepTime:'5 min', diet:'meat', icon:'☕', tags:['high-protein','low-carb'],
+      desc:'A quick protein-packed coffee frappe — perfect for busy mornings.',
+      ingredients:['1 scoop whey protein','200ml almond milk','handful of ice','1-2 shots espresso','5g chocolate topping sauce (optional)','light whipped cream (optional)'],
+      steps:['Add whey, almond milk and ice to blender.','Add coffee shots.','Blend until smooth and frothy.','Top with chocolate sauce and cream if desired.'] },
+  ],
+  snackAm: [
+    { name:'High Protein Yogurt', calories:180, protein:20, carbs:16, fat:3, prepTime:'1 min', diet:'meat', icon:'🍮', tags:['high-protein','low-carb'],
+      desc:'A YoPro or high-protein Greek yogurt — quick and hitting those protein targets.',
+      ingredients:['200g YoPro high-protein yogurt (any flavour)'],
+      steps:['Open and enjoy.','Pairs great with a piece of fruit.'] },
+    { name:'Fruit & Protein Yogurt', calories:220, protein:18, carbs:28, fat:2, prepTime:'2 min', diet:'meat', icon:'🍎', tags:['high-protein'],
+      desc:'Simple combo of fresh fruit and protein yogurt — great between meals.',
+      ingredients:['1 piece of fruit (apple, banana or orange)','150g YoPro or high-protein Greek yogurt'],
+      steps:['Slice fruit if needed.','Serve alongside yogurt.'] },
+    { name:'Protein Bar & Banana', calories:210, protein:12, carbs:28, fat:6, prepTime:'0 min', diet:'meat', icon:'🍫', tags:['high-protein'],
+      desc:'A protein bar plus a banana — simple, portable and satisfying.',
+      ingredients:['1 Wicked Sisters or similar protein bar','1 banana'],
+      steps:['Grab and go — no prep needed.'] },
+    { name:'Skinny Cow Ice Cream', calories:140, protein:4, carbs:24, fat:3, prepTime:'0 min', diet:'meat', icon:'🍦', tags:[],
+      desc:'A guilt-free low-calorie treat that fits the plan.',
+      ingredients:['1 Skinny Cow ice cream bar'],
+      steps:['Enjoy straight from the freezer.'] },
+  ],
+  lunch: [
+    { name:'Chicken Fajita Wraps', calories:548, protein:55, carbs:42, fat:14, prepTime:'15 min', diet:'meat', icon:'🌯', tags:['high-protein'],
+      desc:'High-protein chicken fajitas with yogurt, salsa and low-fat cheese.',
+      ingredients:['150g chicken breast','fajita seasoning','2 large wraps','mixed salad leaves','40g low-fat Greek yogurt','40g salsa','30g low-fat cheese'],
+      steps:['Season chicken with fajita seasoning, cook in pan 6–8 min.','Slice chicken.','Warm wraps in dry pan.','Fill wraps with salad, chicken, yogurt, salsa and cheese.','Roll and serve. Add fresh toppings daily if meal prepping.'] },
+    { name:'Simple Chicken Sangas', calories:482, protein:41, carbs:57, fat:10, prepTime:'5 min', diet:'meat', icon:'🥪', tags:['high-protein'],
+      desc:'Two simple chicken sandwiches with Nando\'s Perinaise — the ultimate meal prep staple.',
+      ingredients:['125g pre-cooked chicken breast','2 slices white bread','salad leaves, cucumber, tomato','20g Nando\'s Perinaise sauce'],
+      steps:['Slice or shred pre-cooked chicken.','Layer salad on bread.','Add chicken and drizzle Perinaise.','Sandwich together. Assemble fresh daily if meal prepping.'] },
+    { name:'Low Cal Chicken Burgers', calories:390, protein:42, carbs:30, fat:10, prepTime:'15 min', diet:'meat', icon:'🍔', tags:['high-protein'],
+      desc:'Two lean chicken burgers on burger thins with Perinaise and salad.',
+      ingredients:['200g chicken breast (raw weight)','2 burger thins','handful of salad','20g Nando\'s Perinaise','15g low-fat cheese'],
+      steps:['Cook chicken breast in pan or air fryer.','Slice chicken and place in burger thins.','Add salad, cheese and Perinaise.','Serve immediately.'] },
+    { name:'Caesar Pasta Salad', calories:506, protein:50, carbs:42, fat:12, prepTime:'15 min', diet:'meat', icon:'🥗', tags:['high-protein'],
+      desc:'Creamy Caesar pasta salad with chicken, bacon and low-fat cheese.',
+      ingredients:['150g chicken breast (raw weight)','60g pasta (raw weight)','25g short cut bacon','15g low-fat cheese','20g Caesar dressing','salad leaves of choice'],
+      steps:['Cook pasta, drain and cool.','Cook chicken, slice. Cook bacon until crispy.','Combine pasta, chicken, bacon, cheese and salad.','Drizzle Caesar dressing and toss. Stores up to 3 days.'] },
+    { name:'Chicken Perinaise Wraps', calories:462, protein:58, carbs:36, fat:8, prepTime:'10 min', diet:'meat', icon:'🌯', tags:['high-protein'],
+      desc:'Alex\'s simplest lunch — two high-protein chicken wraps with Nando\'s Perinaise.',
+      ingredients:['200g chicken breast (raw weight)','2 Mission carb balance wraps','20g Nando\'s Perinaise','lettuce, cucumber, tomato'],
+      steps:['Cook chicken breast, season with salt and pepper.','Slice chicken.','Fill wraps with salad and chicken.','Drizzle Perinaise, roll up and serve.'] },
+  ],
+  snackPm: [
+    { name:'Protein Yogurt & Berries', calories:160, protein:18, carbs:14, fat:2, prepTime:'2 min', diet:'meat', icon:'🍓', tags:['high-protein','low-carb'],
+      desc:'High-protein yogurt topped with berries — simple and satisfying.',
+      ingredients:['150g YoPro or fat-free Greek yogurt','80g mixed berries'],
+      steps:['Spoon yogurt into bowl.','Top with berries and enjoy.'] },
+    { name:'Paddle Pop & Banana', calories:130, protein:2, carbs:26, fat:2, prepTime:'0 min', diet:'meat', icon:'🍌', tags:[],
+      desc:'Classic Paddle Pop plus a banana — simple snack that fits the calorie budget.',
+      ingredients:['1 Paddle Pop ice cream','1 banana'],
+      steps:['Grab and enjoy — no prep needed.'] },
+    { name:'Oreo Ninja Creami Protein Ice Cream', calories:344, protein:34, carbs:32, fat:8, prepTime:'5 min + freeze', diet:'meat', icon:'🍦', tags:['high-protein'],
+      desc:'Alex\'s viral high-protein ice cream — macro-friendly and tastes like a real treat.',
+      ingredients:['250ml skim milk','150ml almond milk','30g whey protein','8g vanilla pudding mix (Cottee\'s)','1 mini pack Oreos (mix-in)'],
+      steps:['Mix milks, whey and pudding mix in Ninja Creami container.','Freeze for 24 hours.','Run through Ninja Creami on ice cream setting.','Add crushed Oreos, run mix-in setting.','Serve immediately.'] },
+  ],
+  dinner: [
+    { name:'Loaded Taco Bowls', calories:447, protein:46, carbs:38, fat:12, prepTime:'20 min', diet:'meat', icon:'🌮', tags:['high-protein'],
+      desc:'Extra lean mince, Spud Lite potatoes and all the taco toppings — Alex\'s go-to dinner.',
+      ingredients:['166g extra lean beef mince','taco seasoning','300g Spud Lite potatoes','salad leaves','15g low-fat cheese','20g salsa','20g lite sour cream'],
+      steps:['Boil or air fry Spud Lite potatoes until tender.','Brown mince in pan with taco seasoning.','Build bowl with potatoes, mince and salad.','Top with cheese, salsa and sour cream.'] },
+    { name:'Spicy Pepper Beef Mince Pasta', calories:558, protein:47, carbs:70, fat:10, prepTime:'20 min', diet:'meat', icon:'🍝', tags:['high-protein'],
+      desc:'Quick beef mince pasta with Dolmio spicy pepper sauce — makes 3 serves.',
+      ingredients:['500g extra lean beef mince (3 serves)','300g Dolmio Spicy Pepper Sauce','240g penne pasta','vegetables of choice'],
+      steps:['Cook pasta per packet, drain.','Brown mince in a large pan.','Add Dolmio sauce and veggies, simmer 5 min.','Divide into 3 portions and top with sauce.','Store extra portions in fridge up to 4 days.'] },
+    { name:'Burrito Bowl with Spud Lite', calories:447, protein:40, carbs:44, fat:12, prepTime:'20 min', diet:'meat', icon:'🫙', tags:['high-protein'],
+      desc:'Lean beef mince taco bowl with Spud Lite potatoes — lower carb and filling.',
+      ingredients:['200g extra lean beef mince','300g Spud Lite potatoes','6g taco spice mix','salad leaves','20g lite sour cream','20g low-fat cheese','20g Nando\'s Perinaise'],
+      steps:['Boil or air fry Spud Lite potatoes.','Cook mince with taco spice until browned.','Build bowl with potatoes, mince, salad.','Top with sour cream, cheese and Perinaise.'] },
+    { name:'Hot Honey Beef Bowl', calories:483, protein:31, carbs:58, fat:12, prepTime:'20 min', diet:'meat', icon:'🍯', tags:['high-protein'],
+      desc:'Taco-seasoned lean mince with sweet potato, avocado and hot honey drizzle.',
+      ingredients:['125g extra lean beef mince','taco seasoning','250g sweet potato','25g avocado','20g honey','10g sriracha or buffalo hot sauce'],
+      steps:['Air fry or bake sweet potato until tender.','Cook mince with taco seasoning.','Mix honey and sriracha together.','Build bowl with sweet potato, mince and avocado.','Drizzle hot honey sauce over the top.'] },
+    { name:'Simplified Chilli Con Carne', calories:619, protein:57, carbs:64, fat:15, prepTime:'25 min', diet:'meat', icon:'🍛', tags:['high-protein'],
+      desc:'A simplified high-protein chilli con carne — great for batch cooking.',
+      ingredients:['200g extra lean beef mince','1 can kidney beans','1 can crushed tomatoes','½ onion diced','2 cloves garlic','chilli powder, cumin, smoked paprika','rice or Spud Lite to serve'],
+      steps:['Brown mince with onion and garlic.','Add spices and cook 1 min.','Add kidney beans and crushed tomatoes.','Simmer 15 min until thickened.','Serve with rice or Spud Lite potatoes.'] },
+  ],
+};
+
+// ── Active recipe source ──
+let activeRecipeSource = 'standard';
+
+function setRecipeSource(source, el) {
+  activeRecipeSource = source;
+  document.querySelectorAll('[data-source]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('agBadge').style.display = source === 'ag' ? 'block' : 'none';
+  const hasMeals = weekPlan.some(d => Object.values(d).some(Boolean));
+  if (hasMeals) {
+    if (confirm('Switching recipe source will clear your current meal plan. Continue?')) {
+      weekPlan = Array.from({length:7}, () => ({breakfast:null,snackAm:null,lunch:null,snackPm:null,dinner:null}));
+      weekPlanServings = Array.from({length:7}, () => ({breakfast:1,snackAm:1,lunch:1,snackPm:1,dinner:1}));
+      renderWeekBar();
     } else {
-      activeDiets.add(diet);
+      activeRecipeSource = source === 'ag' ? 'standard' : 'ag';
+      document.querySelectorAll('[data-source]').forEach(b => b.classList.toggle('active', b.dataset.source === activeRecipeSource));
+      document.getElementById('agBadge').style.display = activeRecipeSource === 'ag' ? 'block' : 'none';
+      return;
     }
   }
-  document.querySelectorAll('.diet-btn').forEach(b => {
-    b.classList.toggle('active', activeDiets.has(b.dataset.diet));
-  });
+  saveAll();
+}
+
+function getActiveDB() {
+  return activeRecipeSource === 'ag' ? AG_RECIPE_DB : RECIPE_DB;
+}
+
+// ── Diet filter ──
+function toggleDietFilter(diet, el) {
+  if (diet === 'all') {
+    activeDiets.clear(); activeDiets.add('all');
+  } else {
+    activeDiets.delete('all');
+    activeDiets.has(diet) ? activeDiets.delete(diet) : activeDiets.add(diet);
+    if (activeDiets.size === 0) activeDiets.add('all');
+  }
+  document.querySelectorAll('.diet-btn').forEach(b => b.classList.toggle('active', activeDiets.has(b.dataset.diet)));
 }
 
 function filterRecipes(slot) {
-  return RECIPE_DB[slot].filter(r => {
+  const db = getActiveDB();
+  return (db[slot] || []).filter(r => {
     if (activeDiets.has('all')) return true;
-    // Diet type match
     const dietMatch = activeDiets.has(r.diet) ||
       (activeDiets.has('vegetarian') && (r.diet === 'vegetarian' || r.diet === 'vegan')) ||
       (activeDiets.has('vegan') && r.diet === 'vegan');
-    // Tag match
     const tagMatch = (activeDiets.has('high-protein') && r.tags.includes('high-protein')) ||
       (activeDiets.has('low-carb') && r.tags.includes('low-carb'));
-    // If only diet filters (no tag filters), match diet only
     const hasTagFilter = activeDiets.has('high-protein') || activeDiets.has('low-carb');
     const hasDietFilter = activeDiets.has('meat') || activeDiets.has('vegetarian') || activeDiets.has('vegan');
     if (hasTagFilter && hasDietFilter) return dietMatch && tagMatch;
     if (hasTagFilter) return tagMatch;
     return dietMatch;
-  });
-}
-
-function showRecipes() {
-  expandedRecipe = null;
-  renderAllRecipeCards();
-  updateMealHeaders();
-  document.getElementById('recipePanelContent').style.display = 'block';
-  document.getElementById('groceryCard').style.display = 'none';
-  renderWeekBar();
-}
-
-function updateMealHeaders() {
-  // Show actual selected Cal for currently viewed day (default Monday)
-  const slotIds = { breakfast:'bfCalBudget', snackAm:'snackAmCalBudget', lunch:'lunchCalBudget', snackPm:'snackPmCalBudget', dinner:'dinnerCalBudget' };
-  // Find first day with meals, or default to day 0
-  const refDay = weekPlan.findIndex(d => Object.values(d).some(Boolean));
-  const dayIdx = refDay >= 0 ? refDay : 0;
-  MEAL_SLOTS.forEach(slot => {
-    const el = document.getElementById(slotIds[slot]);
-    if (!el) return;
-    // Count how many days have this slot filled
-    const daysWithSlot = weekPlan.filter(d => d[slot]).length;
-    const exampleMeal = weekPlan[dayIdx][slot] || weekPlan.find(d => d[slot])?.[slot];
-    if (exampleMeal) {
-      el.textContent = exampleMeal.calories + ' Cal';
-      el.style.color = 'var(--orange)';
-    } else {
-      el.textContent = '— Cal';
-      el.style.color = '';
-    }
   });
 }
 
@@ -3120,121 +3434,31 @@ function renderWeekBar() {
   }).join('');
 }
 
-// Track which meals have been logged per day to avoid double-adding
-const loggedMeals = {}; // key: "dayIdx-slot"
+function showRecipes() {
+  expandedRecipe = null;
+  renderAllRecipeCards();
+  updateMealHeaders();
+  document.getElementById('recipePanelContent').style.display = 'block';
+  document.getElementById('groceryCard').style.display = 'none';
+  renderWeekBar();
+}
 
-function openDayModal(dayIdx) {
-  const dayMeals = weekPlan[dayIdx];
-  const hasMeals = Object.values(dayMeals).some(Boolean);
-  const target = state.calTarget || 0;
-  const totalCal = Object.values(dayMeals).reduce((s,m) => s+(m?m.calories:0), 0);
-
-  document.getElementById('modalDayTitle').textContent = WEEK_DAYS[dayIdx];
-  document.getElementById('modalDaySubtitle').textContent =
-    hasMeals
-      ? `${totalCal} Cal planned${target ? ' · ' + Math.round(totalCal/target*100) + '% of your ' + target + ' Cal target' : ''}`
-      : 'No meals planned for this day yet.';
-
-  const MEAL_DISPLAY = [
-    { slot:'breakfast', label:'☀️ Breakfast' },
-    { slot:'snackAm',   label:'🍎 Morning Snack' },
-    { slot:'lunch',     label:'🥗 Lunch' },
-    { slot:'snackPm',   label:'🧃 Afternoon Snack' },
-    { slot:'dinner',    label:'🌙 Dinner' },
-  ];
-
-  let html = '';
-  MEAL_DISPLAY.forEach(({ slot, label }) => {
-    const meal = dayMeals[slot];
-    if (!meal) return;
-    const key = `${dayIdx}-${slot}`;
-    const isLogged = !!loggedMeals[key];
-    const servings = getServings(dayIdx, slot);
-    const displayCal = meal.calories; // already scaled if servings > 1
-    html += `<div class="modal-meal-row${isLogged ? ' modal-meal-logged' : ''}" id="mmr-${key}">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="modal-meal-check${isLogged ? ' checked' : ''}" onclick="toggleMealLog(${dayIdx},'${slot}')">✓</div>
-        <div>
-          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:2px">${label}</div>
-          <div style="font-size:0.92rem;font-weight:500;color:var(--charcoal)">${meal.icon || '🍽'} ${meal.name}</div>
-          ${servings > 1 ? `<div style="font-size:0.72rem;color:var(--orange);margin-top:2px">${servings} servings</div>` : ''}
-        </div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${isLogged ? 'var(--green)' : 'var(--orange)'}">${displayCal} Cal</div>
-        ${isLogged ? '<div style="font-size:0.65rem;color:var(--green)">✓ Logged</div>' : '<div style="font-size:0.65rem;color:var(--muted)">Tap to log</div>'}
-      </div>
-    </div>`;
+function updateMealHeaders() {
+  const slotIds = { breakfast:'bfCalBudget', snackAm:'snackAmCalBudget', lunch:'lunchCalBudget', snackPm:'snackPmCalBudget', dinner:'dinnerCalBudget' };
+  const refDay = weekPlan.findIndex(d => Object.values(d).some(Boolean));
+  const dayIdx = refDay >= 0 ? refDay : 0;
+  MEAL_SLOTS.forEach(slot => {
+    const el = document.getElementById(slotIds[slot]);
+    if (!el) return;
+    const exampleMeal = weekPlan[dayIdx][slot] || weekPlan.find(d => d[slot])?.[slot];
+    if (exampleMeal) { el.textContent = exampleMeal.calories + ' Cal'; el.style.color = 'var(--orange)'; }
+    else { el.textContent = '— Cal'; el.style.color = ''; }
   });
-
-  if (!html) {
-    html = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.85rem">No meals planned for this day.<br>Go to the recipe cards below and select meals for ${WEEK_DAYS_SHORT[dayIdx]}.</div>`;
-  }
-
-  document.getElementById('modalMealList').innerHTML = html;
-  document.getElementById('dayMealModal').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-
-function toggleMealLog(dayIdx, slot) {
-  const key = `${dayIdx}-${slot}`;
-  const meal = weekPlan[dayIdx][slot];
-  if (!meal) return;
-
-  if (loggedMeals[key]) {
-    // Un-log: remove from food log
-    const idx = state.foods.findIndex(f => f._mealKey === key);
-    if (idx >= 0) {
-      state.consumed -= state.foods[idx].cal;
-      state.foods.splice(idx, 1);
-    }
-    delete loggedMeals[key];
-  } else {
-    // Log: add to food log
-    state.foods.push({ name: meal.name, cal: meal.calories, _mealKey: key });
-    state.consumed += meal.calories;
-    loggedMeals[key] = true;
-  }
-
-  renderFoodList();
-  updateCalDisplay();
-  saveAll();
-  // Re-render just this modal row
-  openDayModal(dayIdx);
-}
-
-function closeDayModal() {
-  document.getElementById('dayMealModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-function rcShowDay(dayIdx) {
-  openDayModal(dayIdx);
 }
 
 function updateRecipeCalBar() { renderWeekBar(); }
 
-// ── Servings: stored as weekPlanServings[dayIdx][meal] = number ──
-let weekPlanServings = Array.from({length:7}, () => ({breakfast:1,snackAm:1,lunch:1,snackPm:1,dinner:1}));
-
-function getServings(dayIdx, meal) {
-  return weekPlanServings[dayIdx]?.[meal] || 1;
-}
-
-// Scale an ingredient string quantity by a multiplier
-function scaleIngredient(raw, mult) {
-  if (mult === 1) return raw;
-  return raw.replace(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/, (_, num) => {
-    // Handle fractions like ½
-    let val = parseFloat(num);
-    if (isNaN(val)) return _;
-    const scaled = val * mult;
-    // Show nicely: integer if whole, 1dp otherwise
-    return (Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1))) + ' ';
-  });
-}
-
-// ── Render cards ──
+// ── Render recipe cards ──
 function renderAllRecipeCards() {
   MEAL_SLOTS.forEach(meal => {
     const el = document.getElementById(meal + 'Cards');
@@ -3246,10 +3470,23 @@ function renderAllRecipeCards() {
   });
 }
 
+// ── Servings ──
+function getServings(dayIdx, meal) {
+  return weekPlanServings[dayIdx]?.[meal] || 1;
+}
+
+function scaleIngredient(raw, mult) {
+  if (mult === 1) return raw;
+  return raw.replace(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/, (_, num) => {
+    let val = parseFloat(num);
+    if (isNaN(val)) return _;
+    const scaled = val * mult;
+    return (Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1))) + ' ';
+  });
+}
+
 function buildRecipeCard(r, meal, idx) {
   const isExpanded = expandedRecipe?.meal === meal && expandedRecipe?.idx === idx;
-
-  // Work out representative servings (use first day this recipe is selected, or 1)
   const selectedDayIdx = WEEK_DAYS_SHORT.findIndex((_,di) => weekPlan[di][meal]?.name === r.name);
   const servings = selectedDayIdx >= 0 ? getServings(selectedDayIdx, meal) : 1;
   const scaledCal = Math.round(r.calories * servings);
@@ -3262,9 +3499,8 @@ function buildRecipeCard(r, meal, idx) {
 
   const daysSelected = WEEK_DAYS_SHORT.filter((_,di) => weekPlan[di][meal]?.name === r.name);
   const selLabel = daysSelected.length > 0
-    ? `<div class="rc-sel-label">📅 ${daysSelected.join(', ')}${servings > 1 ? ' · ' + servings + ' servings' : ''}</div>` : '';
+    ? `<div class="rc-sel-label">📅 ${daysSelected.join(', ')}${servings > 1 ? ' · '+servings+' servings' : ''}</div>` : '';
 
-  // Day checkboxes
   const dayChecks = WEEK_DAYS_SHORT.map((d, di) => {
     const checked = weekPlan[di][meal]?.name === r.name;
     return `<label class="day-check-label ${checked?'checked':''}" onclick="event.stopPropagation()">
@@ -3273,11 +3509,10 @@ function buildRecipeCard(r, meal, idx) {
     </label>`;
   }).join('');
 
-  // Scaled ingredients
   const scaledIngredients = (r.ingredients||[]).map(i => scaleIngredient(i, servings));
   const ingredientsList = scaledIngredients.length
     ? `<div class="recipe-expand-section">
-        <div class="recipe-expand-title">Ingredients${servings > 1 ? ' <span style="color:var(--orange);font-weight:500">× '+servings+'</span>' : ''}</div>
+        <div class="recipe-expand-title">Ingredients${servings>1?' <span style="color:var(--orange);font-weight:500">×'+servings+'</span>':''}</div>
         <ul class="recipe-ingredient-list">${scaledIngredients.map(i=>`<li>${i}</li>`).join('')}</ul>
        </div>` : '';
 
@@ -3287,21 +3522,20 @@ function buildRecipeCard(r, meal, idx) {
         <ol class="recipe-steps-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
        </div>` : '';
 
-  // Servings stepper — only shows when expanded
   const servingsStepper = `
     <div class="recipe-expand-section">
       <div class="recipe-expand-title">Servings</div>
       <div class="servings-stepper">
         <button class="servings-btn" onclick="changeServings('${meal}',${idx},-1,event)">−</button>
         <div class="servings-display">
-          <span class="servings-num" id="srv-${meal}-${idx}">${servings}</span>
-          <span class="servings-label">serving${servings !== 1 ? 's' : ''}</span>
+          <span class="servings-num">${servings}</span>
+          <span class="servings-label">serving${servings!==1?'s':''}</span>
         </div>
         <button class="servings-btn" onclick="changeServings('${meal}',${idx},1,event)">+</button>
       </div>
       <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;text-align:center">
         Total: <strong style="color:var(--orange)">${scaledCal} Cal</strong>
-        ${servings > 1 ? `<span style="color:var(--muted)"> (${r.calories} Cal × ${servings})</span>` : ''}
+        ${servings>1?`<span style="color:var(--muted)"> (${r.calories} Cal × ${servings})</span>`:''}
       </div>
     </div>`;
 
@@ -3311,10 +3545,15 @@ function buildRecipeCard(r, meal, idx) {
       <div class="recipe-info">
         <div class="recipe-name">${r.name}</div>
         <div class="recipe-meta">
-          <span class="recipe-badge badge-cal">🔥 ${scaledCal} Cal${servings > 1 ? ' ×'+servings : ''}</span>
+          <span class="recipe-badge badge-cal">🔥 ${scaledCal} Cal${servings>1?' ×'+servings:''}</span>
           ${dietBadge}
           <span class="recipe-badge badge-time">⏱ ${r.prepTime}</span>
         </div>
+        ${r.protein ? `<div class="macro-mini-row">
+          <span class="macro-mini protein">P ${Math.round(r.protein*servings)}g</span>
+          <span class="macro-mini carbs">C ${Math.round(r.carbs*servings)}g</span>
+          <span class="macro-mini fat">F ${Math.round(r.fat*servings)}g</span>
+        </div>` : ''}
         <div class="recipe-desc">${r.desc}</div>
         ${selLabel}
       </div>
@@ -3331,41 +3570,33 @@ function buildRecipeCard(r, meal, idx) {
   </div>`;
 }
 
+function toggleRecipeExpand(meal, idx) {
+  expandedRecipe = (expandedRecipe?.meal===meal && expandedRecipe?.idx===idx) ? null : {meal, idx};
+  renderAllRecipeCards();
+}
+
 function changeServings(meal, recipeIdx, delta, event) {
   event.stopPropagation();
   const recipes = filterRecipes(meal);
   const r = recipes[recipeIdx];
   if (!r) return;
-
-  // Find a selected day to anchor servings to, or use day 0
   const anchorDay = WEEK_DAYS_SHORT.findIndex((_,di) => weekPlan[di][meal]?.name === r.name);
   const targetDays = anchorDay >= 0
     ? WEEK_DAYS_SHORT.reduce((acc,_,di) => { if (weekPlan[di][meal]?.name === r.name) acc.push(di); return acc; }, [])
     : [];
-
   const currentServings = anchorDay >= 0 ? getServings(anchorDay, meal) : 1;
   const newServings = Math.max(1, Math.min(10, currentServings + delta));
-
-  // Apply to all days that have this recipe in this slot
   targetDays.forEach(di => {
     weekPlanServings[di][meal] = newServings;
-    // Update stored meal calories to scaled version
     if (weekPlan[di][meal]) {
-      weekPlan[di][meal] = { ...r, calories: Math.round(r.calories * newServings), _baseCalories: r.calories, _servings: newServings };
+      weekPlan[di][meal] = { ...r, calories: Math.round(r.calories*newServings), _baseCalories: r.calories, _servings: newServings };
     }
   });
-
   renderWeekBar();
   updateMealHeaders();
-  // Re-render just this meal section
   const el = document.getElementById(meal+'Cards');
   if (el) el.innerHTML = filterRecipes(meal).map((rc,i) => buildRecipeCard(rc, meal, i)).join('');
   saveAll();
-}
-
-function toggleRecipeExpand(meal, idx) {
-  expandedRecipe = (expandedRecipe?.meal===meal && expandedRecipe?.idx===idx) ? null : {meal, idx};
-  renderAllRecipeCards();
 }
 
 function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
@@ -3375,7 +3606,7 @@ function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
   if (checkbox.checked) {
     const servings = weekPlanServings[dayIdx][meal] || 1;
     weekPlan[dayIdx][meal] = servings > 1
-      ? { ...r, calories: Math.round(r.calories * servings), _baseCalories: r.calories, _servings: servings }
+      ? { ...r, calories: Math.round(r.calories*servings), _baseCalories: r.calories, _servings: servings }
       : r;
   } else {
     weekPlan[dayIdx][meal] = null;
@@ -3389,9 +3620,78 @@ function toggleRecipeDay(meal, recipeIdx, dayIdx, checkbox) {
   saveAll();
 }
 
-// ── Grocery list (static — Aldi AU prices) ──
-// ── Supermarket price databases ──
-let activeStore = 'aldi';
+// ── Day meal modal ──
+function openDayModal(dayIdx) {
+  const dayMeals = weekPlan[dayIdx];
+  const hasMeals = Object.values(dayMeals).some(Boolean);
+  const target = state.calTarget || 0;
+  const totalCal = Object.values(dayMeals).reduce((s,m) => s+(m?m.calories:0), 0);
+  document.getElementById('modalDayTitle').textContent = WEEK_DAYS[dayIdx];
+  document.getElementById('modalDaySubtitle').textContent = hasMeals
+    ? `${totalCal} Cal planned${target ? ' · '+Math.round(totalCal/target*100)+'% of your '+target+' Cal target' : ''}`
+    : 'No meals planned for this day yet.';
+  const MEAL_DISPLAY = [
+    { slot:'breakfast', label:'☀️ Breakfast' },
+    { slot:'snackAm',   label:'🍎 Morning Snack' },
+    { slot:'lunch',     label:'🥗 Lunch' },
+    { slot:'snackPm',   label:'🧃 Afternoon Snack' },
+    { slot:'dinner',    label:'🌙 Dinner' },
+  ];
+  let html = '';
+  MEAL_DISPLAY.forEach(({ slot, label }) => {
+    const meal = dayMeals[slot];
+    if (!meal) return;
+    const key = `${dayIdx}-${slot}`;
+    const isLogged = !!loggedMeals[key];
+    const servings = getServings(dayIdx, slot);
+    html += `<div class="modal-meal-row${isLogged?' modal-meal-logged':''}" id="mmr-${key}">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="modal-meal-check${isLogged?' checked':''}" onclick="toggleMealLog(${dayIdx},'${slot}')">✓</div>
+        <div>
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:2px">${label}</div>
+          <div style="font-size:0.92rem;font-weight:500;color:var(--charcoal)">${meal.icon||'🍽'} ${meal.name}</div>
+          ${servings>1?`<div style="font-size:0.72rem;color:var(--orange);margin-top:2px">${servings} servings</div>`:''}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${isLogged?'var(--green)':'var(--orange)'}">${meal.calories} Cal</div>
+        ${isLogged?'<div style="font-size:0.65rem;color:var(--green)">✓ Logged</div>':'<div style="font-size:0.65rem;color:var(--muted)">Tap to log</div>'}
+      </div>
+    </div>`;
+  });
+  if (!html) html = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:0.85rem">No meals planned for this day.</div>`;
+  document.getElementById('modalMealList').innerHTML = html;
+  document.getElementById('dayMealModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function toggleMealLog(dayIdx, slot) {
+  const key = `${dayIdx}-${slot}`;
+  const meal = weekPlan[dayIdx][slot];
+  if (!meal) return;
+  if (loggedMeals[key]) {
+    const idx = state.foods.findIndex(f => f._mealKey === key);
+    if (idx >= 0) { state.consumed -= state.foods[idx].cal; state.foods.splice(idx, 1); }
+    delete loggedMeals[key];
+    removeMealMacros(key);
+  } else {
+    state.foods.push({ name: meal.name, cal: meal.calories, _mealKey: key });
+    state.consumed += meal.calories;
+    loggedMeals[key] = true;
+    logMealMacros(meal, WEEK_DAYS_SHORT[dayIdx], key);
+  }
+  renderFoodList();
+  updateCalDisplay();
+  saveAll();
+  openDayModal(dayIdx);
+}
+
+function closeDayModal() {
+  document.getElementById('dayMealModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function rcShowDay(dayIdx) { openDayModal(dayIdx); }
 
 const STORE_INFO = {
   aldi:       { name: 'Aldi',       url: 'https://www.aldi.com.au',       tagline: '🏷 Aldi — typically the lowest prices, no loyalty program needed', noteColor: '#003087' },
@@ -3694,41 +3994,171 @@ const PRICES = {
   },
 };
 
+// ── Ingredient quantity parser ──
+function parseIngredientQty(raw) {
+  // Extract numeric quantity and unit from ingredient string
+  // Handles: "2 eggs", "½ cup oats", "100g chicken", "3 bacon rashers", "1½ tbsp peanut butter"
+  const fractions = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.667 };
+  let str = raw.trim();
+
+  // Replace unicode fractions
+  Object.entries(fractions).forEach(([f, v]) => { str = str.replace(f, v); });
+
+  // Match patterns like "1.5", "1 ½", "2", etc at start
+  const numMatch = str.match(/^(\d+(?:\.\d+)?)\s*(\d+(?:\.\d+)?)?\s*(tbsp|tsp|cup|cups|g|kg|ml|L|x|rashers?|slices?|cloves?|bunch|handful|pinch|can|tin|tbsp)?\.?\s*/i);
+
+  let qty = 1;
+  let unit = '';
+  let ingredientName = str;
+
+  if (numMatch) {
+    qty = parseFloat(numMatch[1]);
+    if (numMatch[2]) qty += parseFloat(numMatch[2]); // "1 ½" → 1.5
+    unit = (numMatch[3] || '').toLowerCase();
+    ingredientName = str.slice(numMatch[0].length).trim();
+  }
+
+  return { qty, unit, ingredientName };
+}
+
+// ── Pack size database for smart quantity calculation ──
+const PACK_SIZES = {
+  // key: normalised ingredient name → { unit, packSize, packLabel }
+  'eggs':               { unit: 'count', packSize: 12, packLabel: '12-pack' },
+  'bacon':              { unit: 'rashers', packSize: 8,  packLabel: '500g pack (~8 rashers)' },
+  'chicken breast':     { unit: 'g',       packSize: 500, packLabel: '500g pack' },
+  'beef mince':         { unit: 'g',       packSize: 500, packLabel: '500g pack' },
+  'beef strips':        { unit: 'g',       packSize: 500, packLabel: '500g pack' },
+  'salmon':             { unit: 'g',       packSize: 400, packLabel: '400g pack' },
+  'smoked salmon':      { unit: 'g',       packSize: 150, packLabel: '150g pack' },
+  'prawns':             { unit: 'g',       packSize: 400, packLabel: '400g pack' },
+  'tuna':               { unit: 'g',       packSize: 95,  packLabel: '95g tin' },
+  'wholegrain bread':   { unit: 'slices',  packSize: 12, packLabel: 'loaf (~12 slices)' },
+  'wholegrain wrap':    { unit: 'count',   packSize: 8,  packLabel: '8-pack' },
+  'english muffin':     { unit: 'count',   packSize: 6,  packLabel: '6-pack' },
+  'corn tortillas':     { unit: 'count',   packSize: 12, packLabel: '12-pack' },
+  'rice':               { unit: 'cups',    packSize: 10, packLabel: '1kg bag (~10 cups)' },
+  'pasta':              { unit: 'cups',    packSize: 6,  packLabel: '500g bag (~6 cups)' },
+  'rolled oats':        { unit: 'cups',    packSize: 10, packLabel: '1kg bag (~10 cups)' },
+  'greek yogurt':       { unit: 'g',       packSize: 500, packLabel: '500g tub' },
+  'coconut yogurt':     { unit: 'cups',    packSize: 2,  packLabel: '500g tub (~2 cups)' },
+  'almond milk':        { unit: 'cups',    packSize: 4,  packLabel: '1L carton (~4 cups)' },
+  'oat milk':           { unit: 'cups',    packSize: 4,  packLabel: '1L carton (~4 cups)' },
+  'coconut milk':       { unit: 'count',   packSize: 1,  packLabel: '400ml tin' },
+  'crushed tomatoes':   { unit: 'count',   packSize: 1,  packLabel: '400g tin' },
+  'canned chickpeas':   { unit: 'count',   packSize: 1,  packLabel: '400g tin' },
+  'canned black beans': { unit: 'count',   packSize: 1,  packLabel: '400g tin' },
+  'red lentils':        { unit: 'cups',    packSize: 8,  packLabel: '500g bag (~8 cups)' },
+  'quinoa':             { unit: 'cups',    packSize: 6,  packLabel: '500g bag (~6 cups)' },
+  'avocado':            { unit: 'count',   packSize: 1,  packLabel: 'each' },
+  'banana':             { unit: 'count',   packSize: 5,  packLabel: 'bunch of 5' },
+  'lemon':              { unit: 'count',   packSize: 3,  packLabel: 'bag of 3' },
+  'garlic':             { unit: 'cloves',  packSize: 10, packLabel: '1 bulb (~10 cloves)' },
+  'peanut butter':      { unit: 'tbsp',    packSize: 25, packLabel: '375g jar (~25 tbsp)' },
+  'almond butter':      { unit: 'tbsp',    packSize: 16, packLabel: '250g jar (~16 tbsp)' },
+  'honey':              { unit: 'tsp',     packSize: 80, packLabel: '500g jar (~80 tsp)' },
+  'maple syrup':        { unit: 'tsp',     packSize: 50, packLabel: '250ml bottle (~50 tsp)' },
+  'olive oil':          { unit: 'tbsp',    packSize: 50, packLabel: '750ml bottle (~50 tbsp)' },
+  'soy sauce':          { unit: 'tbsp',    packSize: 30, packLabel: '500ml bottle (~30 tbsp)' },
+  'sesame oil':         { unit: 'tbsp',    packSize: 15, packLabel: '250ml bottle (~15 tbsp)' },
+  'tahini':             { unit: 'tbsp',    packSize: 16, packLabel: '250g jar (~16 tbsp)' },
+  'light mayo':         { unit: 'tbsp',    packSize: 25, packLabel: '400g jar (~25 tbsp)' },
+  'hokkien noodles':    { unit: 'g',       packSize: 440, packLabel: '440g pack' },
+  'mixed nuts':         { unit: 'g',       packSize: 500, packLabel: '500g bag' },
+  'granola':            { unit: 'tbsp',    packSize: 20, packLabel: '500g bag (~20 tbsp)' },
+  'chia seeds':         { unit: 'tbsp',    packSize: 25, packLabel: '250g bag (~25 tbsp)' },
+  'edamame':            { unit: 'cups',    packSize: 4,  packLabel: '500g bag (~4 cups)' },
+  'firm tofu':          { unit: 'g',       packSize: 300, packLabel: '300g pack' },
+};
+
 function generateGroceryList() {
   const allSelected = [];
   weekPlan.forEach((dayMeals, di) => {
-    Object.values(dayMeals).forEach(m => { if (m) allSelected.push({day: WEEK_DAYS_SHORT[di], meal: m}); });
+    MEAL_SLOTS.forEach(slot => {
+      const m = dayMeals[slot];
+      if (m) {
+        const servings = getServings(di, slot);
+        allSelected.push({ day: WEEK_DAYS_SHORT[di], dayIdx: di, slot, meal: m, servings });
+      }
+    });
   });
   if (allSelected.length === 0) { alert('Please select at least one recipe first.'); return; }
 
   const storePrices = PRICES[activeStore];
+
+  // Aggregate ingredients with quantities across all days × servings
+  // ingredientMap[normName] = { displayName, totalQty, unit, days: [] }
   const ingredientMap = {};
-  allSelected.forEach(({meal: m}) => {
-    (m.ingredients || []).forEach(raw => {
-      const name = raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i, '').toLowerCase().trim()
-        .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced)$/i,'').trim();
-      if (!ingredientMap[name]) ingredientMap[name] = { raw, count: 0 };
-      ingredientMap[name].count++;
+
+  allSelected.forEach(({ meal: m, servings, day }) => {
+    // Use base recipe ingredients (not scaled version stored in weekPlan)
+    const allRecipes = [...Object.values(RECIPE_DB).flat(), ...Object.values(AG_RECIPE_DB).flat()];
+    const baseRecipe = allRecipes.find(r => r.name === m.name);
+    const ingredients = baseRecipe?.ingredients || m.ingredients || [];
+
+    ingredients.forEach(raw => {
+      const { qty, unit, ingredientName } = parseIngredientQty(raw);
+      const normName = ingredientName.toLowerCase()
+        .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced|rinsed|drained)$/i, '')
+        .trim();
+
+      const totalQty = qty * servings;
+
+      if (!ingredientMap[normName]) {
+        ingredientMap[normName] = { displayName: ingredientName, totalQty: 0, unit, days: [], rawExamples: [] };
+      }
+      ingredientMap[normName].totalQty += totalQty;
+      if (!ingredientMap[normName].days.includes(day)) ingredientMap[normName].days.push(day);
+      if (ingredientMap[normName].rawExamples.length < 2) ingredientMap[normName].rawExamples.push(raw);
     });
   });
 
+  // Now compute how many packs/units needed
   groceryItems = [];
   const sections = { 'Produce': [], 'Meat & Fish': [], 'Dairy & Eggs': [], 'Pantry & Dry Goods': [], 'Frozen & Other': [] };
-  const produceKeys = ['tomato','cherry tomato','spinach','avocado','carrot','cucumber','zucchini','capsicum','bok choy','broccolini','asparagus','broccoli','sweet potato','lemon','onion','garlic','ginger','spring onion','celery','banana','grapes','fresh parsley','fresh coriander','lettuce'];
-  const meatKeys = ['chicken breast','salmon','beef','prawn','tuna','smoked salmon','beef strip','bacon rasher','bacon'];
+  const produceKeys = ['tomato','cherry tomato','spinach','avocado','carrot','cucumber','zucchini','capsicum','bok choy','broccolini','asparagus','broccoli','sweet potato','lemon','onion','garlic','ginger','spring onion','celery','banana','grapes','parsley','coriander','lettuce','apple'];
+  const meatKeys = ['chicken','salmon','beef','prawn','tuna','smoked salmon','bacon','pork'];
   const dairyKeys = ['egg','yogurt','cheese','cream cheese','cottage cheese','butter','mozzarella','feta','cheddar','milk'];
-  const frozenKeys = ['edamame','frozen','ice'];
+  const frozenKeys = ['edamame','frozen'];
 
-  Object.entries(ingredientMap).forEach(([name, info]) => {
-    const priceKey = Object.keys(storePrices).find(k => name.includes(k) || k.includes(name.split(' ')[0]));
+  Object.entries(ingredientMap).forEach(([normName, info]) => {
+    const priceKey = Object.keys(storePrices).find(k => normName.includes(k) || k.includes(normName.split(' ')[0]));
     const priceInfo = priceKey ? storePrices[priceKey] : { price: 2.99, qty: '1 unit' };
-    const uid = 'gi-' + groceryItems.length;
-    const item = { uid, name: info.raw.replace(/^\d+[\w.]*\s*(tbsp|tsp|cup|g|kg|ml|L|x)?\s*/i,'').trim(), qty: priceInfo.qty, price: priceInfo.price, section: '' };
 
-    if (produceKeys.some(k => name.includes(k))) item.section = 'Produce';
-    else if (meatKeys.some(k => name.includes(k))) item.section = 'Meat & Fish';
-    else if (dairyKeys.some(k => name.includes(k))) item.section = 'Dairy & Eggs';
-    else if (frozenKeys.some(k => name.includes(k))) item.section = 'Frozen & Other';
+    // Work out packs needed
+    const packKey = Object.keys(PACK_SIZES).find(k => normName.includes(k) || k.includes(normName.split(' ')[0]));
+    const packInfo = packKey ? PACK_SIZES[packKey] : null;
+
+    let packsNeeded = 1;
+    let qtyLabel = '';
+    if (packInfo && info.totalQty > 0) {
+      packsNeeded = Math.ceil(info.totalQty / packInfo.packSize);
+      const totalRounded = Number.isInteger(info.totalQty) ? info.totalQty : parseFloat(info.totalQty.toFixed(1));
+      qtyLabel = `${totalRounded}${info.unit ? ' ' + info.unit : ''} needed → ${packsNeeded} × ${packInfo.packLabel}`;
+    } else {
+      const totalRounded = Number.isInteger(info.totalQty) ? info.totalQty : parseFloat(info.totalQty.toFixed(1));
+      qtyLabel = totalRounded > 0 && info.unit
+        ? `${totalRounded} ${info.unit} needed`
+        : priceInfo.qty;
+    }
+
+    const uid = 'gi-' + groceryItems.length;
+    const totalPrice = priceInfo.price * packsNeeded;
+    const item = {
+      uid,
+      name: info.displayName,
+      qty: qtyLabel,
+      price: totalPrice,
+      packsNeeded,
+      packPrice: priceInfo.price,
+      section: '',
+      days: info.days,
+    };
+
+    if (produceKeys.some(k => normName.includes(k))) item.section = 'Produce';
+    else if (meatKeys.some(k => normName.includes(k))) item.section = 'Meat & Fish';
+    else if (dairyKeys.some(k => normName.includes(k))) item.section = 'Dairy & Eggs';
+    else if (frozenKeys.some(k => normName.includes(k))) item.section = 'Frozen & Other';
     else item.section = 'Pantry & Dry Goods';
 
     sections[item.section].push(item);
@@ -3744,8 +4174,8 @@ function generateGroceryList() {
 function renderGroceryList(sections, days) {
   const info = STORE_INFO[activeStore];
   let html = '';
-  if (days.length > 1) {
-    html += `<div style="font-size:0.78rem;color:var(--green);margin-bottom:12px;font-weight:500">📅 Combined for: ${days.join(', ')}</div>`;
+  if (days.length > 0) {
+    html += `<div style="font-size:0.78rem;color:var(--green);margin-bottom:12px;font-weight:500">📅 Quantities calculated for: ${days.join(', ')} (${days.length} day${days.length>1?'s':''})</div>`;
   }
   let grandTotal = 0;
   Object.entries(sections).forEach(([title, items]) => {
@@ -3753,10 +4183,13 @@ function renderGroceryList(sections, days) {
     html += `<div class="grocery-section-title">${title}</div>`;
     items.forEach(item => {
       grandTotal += item.price;
+      const packsLabel = item.packsNeeded > 1 ? `<span style="font-size:0.65rem;color:var(--orange);margin-left:4px">×${item.packsNeeded} packs</span>` : '';
       html += `<div class="grocery-item" id="${item.uid}">
-        <div class="grocery-check" onclick="toggleGrocery('${item.uid}')">&#10003;</div>
-        <div class="grocery-name" style="text-transform:capitalize">${item.name}</div>
-        <div class="grocery-qty">${item.qty}</div>
+        <div class="grocery-check" onclick="toggleGrocery('${item.uid}')">✓</div>
+        <div style="flex:1;min-width:0">
+          <div class="grocery-name" style="text-transform:capitalize">${item.name} ${packsLabel}</div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:1px">${item.qty}</div>
+        </div>
         <div class="grocery-price">$${item.price.toFixed(2)}</div>
       </div>`;
     });
@@ -3817,6 +4250,143 @@ function downloadGroceryList() {
 }
 
 
+// ─── MACROS ───
+function saveMacroTargets() {
+  macroTargets.protein = parseFloat(document.getElementById('targetProteinInput')?.value) || 0;
+  macroTargets.carbs   = parseFloat(document.getElementById('targetCarbsInput')?.value)   || 0;
+  macroTargets.fat     = parseFloat(document.getElementById('targetFatInput')?.value)     || 0;
+  updateMacroDisplay();
+  saveAll();
+}
+
+function addMacroEntry() {
+  const name    = document.getElementById('macroFoodName')?.value.trim();
+  const cal     = parseFloat(document.getElementById('macroCalInput')?.value)     || 0;
+  const protein = parseFloat(document.getElementById('macroProteinInput')?.value) || 0;
+  const carbs   = parseFloat(document.getElementById('macroCarbsInput')?.value)   || 0;
+  const fat     = parseFloat(document.getElementById('macroFatInput')?.value)     || 0;
+  if (!name) { document.getElementById('macroFoodName')?.focus(); return; }
+
+  // Also add to food log if cal > 0
+  if (cal > 0) {
+    state.foods.push({ name, cal, _macroId: macroIdCounter });
+    state.consumed += cal;
+    renderFoodList();
+    updateCalDisplay();
+  }
+
+  macroLog.push({ id: macroIdCounter++, name, cal, protein, carbs, fat, source: 'manual' });
+
+  // Clear inputs
+  ['macroFoodName','macroCalInput','macroProteinInput','macroCarbsInput','macroFatInput']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  updateMacroDisplay();
+  saveAll();
+}
+
+function removeMacroEntry(id) {
+  const idx = macroLog.findIndex(e => e.id === id);
+  if (idx < 0) return;
+  const entry = macroLog[idx];
+  // Remove from food log too if it came from here
+  const foodIdx = state.foods.findIndex(f => f._macroId === id);
+  if (foodIdx >= 0) {
+    state.consumed -= state.foods[foodIdx].cal;
+    state.foods.splice(foodIdx, 1);
+    renderFoodList();
+    updateCalDisplay();
+  }
+  macroLog.splice(idx, 1);
+  updateMacroDisplay();
+  saveAll();
+}
+
+// Called when a meal is logged via the day modal — adds it to macro log too
+function logMealMacros(meal, dayLabel, mealKey) {
+  const allRecipes = [...Object.values(RECIPE_DB).flat(), ...Object.values(AG_RECIPE_DB).flat()];
+  const r = allRecipes.find(r => r.name === meal.name);
+  const servings = meal._servings || 1;
+  macroLog.push({
+    id: macroIdCounter++,
+    name: meal.name + (dayLabel ? ' (' + dayLabel + ')' : ''),
+    cal:     meal.calories,
+    protein: r ? Math.round((r.protein || 0) * servings) : 0,
+    carbs:   r ? Math.round((r.carbs   || 0) * servings) : 0,
+    fat:     r ? Math.round((r.fat     || 0) * servings) : 0,
+    source:  'recipe',
+    mealKey,
+  });
+  updateMacroDisplay();
+  saveAll();
+}
+
+function removeMealMacros(mealKey) {
+  const idx = macroLog.findIndex(e => e.mealKey === mealKey);
+  if (idx >= 0) { macroLog.splice(idx, 1); }
+  updateMacroDisplay();
+  saveAll();
+}
+
+function updateMacroDisplay() {
+  const totals = macroLog.reduce((acc, e) => {
+    acc.protein += e.protein || 0;
+    acc.carbs   += e.carbs   || 0;
+    acc.fat     += e.fat     || 0;
+    return acc;
+  }, { protein: 0, carbs: 0, fat: 0 });
+
+  // Update total displays
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('totalProtein', Math.round(totals.protein) + 'g');
+  set('totalCarbs',   Math.round(totals.carbs)   + 'g');
+  set('totalFat',     Math.round(totals.fat)     + 'g');
+
+  // Target labels
+  set('targetProtein', macroTargets.protein ? 'Target: ' + macroTargets.protein + 'g' : 'No target set');
+  set('targetCarbs',   macroTargets.carbs   ? 'Target: ' + macroTargets.carbs   + 'g' : 'No target set');
+  set('targetFat',     macroTargets.fat     ? 'Target: ' + macroTargets.fat     + 'g' : 'No target set');
+
+  // Progress bars
+  const pct = (val, target) => target > 0 ? Math.min(100, Math.round(val / target * 100)) : 0;
+  const barEl = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = pct + '%'; };
+  barEl('proteinBar', pct(totals.protein, macroTargets.protein));
+  barEl('carbsBar',   pct(totals.carbs,   macroTargets.carbs));
+  barEl('fatBar',     pct(totals.fat,     macroTargets.fat));
+
+  // Log list
+  const listEl = document.getElementById('macroLogList');
+  if (!listEl) return;
+  if (macroLog.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem">No macros logged yet.<br>Log a meal via the day pills or add one manually above.</div>`;
+    return;
+  }
+  listEl.innerHTML = macroLog.map(e => `
+    <div class="macro-log-item">
+      <div style="flex:1;min-width:0">
+        <div class="macro-log-name">${e.name}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap">
+          ${e.protein ? `<span class="macro-mini protein">P ${e.protein}g</span>` : ''}
+          ${e.carbs   ? `<span class="macro-mini carbs">C ${e.carbs}g</span>`     : ''}
+          ${e.fat     ? `<span class="macro-mini fat">F ${e.fat}g</span>`         : ''}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="macro-log-cal">${e.cal} Cal</div>
+        <div style="font-size:0.65rem;color:var(--muted)">${e.source === 'recipe' ? '🍽 Recipe' : '✏️ Manual'}</div>
+      </div>
+      <div style="color:var(--muted);cursor:pointer;padding:4px 6px;font-size:0.8rem;flex-shrink:0" onclick="removeMacroEntry(${e.id})">✕</div>
+    </div>
+  `).join('');
+}
+
+function restoreMacroTargetInputs() {
+  const s = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  s('targetProteinInput', macroTargets.protein || '');
+  s('targetCarbsInput',   macroTargets.carbs   || '');
+  s('targetFatInput',     macroTargets.fat     || '');
+}
+
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -3826,6 +4396,7 @@ function switchTab(id) {
   if (id === 'steps') updateStepDisplay();
   if (id === 'weekly') { syncTodayToWeekly(); renderDayGrid(); updateWeekSummary(); updateWeekHistory(); }
   if (id === 'recipes') renderWeekBar();
+  if (id === 'macros')  { updateMacroDisplay(); restoreMacroTargetInputs(); }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -3836,13 +4407,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (hasSaved) {
     restoreUI();
   } else {
-    // Fresh start
-    renderExercises();
-    updateWorkoutSummary();
-    renderDayGrid();
-    updateWeekSummary();
-    updateWeekHistory();
-    renderWeekBar();
+    // Fresh start — defer to ensure all functions are defined
+    setTimeout(() => {
+      renderExercises();
+      updateWorkoutSummary();
+      renderDayGrid();
+      updateWeekSummary();
+      updateWeekHistory();
+      renderWeekBar();
+    }, 0);
   }
 });
 </script>
