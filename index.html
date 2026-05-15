@@ -2040,7 +2040,7 @@
     <div class="dash-cal-stats">
       <div class="dash-stat-row">
         <span class="dash-stat-dot" style="background:var(--orange)"></span>
-        <span class="dash-stat-label">Target</span>
+        <span class="dash-stat-label">Effective target</span>
         <span class="dash-stat-val" id="dashCalTarget">— Cal</span>
       </div>
       <div class="dash-stat-row">
@@ -2050,7 +2050,7 @@
       </div>
       <div class="dash-stat-row">
         <span class="dash-stat-dot" style="background:var(--green)"></span>
-        <span class="dash-stat-label">Burned</span>
+        <span class="dash-stat-label">Steps earned</span>
         <span class="dash-stat-val" id="dashBurned">0 Cal</span>
       </div>
     </div>
@@ -2191,18 +2191,6 @@
 
     <div class="form-row">
       <div class="form-group full">
-        <label>Activity Level</label>
-        <select id="activity">
-          <option value="1.2">Sedentary (desk job, little exercise)</option>
-          <option value="1.375">Lightly active (1–3 days/week)</option>
-          <option value="1.55" selected>Moderately active (3–5 days/week)</option>
-          <option value="1.725">Very active (6–7 days/week)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group full">
         <label>Weekly weight loss goal</label>
         <select id="deficit">
           <option value="250">Gentle — 0.25 kg/week (−250 cal/day)</option>
@@ -2212,24 +2200,28 @@
       </div>
     </div>
 
+    <div class="tip-strip" style="margin-bottom:12px">
+      💡 <strong>How your target works:</strong> Your calorie target is based on your BMR (calories your body burns at rest) minus your deficit goal. Your actual step count adds back calories each day at 65% efficiency — so the more you move, the more you can eat. No activity level assumptions needed.
+    </div>
+
     <button class="calc-btn" onclick="calculate()">Calculate My Targets →</button>
   </div>
 
   <div class="card" id="resultsCard" style="display:none">
     <div class="card-title">Your Daily Targets</div>
-    <div class="card-desc">Based on the Mifflin-St Jeor equation</div>
+    <div class="card-desc">Based on BMR — your target adjusts daily with your actual step count</div>
     <div class="results-grid">
       <div class="result-box highlight">
         <div class="result-val" id="r-calTarget">—</div>
-        <div class="result-label">Daily calorie target to lose weight</div>
+        <div class="result-label">Base daily calorie target (BMR − deficit)</div>
       </div>
       <div class="result-box">
         <div class="result-val" id="r-bmr">—</div>
         <div class="result-label">BMR (calories at rest)</div>
       </div>
       <div class="result-box">
-        <div class="result-val" id="r-tdee">—</div>
-        <div class="result-label">TDEE (maintenance calories)</div>
+        <div class="result-val" id="r-stepEarn">—</div>
+        <div class="result-label">Cal earned per 1,000 steps (65% efficiency)</div>
       </div>
       <div class="result-box">
         <div class="result-val" id="r-steps">—</div>
@@ -2237,7 +2229,7 @@
       </div>
       <div class="result-box">
         <div class="result-val" id="r-stepCal">—</div>
-        <div class="result-label">Calories burned by steps</div>
+        <div class="result-label">Cal earned at step goal</div>
       </div>
     </div>
     <div class="tip-strip" id="profileTip"></div>
@@ -2262,7 +2254,7 @@
     </div>
 
     <div class="cal-row">
-      <span class="cal-row-label">🎯 Daily target</span>
+      <span class="cal-row-label">🎯 Effective target today</span>
       <span class="cal-row-val" id="calTargetDisplay">— Cal</span>
     </div>
     <div class="cal-row">
@@ -2270,12 +2262,15 @@
       <span class="cal-row-val" id="calConsumedDisplay">0 Cal</span>
     </div>
     <div class="cal-row">
-      <span class="cal-row-label">🔥 Burned (exercise)</span>
-      <span class="cal-row-val" id="calBurnedDisplay">0 Cal</span>
+      <span class="cal-row-label">👟 Earned from steps</span>
+      <span class="cal-row-val" id="calStepBurnDisplay">0 Cal</span>
     </div>
     <div class="cal-row">
-      <span class="cal-row-label">👟 Burned (steps)</span>
-      <span class="cal-row-val" id="calStepBurnDisplay">0 Cal</span>
+      <span class="cal-row-label" style="font-size:0.72rem;color:var(--muted)">ℹ️ Exercise logged (info only)</span>
+      <span class="cal-row-val" id="calBurnedDisplay" style="font-size:0.85rem;color:var(--muted)">0 Cal</span>
+    </div>
+    <div style="margin-top:10px;font-size:0.72rem;color:var(--muted);line-height:1.5;padding:8px 10px;background:var(--surface);border-radius:8px">
+      💡 Your target = BMR − deficit + steps earned (at 65% efficiency). The more you walk, the more you can eat. Exercise is tracked for motivation but doesn't inflate your target.
     </div>
   </div>
 
@@ -2291,8 +2286,8 @@
   </div>
 
   <div class="card">
-    <div class="card-title">Log Exercise Calories</div>
-    <div class="card-desc">Manually add calories burned from any workout</div>
+    <div class="card-title">Log Exercise <span style="font-size:0.75rem;font-weight:300;color:var(--muted)">(informational)</span></div>
+    <div class="card-desc">Track your workouts — shown for motivation, not added to your calorie budget</div>
     <div class="input-row">
       <input type="text" id="exName" placeholder="Exercise name">
       <input type="number" id="exCal" placeholder="Cal" style="width:90px;flex:none">
@@ -2329,7 +2324,7 @@
     <div class="step-stats">
       <div class="step-stat">
         <div class="step-stat-val" id="statCal">0</div>
-        <div class="step-stat-label">Cal burned</div>
+        <div class="step-stat-label">Cal earned</div>
       </div>
       <div class="step-stat">
         <div class="step-stat-val" id="statKm">0.0</div>
@@ -2713,11 +2708,13 @@ let state = {
 };
 
 // ─── ADDITIONAL STATE (must be before saveAll/loadAll) ───
-const loggedMeals = {};     // key: "dayIdx-slot" → true
-let macroLog = [];          // { id, name, cal, protein, carbs, fat, source, mealKey? }
+const loggedMeals = {};
+let macroLog = [];
 let macroTargets = { protein: 0, carbs: 0, fat: 0 };
 let macroIdCounter = 0;
 let weekPlanServings = Array.from({length:7}, () => ({breakfast:1,snackAm:1,lunch:1,snackPm:1,dinner:1}));
+let activeStore = 'aldi';
+let lastSavedDate = new Date().toDateString();
 const SAVE_KEY = 'moveandburn_v1';
 
 function saveAll() {
@@ -2732,6 +2729,8 @@ function saveAll() {
       weekPlanServings,
       activeDiets: [...activeDiets],
       activeRecipeSource,
+      activeStore,
+      lastSavedDate: new Date().toDateString(),
       loggedMeals,
       macroLog,
       macroTargets,
@@ -2741,7 +2740,6 @@ function saveAll() {
         sex: document.getElementById('sex')?.value || 'male',
         weight: document.getElementById('weight')?.value || '',
         height: document.getElementById('height')?.value || '',
-        activity: document.getElementById('activity')?.value || '1.55',
         deficit: document.getElementById('deficit')?.value || '500',
       },
       stepInput: document.getElementById('stepInput')?.value || '',
@@ -2779,6 +2777,25 @@ function loadAll() {
     // Restore diet filters
     if (data.activeDiets) activeDiets = new Set(data.activeDiets);
     if (data.activeRecipeSource) activeRecipeSource = data.activeRecipeSource;
+    if (data.activeStore) activeStore = data.activeStore;
+
+    // ── Daily reset: clear day-specific data if it's a new day ──
+    const today = new Date().toDateString();
+    if (data.lastSavedDate && data.lastSavedDate !== today) {
+      // Reset daily counters — keep profile, weekly plan, recipes
+      state.consumed = 0;
+      state.burned = 0;
+      state.stepsBurned = 0;
+      state.calisthenicsCalBurned = 0;
+      state.steps = 0;
+      state.foods = [];
+      state.exercises = [];
+      macroLog = [];
+      // Clear ticked exercise sets
+      exercises.forEach((_, i) => tickedSets[i] = new Set());
+      // Clear logged meals for the new day
+      Object.keys(loggedMeals).forEach(k => delete loggedMeals[k]);
+    }
 
     // Restore logged meals
     if (data.loggedMeals) Object.assign(loggedMeals, data.loggedMeals);
@@ -2791,7 +2808,7 @@ function loadAll() {
       const p = data.profile;
       const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
       set('age', p.age); set('sex', p.sex); set('weight', p.weight);
-      set('height', p.height); set('activity', p.activity); set('deficit', p.deficit);
+      set('height', p.height); set('deficit', p.deficit);
     }
 
     // Restore step input
@@ -2871,11 +2888,10 @@ function clearAllData() {
 
 // ─── CALCULATE ───
 function calculate() {
-  const age = parseFloat(document.getElementById('age').value);
-  const sex = document.getElementById('sex').value;
+  const age    = parseFloat(document.getElementById('age').value);
+  const sex    = document.getElementById('sex').value;
   const weight = parseFloat(document.getElementById('weight').value);
   const height = parseFloat(document.getElementById('height').value);
-  const activity = parseFloat(document.getElementById('activity').value);
   const deficit = parseFloat(document.getElementById('deficit').value);
 
   if (!age || !weight || !height) {
@@ -2883,39 +2899,51 @@ function calculate() {
     return;
   }
 
-  // Mifflin-St Jeor BMR
-  let bmr = sex === 'male'
-    ? 10 * weight + 6.25 * height - 5 * age + 5
-    : 10 * weight + 6.25 * height - 5 * age - 161;
+  // Mifflin-St Jeor BMR — no activity multiplier
+  const bmr = sex === 'male'
+    ? Math.round(10 * weight + 6.25 * height - 5 * age + 5)
+    : Math.round(10 * weight + 6.25 * height - 5 * age - 161);
 
-  const tdee = Math.round(bmr * activity);
-  const calTarget = Math.max(1200, tdee - deficit);
+  // Base daily target = BMR − deficit (minimum 1200)
+  const calTarget = Math.max(1200, bmr - deficit);
 
-  // Step goal: calories needed from steps = deficit / 2
-  // ~0.04 kcal per step per kg of body weight (approx)
-  const calPerStep = weight * 0.00045;
-  const stepsNeeded = Math.round(deficit / 2 / calPerStep / 1000) * 1000;
-  const stepGoal = Math.max(7000, Math.min(15000, stepsNeeded + 7000));
+  // Calories earned per step at 65% efficiency
+  // Raw: ~0.00045 Cal/step/kg body weight; × 0.65 efficiency
+  const calPerStepRaw = weight * 0.00045;
+  const calPerStep    = calPerStepRaw * 0.65;
 
-  state.calTarget = calTarget;
-  state.tdee = tdee;
-  state.weight = weight;
-  state.stepGoal = stepGoal;
+  // Cal earned per 1,000 steps (for display)
+  const calPer1000Steps = Math.round(calPerStep * 1000);
+
+  // Recommended step goal: enough steps to cover the deficit + a buffer
+  // i.e. steps needed so step earnings ≈ deficit
+  const stepsForDeficit = Math.round(deficit / calPerStep / 1000) * 1000;
+  const stepGoal = Math.max(7000, Math.min(15000, stepsForDeficit));
+
+  // Effective target at step goal (what they can eat if they hit their steps)
+  const targetAtStepGoal = calTarget + Math.round(stepGoal * calPerStep);
+
+  state.calTarget     = calTarget;
+  state.bmr           = bmr;
+  state.weight        = weight;
+  state.stepGoal      = stepGoal;
   state.stepCalPerStep = calPerStep;
 
-  document.getElementById('r-bmr').textContent = Math.round(bmr).toLocaleString();
-  document.getElementById('r-tdee').textContent = tdee.toLocaleString();
-  document.getElementById('r-calTarget').textContent = calTarget.toLocaleString()  + " Cal";
-  document.getElementById('r-steps').textContent = stepGoal.toLocaleString();
-  document.getElementById('r-stepCal').textContent = Math.round(stepGoal * calPerStep)  + " Cal";
+  // Update results display
+  const s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  s('r-bmr',      bmr.toLocaleString() + ' Cal');
+  s('r-calTarget', calTarget.toLocaleString() + ' Cal');
+  s('r-stepEarn', calPer1000Steps + ' Cal');
+  s('r-steps',    stepGoal.toLocaleString());
+  s('r-stepCal',  targetAtStepGoal.toLocaleString() + ' Cal');
 
   const weeklyLoss = (deficit * 7 / 7700).toFixed(2);
   document.getElementById('profileTip').innerHTML =
-    `<strong>At this deficit</strong>, you're on track to lose roughly <strong>${weeklyLoss} kg per week</strong>. Combined with ${stepGoal.toLocaleString()} steps/day, that's sustainable, healthy progress. Update your numbers monthly as your weight changes.`;
+    `<strong>Your base target is ${calTarget.toLocaleString()} Cal/day.</strong> Every 1,000 steps you walk adds back ~${calPer1000Steps} Cal. Hit your ${stepGoal.toLocaleString()} step goal and your effective target becomes <strong>${targetAtStepGoal.toLocaleString()} Cal</strong> — on track for ~${weeklyLoss} kg/week loss. The more you move, the more flexibility you have.`;
 
   document.getElementById('resultsCard').style.display = 'block';
   document.getElementById('stepRingGoal').textContent = stepGoal.toLocaleString();
-  document.getElementById('calTargetDisplay').textContent = calTarget.toLocaleString()  + " Cal";
+  document.getElementById('calTargetDisplay').textContent = calTarget.toLocaleString() + ' Cal';
   updateCalDisplay();
   saveAll();
 }
@@ -2978,27 +3006,44 @@ function renderExList() {
 }
 
 function updateCalDisplay() {
-  const target = state.calTarget || 2000;
-  const totalBurned = state.burned + state.stepsBurned + (state.calisthenicsCalBurned || 0);
-  const netConsumed = state.consumed - totalBurned;
-  const balance = netConsumed - target;
+  const baseTarget = state.calTarget || 2000;
+  const calPerStep = state.stepCalPerStep || 0.04;
+
+  // Steps earn back calories at 65% efficiency (already baked into calPerStep)
+  const stepsEarned = Math.round((state.steps || 0) * calPerStep);
+
+  // Manual exercise burn (from the Log Exercise Calories section — kept informational)
+  const manualBurn = state.burned || 0;
+
+  // Effective target for today = base + steps earned
+  const effectiveTarget = baseTarget + stepsEarned;
+
+  // Balance = consumed vs effective target (manual burn shown separately, not subtracted)
+  const balance = state.consumed - effectiveTarget;
 
   const balEl = document.getElementById('calBalance');
-  balEl.textContent = (balance >= 0 ? '+' : '') + Math.round(balance).toLocaleString();
-  balEl.className = 'cal-number ' + (balance > 100 ? 'surplus' : balance < -100 ? 'deficit' : 'balanced');
+  if (balEl) {
+    balEl.textContent = (balance >= 0 ? '+' : '') + Math.round(balance).toLocaleString();
+    balEl.className = 'cal-number ' + (balance > 100 ? 'surplus' : balance < -100 ? 'deficit' : 'balanced');
+  }
 
-  document.getElementById('calStatus').textContent = balance > 100
+  const statusEl = document.getElementById('calStatus');
+  if (statusEl) statusEl.textContent = balance > 100
     ? 'calorie surplus — eat a little less'
     : balance < -100
     ? 'calorie deficit — great work!'
     : 'right on target';
 
-  document.getElementById('calConsumedDisplay').textContent = state.consumed.toLocaleString()  + " Cal";
-  document.getElementById('calBurnedDisplay').textContent = Math.round(state.burned + (state.calisthenicsCalBurned || 0)).toLocaleString()  + " Cal";
-  document.getElementById('calStepBurnDisplay').textContent = Math.round(state.stepsBurned).toLocaleString()  + " Cal";
+  const s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  s('calConsumedDisplay',  state.consumed.toLocaleString() + ' Cal');
+  s('calBurnedDisplay',    manualBurn.toLocaleString() + ' Cal');
+  s('calStepBurnDisplay',  stepsEarned.toLocaleString() + ' Cal');
+  s('calTargetDisplay',    effectiveTarget.toLocaleString() + ' Cal');
 
-  const pct = Math.min(100, (state.consumed / target) * 100);
-  document.getElementById('calBarConsumed').style.width = pct + '%';
+  const pct = Math.min(100, (state.consumed / effectiveTarget) * 100);
+  const barEl = document.getElementById('calBarConsumed');
+  if (barEl) barEl.style.width = pct + '%';
+
   // Refresh dashboard if visible
   if (document.getElementById('panel-today')?.classList.contains('active')) {
     renderDashCalRing();
@@ -3008,43 +3053,33 @@ function updateCalDisplay() {
 // ─── STEPS ───
 function getEffectiveStepGoal() {
   const baseGoal = state.stepGoal || 10000;
-  const calPerStep = state.stepCalPerStep || 0.04;
-  const calisthenicsCal = state.calisthenicsCalBurned || 0;
-  // Convert calisthenics calories to equivalent steps, cap reduction at 50% of base goal
-  const stepCredit = Math.round(calisthenicsCal / calPerStep);
-  const maxReduction = Math.round(baseGoal * 0.5);
-  const reduction = Math.min(stepCredit, maxReduction);
-  return { baseGoal, reduction, effectiveGoal: Math.max(0, baseGoal - reduction) };
+  // Step goal stays fixed — no more calisthenics reduction (that was part of old burn model)
+  return { baseGoal, reduction: 0, effectiveGoal: baseGoal };
 }
 
 function updateSteps() {
-  const val = parseFloat(document.getElementById('stepInput').value) || 0;
+  const val = parseFloat(document.getElementById('stepInput')?.value) || 0;
   state.steps = val;
   const calPerStep = state.stepCalPerStep || 0.04;
-  const burned = val * calPerStep;
-  state.stepsBurned = burned;
+  const earned = Math.round(val * calPerStep); // Cal earned at 65% efficiency
+  state.stepsBurned = earned; // kept for legacy save compat
 
-  const { baseGoal, reduction, effectiveGoal } = getEffectiveStepGoal();
-
+  const { effectiveGoal } = getEffectiveStepGoal();
   const pct = effectiveGoal > 0 ? Math.min(1, val / effectiveGoal) : 1;
-  const circumference = 427;
-  document.getElementById('stepRingCircle').style.strokeDashoffset = circumference * (1 - pct);
-  document.getElementById('stepRingNum').textContent = val.toLocaleString();
-  document.getElementById('stepRingGoal').textContent = effectiveGoal.toLocaleString();
-  document.getElementById('statCal').textContent = Math.round(burned);
-  document.getElementById('statKm').textContent = (val * 0.00075).toFixed(1);
-  document.getElementById('statPct').textContent = Math.round(pct * 100) + '%';
+  const circ = 427;
 
-  // Show/hide exercise reduction strip
+  const ringEl = document.getElementById('stepRingCircle');
+  if (ringEl) ringEl.style.strokeDashoffset = circ * (1 - pct);
+  const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  s('stepRingNum',  val.toLocaleString());
+  s('stepRingGoal', effectiveGoal.toLocaleString());
+  s('statCal',      earned);
+  s('statKm',       (val * 0.00075).toFixed(1));
+  s('statPct',      Math.round(pct * 100) + '%');
+
+  // Hide the old exercise reduction strip — no longer relevant
   const strip = document.getElementById('exReductionStrip');
-  if (reduction > 0) {
-    strip.style.display = 'block';
-    document.getElementById('exStepCredit').textContent = '−' + reduction.toLocaleString() + ' steps';
-    document.getElementById('exBaseGoal').textContent = baseGoal.toLocaleString();
-    document.getElementById('exReducedGoal').textContent = effectiveGoal.toLocaleString();
-  } else {
-    strip.style.display = 'none';
-  }
+  if (strip) strip.style.display = 'none';
 
   updateCalDisplay();
   syncTodayToWeekly();
@@ -4497,25 +4532,31 @@ function generateGroceryList() {
   const ingredientMap = {};
 
   allSelected.forEach(({ meal: m, servings, day }) => {
-    // Use base recipe ingredients (not scaled version stored in weekPlan)
     const allRecipes = [...Object.values(RECIPE_DB).flat(), ...Object.values(AG_RECIPE_DB).flat()];
     const baseRecipe = allRecipes.find(r => r.name === m.name);
     const ingredients = baseRecipe?.ingredients || m.ingredients || [];
 
     ingredients.forEach(raw => {
       const { qty, unit, ingredientName } = parseIngredientQty(raw);
+
+      // Normalise name — strip descriptors
       const normName = ingredientName.toLowerCase()
-        .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced|rinsed|drained)$/i, '')
+        .replace(/\s*\(.*?\)/g, '') // remove parenthetical notes like "(raw weight)"
+        .replace(/\s+(diced|sliced|chopped|grated|cubed|cooked|frozen|canned|fresh|cold|minced|rinsed|drained|small|medium|large)$/i, '')
         .trim();
 
-      const totalQty = qty * servings;
+      // Scale by servings for THIS day
+      const scaledQty = qty * servings;
 
       if (!ingredientMap[normName]) {
-        ingredientMap[normName] = { displayName: ingredientName, totalQty: 0, unit, days: [], rawExamples: [] };
+        ingredientMap[normName] = { displayName: ingredientName.replace(/\s*\(.*?\)/g,'').trim(), totalQty: 0, unit, days: [] };
       }
-      ingredientMap[normName].totalQty += totalQty;
+      ingredientMap[normName].totalQty += scaledQty;
       if (!ingredientMap[normName].days.includes(day)) ingredientMap[normName].days.push(day);
-      if (ingredientMap[normName].rawExamples.length < 2) ingredientMap[normName].rawExamples.push(raw);
+      // Keep most informative unit (prefer g/ml over count)
+      if (['g','kg','ml','l'].includes(unit) && !['g','kg','ml','l'].includes(ingredientMap[normName].unit)) {
+        ingredientMap[normName].unit = unit;
+      }
     });
   });
 
@@ -4531,21 +4572,34 @@ function generateGroceryList() {
     const priceKey = Object.keys(storePrices).find(k => normName.includes(k) || k.includes(normName.split(' ')[0]));
     const priceInfo = priceKey ? storePrices[priceKey] : { price: 2.99, qty: '1 unit' };
 
-    // Work out packs needed
+    // Find best pack size match
     const packKey = Object.keys(PACK_SIZES).find(k => normName.includes(k) || k.includes(normName.split(' ')[0]));
     const packInfo = packKey ? PACK_SIZES[packKey] : null;
 
     let packsNeeded = 1;
-    let qtyLabel = '';
+    let qtyLabel = priceInfo.qty;
+
     if (packInfo && info.totalQty > 0) {
-      packsNeeded = Math.ceil(info.totalQty / packInfo.packSize);
+      // Only apply pack math if units match or item is countable
+      const unitMatches = packInfo.unit === info.unit ||
+        (info.unit === '' && packInfo.unit === 'count') ||
+        packInfo.unit === 'count';
+
+      if (unitMatches || info.unit === '') {
+        packsNeeded = Math.max(1, Math.ceil(info.totalQty / packInfo.packSize));
+        // Sanity cap: never more than 20 packs of anything
+        packsNeeded = Math.min(packsNeeded, 20);
+        const totalRounded = Number.isInteger(info.totalQty) ? info.totalQty : parseFloat(info.totalQty.toFixed(1));
+        qtyLabel = `${totalRounded}${info.unit ? ' '+info.unit : ''} needed → ${packsNeeded}× ${packInfo.packLabel}`;
+      } else {
+        // Units don't match cleanly — just say how many days and use 1 pack
+        qtyLabel = `${info.days.length} day${info.days.length>1?'s':''} — ${priceInfo.qty}`;
+      }
+    } else if (info.totalQty > 0 && info.unit) {
       const totalRounded = Number.isInteger(info.totalQty) ? info.totalQty : parseFloat(info.totalQty.toFixed(1));
-      qtyLabel = `${totalRounded}${info.unit ? ' ' + info.unit : ''} needed → ${packsNeeded} × ${packInfo.packLabel}`;
+      qtyLabel = `${totalRounded} ${info.unit} — ${priceInfo.qty}`;
     } else {
-      const totalRounded = Number.isInteger(info.totalQty) ? info.totalQty : parseFloat(info.totalQty.toFixed(1));
-      qtyLabel = totalRounded > 0 && info.unit
-        ? `${totalRounded} ${info.unit} needed`
-        : priceInfo.qty;
+      qtyLabel = `${info.days.length} day${info.days.length>1?'s':''} — ${priceInfo.qty}`;
     }
 
     const uid = 'gi-' + groceryItems.length;
@@ -4813,26 +4867,26 @@ function renderDashGreeting() {
 }
 
 function renderDashCalRing() {
-  const target = state.calTarget || 0;
-  const totalBurned = state.burned + state.stepsBurned + (state.calisthenicsCalBurned || 0);
-  const net = state.consumed - totalBurned;
-  const remaining = target ? target - net : 0;
-  const pct = target ? Math.min(1, net / target) : 0;
+  const baseTarget  = state.calTarget || 0;
+  const calPerStep  = state.stepCalPerStep || 0.04;
+  const stepsEarned = Math.round((state.steps || 0) * calPerStep);
+  const effectiveTarget = baseTarget + stepsEarned;
+
+  const remaining = effectiveTarget - state.consumed;
+  const pct = effectiveTarget > 0 ? Math.min(1, state.consumed / effectiveTarget) : 0;
 
   const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  s('dashCalRemaining', target ? Math.abs(Math.round(remaining)).toLocaleString() : '—');
-  s('dashCalTarget', target ? target.toLocaleString() + ' Cal' : 'Set profile');
-  s('dashConsumed', state.consumed.toLocaleString() + ' Cal');
-  s('dashBurned', Math.round(totalBurned).toLocaleString() + ' Cal');
+  s('dashCalRemaining', effectiveTarget > 0 ? Math.abs(Math.round(remaining)).toLocaleString() : '—');
+  s('dashCalTarget',    effectiveTarget > 0 ? effectiveTarget.toLocaleString() + ' Cal' : 'Set profile');
+  s('dashConsumed',     state.consumed.toLocaleString() + ' Cal');
+  s('dashBurned',       stepsEarned.toLocaleString() + ' Cal earned');
 
   const ring = document.getElementById('dashCalRing');
   if (ring) {
-    const circ = 364;
-    ring.style.strokeDashoffset = circ * (1 - pct);
+    ring.style.strokeDashoffset = 364 * (1 - pct);
     ring.style.stroke = pct > 1 ? 'var(--red)' : 'var(--orange)';
   }
 
-  // Update ring label
   const label = document.querySelector('.dash-cal-ring-label');
   if (label) label.textContent = remaining < 0 ? 'Cal over' : 'Cal left';
 }
